@@ -42,9 +42,19 @@ namespace BetterBuildings.Framework.Patches.Buildings
 
         internal static bool ResetTexturePrefix(Building __instance)
         {
+            var customBuildingId = String.Empty;
             if (__instance.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
             {
-                var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<GenericBuilding>(__instance.modData[ModDataKeys.GENERIC_BUILDING]);
+                customBuildingId = __instance.modData[ModDataKeys.GENERIC_BUILDING];
+            }
+            else if (__instance.buildingType is not null)
+            {
+                customBuildingId = __instance.buildingType.Value;
+            }
+
+            if (!String.IsNullOrEmpty(customBuildingId))
+            {
+                var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<GenericBuilding>(customBuildingId);
                 if (buildingModel is null || buildingModel.Texture is null)
                 {
                     return true;
@@ -59,11 +69,6 @@ namespace BetterBuildings.Framework.Patches.Buildings
             }
 
             return true;
-        }
-
-        public static void ResetTextureReversePatch(Building __instance)
-        {
-            new NotImplementedException("It's a stub!");
         }
     }
 }

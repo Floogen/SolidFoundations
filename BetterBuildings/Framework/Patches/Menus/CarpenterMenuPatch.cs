@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Buildings;
 using StardewValley.Locations;
 using StardewValley.Menus;
@@ -32,16 +33,13 @@ namespace BetterBuildings.Framework.Patches.Menus
         internal void Apply(Harmony harmony)
         {
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.setNewActiveBlueprint), null), prefix: new HarmonyMethod(GetType(), nameof(SetNewActiveBlueprintPrefix)));
+            harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.draw), new[] { typeof(SpriteBatch) }), prefix: new HarmonyMethod(GetType(), nameof(DrawPrefix)));
             harmony.Patch(AccessTools.Constructor(typeof(CarpenterMenu), new[] { typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(CarpenterMenuPostfix)));
         }
 
         private static bool SetNewActiveBlueprintPrefix(CarpenterMenu __instance, int ___currentBlueprintIndex, List<BluePrint> ___blueprints, ref Building ___currentBuilding, ref int ___price, ref string ___buildingName, ref string ___buildingDescription, ref List<Item> ___ingredients)
         {
-            _monitor.Log(___currentBlueprintIndex.ToString(), LogLevel.Debug);
-            _monitor.Log(___blueprints[___currentBlueprintIndex].name, LogLevel.Debug);
-
-            var blueprint = ___blueprints[___currentBlueprintIndex];
-            if (blueprint is null || blueprint is not GenericBlueprint genericBlueprint)
+            if (__instance.CurrentBlueprint is not GenericBlueprint genericBlueprint)
             {
                 return true;
             }
@@ -53,7 +51,7 @@ namespace BetterBuildings.Framework.Patches.Menus
             }
 
             // Set the building
-            var customBuilding = new Building(blueprint, Vector2.Zero);
+            var customBuilding = new Building(genericBlueprint, Vector2.Zero);
             customBuilding.modData[ModDataKeys.GENERIC_BUILDING] = buildingModel.Id;
             customBuilding.buildingType.Value = ModDataKeys.GENERIC_BUILDING;
             ___currentBuilding.texture = new Lazy<Texture2D>(delegate
@@ -72,6 +70,72 @@ namespace BetterBuildings.Framework.Patches.Menus
             foreach (var item in genericBlueprint.GetActualRequiredItems())
             {
                 ___ingredients.Add(item);
+            }
+
+            return false;
+        }
+
+        private static bool DrawPrefix(CarpenterMenu __instance, SpriteBatch b, bool ___onFarm, Building ___currentBuilding, Building ___buildingToMove, string ___hoverText, bool ___upgrading, bool ___painting, bool ___demolishing, bool ___moving)
+        {
+            if (!___onFarm || ___currentBuilding is null || !___currentBuilding.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
+            {
+                return true;
+            }
+
+            // Confirm that the blueprint is a GenericBlueprint
+            if (__instance.CurrentBlueprint is not GenericBlueprint genericBlueprint || Game1.currentLocation is not BuildableGameLocation buildableGameLocation)
+            {
+                return true;
+            }
+
+            // Draw banner
+            string message = (___upgrading ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Upgrade", genericBlueprint.NameOfBuildingToUpgrade) : (___demolishing ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Demolish") : ((!___painting) ? Game1.content.LoadString("Strings\\UI:Carpenter_ChooseLocation") : Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Paint"))));
+            SpriteText.drawStringWithScrollBackground(b, message, Game1.uiViewport.Width / 2 - SpriteText.getWidthOfString(message) / 2, 16);
+
+
+            // Draw the building
+            if (!___upgrading && !___demolishing && !___moving && !___painting)
+            {
+                Vector2 mousePositionTile2 = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
+                for (int y4 = 0; y4 < genericBlueprint.tilesHeight; y4++)
+                {
+                    for (int x3 = 0; x3 < genericBlueprint.tilesWidth; x3++)
+                    {
+                        int sheetIndex3 = genericBlueprint.getTileSheetIndexForStructurePlacementTile(x3, y4);
+                        Vector2 currentGlobalTilePosition3 = new Vector2(mousePositionTile2.X + (float)x3, mousePositionTile2.Y + (float)y4);
+                        if (!buildableGameLocation.isBuildable(currentGlobalTilePosition3))
+                        {
+                            sheetIndex3++;
+                        }
+                        b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, currentGlobalTilePosition3 * 64f), new Rectangle(194 + sheetIndex3 * 16, 388, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.999f);
+                    }
+                }
+
+                foreach (Point additionalPlacementTile in genericBlueprint.additionalPlacementTiles)
+                {
+                    int x4 = additionalPlacementTile.X;
+                    int y3 = additionalPlacementTile.Y;
+                    int sheetIndex4 = genericBlueprint.getTileSheetIndexForStructurePlacementTile(x4, y3);
+                    Vector2 currentGlobalTilePosition4 = new Vector2(mousePositionTile2.X + (float)x4, mousePositionTile2.Y + (float)y3);
+                    if (!(Game1.currentLocation as BuildableGameLocation).isBuildable(currentGlobalTilePosition4))
+                    {
+                        sheetIndex4++;
+                    }
+                    b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, currentGlobalTilePosition4 * 64f), new Rectangle(194 + sheetIndex4 * 16, 388, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.999f);
+                }
+            }
+            else if (!___painting && ___moving && ___buildingToMove != null)
+            {
+                // TODO: Implement moving
+            }
+            Game1.EndWorldDrawInUI(b);
+
+            // Draw the interactable UI
+            __instance.cancelButton.draw(b);
+            __instance.drawMouse(b);
+            if (___hoverText.Length > 0)
+            {
+                IClickableMenu.drawHoverText(b, ___hoverText, Game1.dialogueFont);
             }
 
             return false;

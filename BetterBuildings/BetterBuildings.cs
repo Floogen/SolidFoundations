@@ -7,6 +7,8 @@ using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley;
+using StardewValley.Locations;
 using System;
 using System.IO;
 using System.Linq;
@@ -55,7 +57,7 @@ namespace BetterBuildings
             }
 
             // Add in the debug commands
-            helper.ConsoleCommands.Add("bb_reload", "Reloads all Better Buildings content packs.\n\nUsage: bb_reload", delegate { this.LoadContentPacks(); });
+            helper.ConsoleCommands.Add("bb_reload", "Reloads all Better Buildings content packs.\n\nUsage: bb_reload", delegate { this.LoadContentPacks(); RefreshAllCustomBuildings(); });
 
             // Hook into the required events
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
@@ -162,6 +164,17 @@ namespace BetterBuildings
                 catch (Exception ex)
                 {
                     Monitor.Log($"Error loading buildings from content pack {contentPack.Manifest.Name}: {ex}", LogLevel.Error);
+                }
+            }
+        }
+
+        internal void RefreshAllCustomBuildings()
+        {
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
+            {
+                foreach (var building in buildableLocation.buildings)
+                {
+                    building.resetTexture();
                 }
             }
         }

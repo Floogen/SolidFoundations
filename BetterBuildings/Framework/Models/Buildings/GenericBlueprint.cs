@@ -20,6 +20,7 @@ namespace BetterBuildings.Framework.Models.Buildings
     internal class GenericBlueprint : BluePrint
     {
         public Vendor Vendor { get; set; } = Vendor.Robin;
+        public string NameOfBuildingToUpgrade { get; set; }
         public int RequiredMoney { get; set; }
         public List<GenericItem> RequiredItems { get; set; } = new List<GenericItem>();
 
@@ -51,6 +52,15 @@ namespace BetterBuildings.Framework.Models.Buildings
             base.moneyRequired = this.RequiredMoney;
             base.tilesHeight = building.Dimensions.Height;
             base.tilesWidth = building.Dimensions.Width;
+
+            // TODO: Look into possibility including this as a part of the framework?
+            base.additionalPlacementTiles = new List<Microsoft.Xna.Framework.Point>();
+
+            // Establish if the blueprint is an upgrade
+            if (!String.IsNullOrEmpty(this.NameOfBuildingToUpgrade))
+            {
+                base.nameOfBuildingToUpgrade = String.Concat(building.Owner, "/", "/", this.NameOfBuildingToUpgrade);
+            }
 
             // Set private fields via reflection
             BetterBuildings.modHelper.Reflection.GetField<Texture2D>(this, "texture").SetValue(building.Texture);
