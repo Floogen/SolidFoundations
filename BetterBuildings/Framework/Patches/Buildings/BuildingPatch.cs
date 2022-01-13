@@ -57,7 +57,7 @@ namespace BetterBuildings.Framework.Patches.Buildings
                 var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<GenericBuilding>(customBuildingId);
                 if (buildingModel is null || buildingModel.Texture is null)
                 {
-                    return true;
+                    return false;
                 }
 
                 __instance.texture = new Lazy<Texture2D>(delegate

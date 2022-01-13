@@ -3,15 +3,19 @@ using BetterBuildings.Framework.Models.Buildings;
 using BetterBuildings.Framework.Patches.Buildings;
 using BetterBuildings.Framework.Patches.Menus;
 using BetterBuildings.Framework.Patches.Outliers;
+using BetterBuildings.Framework.Utilities;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Locations;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace BetterBuildings
 {
@@ -61,6 +65,41 @@ namespace BetterBuildings
 
             // Hook into the required events
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
+            modHelper.Events.GameLoop.DayStarted += OnDayStarted;
+            modHelper.Events.GameLoop.DayEnding += OnDayEnding;
+        }
+
+        private void OnDayStarted(object sender, DayStartedEventArgs e)
+        {
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation && l.modData.ContainsKey(ModDataKeys.LOCATION_CUSTOM_BUILDINGS)))
+            {
+                var customBuildings = JsonSerializer.Deserialize<List<Building>>(buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS]);
+                foreach (var building in customBuildings)
+                {
+                    buildableLocation.buildings.Add(building);
+                }
+            }
+        }
+
+        private void OnDayEnding(object sender, DayEndingEventArgs e)
+        {
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
+            {
+                var customBuildings = new List<Building>();
+                foreach (var building in buildableLocation.buildings.ToList())
+                {
+                    var customBuilding = buildingManager.GetSpecificBuildingModel<GenericBuilding>(building.buildingType.Value);
+                    if (customBuilding is not null)
+                    {
+
+                        monitor.Log("TEST 123", LogLevel.Debug);
+                        customBuildings.Add(building);
+                        buildableLocation.buildings.Remove(building);
+                    }
+                }
+
+                buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(customBuildings);
+            }
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)

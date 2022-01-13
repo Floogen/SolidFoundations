@@ -11,5 +11,6 @@ namespace BetterBuildings.Framework.Utilities
         // Core keys
         internal const string GENERIC_BLUEPRINT = "BetterBuildings.GenericBlueprint";
         internal const string GENERIC_BUILDING = "BetterBuildings.GenericBuilding";
+        internal const string LOCATION_CUSTOM_BUILDINGS = "BetterBuildings.Location.CustomBuildings";
     }
 }

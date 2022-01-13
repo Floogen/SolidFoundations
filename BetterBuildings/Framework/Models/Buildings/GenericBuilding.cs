@@ -10,6 +10,7 @@ namespace BetterBuildings.Framework.Models.Buildings
 {
     internal class GenericBuilding
     {
+        public string DisplayName { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public Dimensions Dimensions { get; set; }
