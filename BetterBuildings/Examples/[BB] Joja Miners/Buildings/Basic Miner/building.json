@@ -1,6 +1,11 @@
 {
   "Name": "Basic Miner",
   "Description": "A very makeshift miner. Produces copper ore while consuming coal.",
+  "Dimensions":
+  {
+    "Height": 3,
+    "Width": 3
+  },
 
   "Blueprint":
   {

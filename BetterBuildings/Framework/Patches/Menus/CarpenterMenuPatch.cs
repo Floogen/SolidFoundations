@@ -53,7 +53,7 @@ namespace BetterBuildings.Framework.Patches.Menus
             }
 
             // Set the building
-            var customBuilding = new Building();
+            var customBuilding = new Building(blueprint, Vector2.Zero);
             customBuilding.modData[ModDataKeys.GENERIC_BUILDING] = buildingModel.Id;
             customBuilding.buildingType.Value = ModDataKeys.GENERIC_BUILDING;
             ___currentBuilding.texture = new Lazy<Texture2D>(delegate

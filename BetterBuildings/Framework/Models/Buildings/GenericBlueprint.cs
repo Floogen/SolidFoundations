@@ -49,6 +49,8 @@ namespace BetterBuildings.Framework.Models.Buildings
             base.name = building.Id;
             base.itemsRequired = new Dictionary<int, int>();
             base.moneyRequired = this.RequiredMoney;
+            base.tilesHeight = building.Dimensions.Height;
+            base.tilesWidth = building.Dimensions.Width;
 
             // Set private fields via reflection
             BetterBuildings.modHelper.Reflection.GetField<Texture2D>(this, "texture").SetValue(building.Texture);

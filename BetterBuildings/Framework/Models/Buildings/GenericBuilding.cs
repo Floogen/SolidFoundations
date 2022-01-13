@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using BetterBuildings.Framework.Models.General;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace BetterBuildings.Framework.Models.Buildings
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public Dimensions Dimensions { get; set; }
         public GenericBlueprint Blueprint { get; set; }
 
         internal string Owner { get; set; }
