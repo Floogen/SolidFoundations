@@ -37,8 +37,10 @@
 			7z a -tzip "C:\Users\Floogen\Documents\GitHub Repos\BetterBuildings\BetterBuildings\releases\BetterBuildings-$(Version).zip" "C:\Users\Floogen\Documents\GitHub Repos\BetterBuildings\BetterBuildings\releases\latest\BetterBuildings"
 
 			powershell Remove-Item -Path '$(GameModsPath)\BetterBuildings' -Recurse -Force
+			powershell Remove-Item -Path '$(GameModsPath)\Better Buildings Examples' -Recurse -Force
 
 			xcopy /s /y /i "C:\Users\Floogen\Documents\GitHub Repos\BetterBuildings\BetterBuildings\releases\latest\BetterBuildings" "$(GameModsPath)\BetterBuildings"
+			xcopy /s /y /i "C:\Users\Floogen\Documents\GitHub Repos\BetterBuildings\BetterBuildings\Examples\*" "$(GameModsPath)\Better Buildings Examples"
 		</PostBuildEvent>
 	</PropertyGroup>
 </Project>
