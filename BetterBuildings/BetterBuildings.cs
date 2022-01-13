@@ -54,6 +54,9 @@ namespace BetterBuildings
                 return;
             }
 
+            // Add in the debug commands
+            helper.ConsoleCommands.Add("bb_reload", "Reloads all Better Buildings content packs.\n\nUsage: bb_reload", delegate { this.LoadContentPacks(); });
+
             // Hook into the required events
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
         }
@@ -66,6 +69,9 @@ namespace BetterBuildings
 
         internal void LoadContentPacks(bool silent = false)
         {
+            // Clear the existing cache of custom buildings
+            buildingManager.Reset();
+
             // Load owned content packs
             foreach (IContentPack contentPack in Helper.ContentPacks.GetOwned())
             {
