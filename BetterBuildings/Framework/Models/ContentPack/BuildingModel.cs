@@ -18,6 +18,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string Name { get; set; }
         public string Description { get; set; }
         public Dimensions Dimensions { get; set; }
+        public bool ShowShadow { get; set; } = true;
+        public List<TileLocation> WalkableTiles { get; set; }
         public BlueprintModel Blueprint { get; set; }
 
         internal string Owner { get; set; }
@@ -38,7 +40,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             var building = new GenericBuilding(Blueprint.CreateBlueprint())
             {
-                Id = this.Id
+                Id = this.Id,
+                WalkableTiles = this.WalkableTiles,
+                ShowShadow = this.ShowShadow
             };
 
             building.buildingType.Value = ModDataKeys.GENERIC_BUILDING;
