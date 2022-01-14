@@ -1,0 +1,13 @@
+﻿{
+  "Name": "[BB] Example Pack",
+  "Author": "PeacefulEnd",
+  "Version": "1.0.0",
+  "Description": "A set of example buildings for the Better Buildings framework.",
+  "UniqueID": "PeacefulEnd.BetterBuildings.ExamplePack",
+  "UpdateKeys": [],
+  "Dependencies": [],
+  "ContentPackFor": {
+    "UniqueID": "PeacefulEnd.BetterBuildings",
+    "MinimumVersion": "1.0.0"
+  }
+}

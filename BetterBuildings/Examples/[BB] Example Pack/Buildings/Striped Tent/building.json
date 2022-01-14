@@ -1,0 +1,36 @@
+{
+  "Name": "StripedTent",
+  "DisplayName": "Striped Tent",
+  "Description": "A striped tent. Can be used to store things.",
+  "ShowShadow": false,
+  "Dimensions": {
+    "Height": 3,
+    "Width": 6
+  },
+  "WalkableTiles": [
+    {
+      "X": 2,
+      "Y": 4
+    },
+    {
+      "X": 3,
+      "Y": 4
+    }
+  ],
+
+  "Blueprint": {
+    "Vendor": "Robin",
+    "DaysToConstruct": 0,
+    "RequiredMoney": 2500,
+    "RequiredItems": [
+      {
+        "Name": "Cloth",
+        "Quantity": 25
+      },
+      {
+        "Name": "Wood",
+        "Quantity": 25
+      }
+    ]
+  }
+}
