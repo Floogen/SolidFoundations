@@ -13,26 +13,29 @@ namespace BetterBuildings.Framework.Models.ContentPack
 {
     public class GenericBuilding : Building
     {
-        public string Id { get; set; }
+        public BuildingModel Model { get; set; }
+        public string Id { get { return Model is null ? String.Empty : Model.Id; } }
         public string LocationName { get; set; }
-        public Dimensions Dimensions { get { return new Dimensions() { Height = base.tilesHigh.Value, Width = base.tilesWide.Value }; } }
-        public bool ShowShadow { get; set; } = true;
         public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
-        public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
 
         public GenericBuilding() : base()
         {
 
         }
 
-        public GenericBuilding(GenericBlueprint genericBlueprint) : base(genericBlueprint, Vector2.Zero)
+        public GenericBuilding(BuildingModel model, GenericBlueprint genericBlueprint) : base(genericBlueprint, Vector2.Zero)
         {
+            Model = model;
+        }
 
+        public void RefreshModel(BuildingModel model)
+        {
+            Model = model;
         }
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
         {
-            return WalkableTiles.Any(t => t.X == tileLocation.X + 1 && t.Y == tileLocation.Y);
+            return Model.WalkableTiles.Any(t => t.X == tileLocation.X + 1 && t.Y == tileLocation.Y);
         }
 
         public override bool intersects(Rectangle boundingBox)
@@ -43,7 +46,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
             else if (base.intersects(boundingBox))
             {
-                foreach (var tileLocation in WalkableTiles)
+                foreach (var tileLocation in Model.WalkableTiles)
                 {
                     if (boundingBox.X >= (tileLocation.X + base.tileX.Value) * 64 && boundingBox.Right <= (tileLocation.X + base.tileX.Value + 1) * 64 + (IsTileToTheRightWalkable(tileLocation) ? 64 : 0))
                     {
@@ -59,7 +62,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public override void drawShadow(SpriteBatch b, int localX = -1, int localY = -1)
         {
-            if (ShowShadow)
+            if (Model.ShowShadow)
             {
                 base.drawShadow(b, localX, localY);
             }

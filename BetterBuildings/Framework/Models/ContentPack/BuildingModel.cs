@@ -38,12 +38,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         internal GenericBuilding CreateBuilding()
         {
-            var building = new GenericBuilding(Blueprint.CreateBlueprint())
-            {
-                Id = this.Id,
-                WalkableTiles = this.WalkableTiles,
-                ShowShadow = this.ShowShadow
-            };
+            var building = new GenericBuilding(this, Blueprint.CreateBlueprint());
 
             building.buildingType.Value = ModDataKeys.GENERIC_BUILDING;
             building.texture = new Lazy<Texture2D>(delegate

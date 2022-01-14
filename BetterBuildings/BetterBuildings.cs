@@ -109,6 +109,9 @@ namespace BetterBuildings
                         continue;
                     }
 
+                    // Update the building's model
+                    customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<BuildingModel>(customBuilding.Id));
+
                     // Restore the archived custom building
                     buildableLocation.buildings.Add(customBuilding);
 
@@ -264,13 +267,22 @@ namespace BetterBuildings
             }
         }
 
-        internal void RefreshAllCustomBuildings()
+        internal void RefreshAllCustomBuildings(bool resetTexture = true)
         {
             foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
             {
-                foreach (var building in buildableLocation.buildings)
+                foreach (GenericBuilding building in buildableLocation.buildings.Where(b => b is GenericBuilding))
                 {
-                    building.resetTexture();
+                    var model = buildingManager.GetSpecificBuildingModel<BuildingModel>(building.Id);
+                    if (model is not null)
+                    {
+                        building.RefreshModel(model);
+                    }
+
+                    if (resetTexture)
+                    {
+                        building.resetTexture();
+                    }
                 }
             }
         }
