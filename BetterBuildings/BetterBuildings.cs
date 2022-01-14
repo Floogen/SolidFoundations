@@ -111,6 +111,9 @@ namespace BetterBuildings
 
                     // Restore the archived custom building
                     buildableLocation.buildings.Add(customBuilding);
+
+                    // Trigger the missed DayUpdate
+                    customBuilding.dayUpdate(Game1.dayOfMonth);
                 }
             }
         }

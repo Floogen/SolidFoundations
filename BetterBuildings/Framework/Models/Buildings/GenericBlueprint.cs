@@ -35,8 +35,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
             BetterBuildings.modHelper.Reflection.GetField<Texture2D>(this, "texture").SetValue(building.Texture);
         }
 
-        public GenericBlueprint(int requiredMoney, string nameOfBuildingToUpgrade, BuildingModel building) : this(building)
+        public GenericBlueprint(int daysToBuild, int requiredMoney, string nameOfBuildingToUpgrade, BuildingModel building) : this(building)
         {
+            base.daysToConstruct = daysToBuild;
             base.moneyRequired = requiredMoney;
 
             // Establish if the blueprint is an upgrade

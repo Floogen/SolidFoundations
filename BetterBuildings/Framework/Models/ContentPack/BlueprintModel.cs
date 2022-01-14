@@ -21,6 +21,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
     {
         public Vendor Vendor { get; set; } = Vendor.Robin;
         public string NameOfBuildingToUpgrade { get; set; }
+        public int DaysToConstruct { get; set; }
         public int RequiredMoney { get; set; }
         public List<ItemModel> RequiredItems { get; set; } = new List<ItemModel>();
 
@@ -28,7 +29,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         internal GenericBlueprint CreateBlueprint()
         {
-            var blueprint = new GenericBlueprint(RequiredMoney, NameOfBuildingToUpgrade, AssociatedBuildingModel)
+            var blueprint = new GenericBlueprint(DaysToConstruct, RequiredMoney, NameOfBuildingToUpgrade, AssociatedBuildingModel)
             {
                 RequiredItems = GetActualRequiredItems()
             };

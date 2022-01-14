@@ -9,6 +9,7 @@
 
   "Blueprint": {
     "Vendor": "Robin",
+    "DaysToConstruct": 2,
     "RequiredMoney": 1000,
     "RequiredItems": [
       {
