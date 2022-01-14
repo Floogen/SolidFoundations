@@ -76,7 +76,7 @@ namespace BetterBuildings.Framework.Patches.Outliers
 
         private static bool HasInventoryItemWithRequiredQuantityAndQuality(Item targetItem, int quantity, int quality = -1)
         {
-            foreach (var item in Game1.player.Items.Where(i => i.Name.Equals(targetItem.Name)))
+            foreach (var item in Game1.player.Items.Where(i => i is not null && i.Name.Equals(targetItem.Name)))
             {
                 if (item.Stack >= quantity)
                 {
