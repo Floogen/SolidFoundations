@@ -1,38 +1,30 @@
 ﻿using BetterBuildings.Framework.Models.General;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewValley.Buildings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterBuildings.Framework.Models.Buildings
+namespace BetterBuildings.Framework.Models.ContentPack
 {
-    internal class GenericBuilding
+    public class GenericBuilding : Building
     {
-        public string DisplayName { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public Dimensions Dimensions { get; set; }
-        public GenericBlueprint Blueprint { get; set; }
+        public string Id { get; set; }
+        public string LocationName { get; set; }
+        public Dimensions Dimensions { get { return new Dimensions() { Height = base.tilesHigh.Value, Width = base.tilesWide.Value }; } }
+        public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
 
-        internal string Owner { get; set; }
-        internal string PackName { get; set; }
-        internal string Id { get; set; }
-        internal Texture2D Texture { get; set; }
-        internal Texture2D PaintMask { get; set; }
-
-        internal void EstablishBlueprint()
+        public GenericBuilding() : base()
         {
-            if (Blueprint is not null)
-            {
-                Blueprint.Setup(this);
-            }
+
         }
 
-        public override string ToString()
+        public GenericBuilding(GenericBlueprint genericBlueprint) : base(genericBlueprint, Vector2.Zero)
         {
-            return $"Name: {Name} | Id: {Id} | Pack Name: {PackName}";
+
         }
     }
 }

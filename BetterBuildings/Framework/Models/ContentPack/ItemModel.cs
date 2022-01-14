@@ -4,17 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterBuildings.Framework.Models.General
+namespace BetterBuildings.Framework.Models.ContentPack
 {
     public enum Quality
     {
+        Any,
         Normal,
         Silver,
         Gold,
         Iridium
     }
 
-    internal class GenericItem
+    public class ItemModel
     {
         public string Name { get; set; }
         public bool IsVanillaItem { get; set; } = true;
@@ -35,7 +36,7 @@ namespace BetterBuildings.Framework.Models.General
                     return 4;
             }
 
-            return 0;
+            return -1;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using BetterBuildings.Framework.Models.Buildings;
+﻿using BetterBuildings.Framework.Models.ContentPack;
 using BetterBuildings.Framework.Utilities;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -42,33 +42,23 @@ namespace BetterBuildings.Framework.Patches.Buildings
 
         internal static bool ResetTexturePrefix(Building __instance)
         {
-            var customBuildingId = String.Empty;
-            if (__instance.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
+            if (__instance is not GenericBuilding genericBuilding)
             {
-                customBuildingId = __instance.modData[ModDataKeys.GENERIC_BUILDING];
-            }
-            else if (__instance.buildingType is not null)
-            {
-                customBuildingId = __instance.buildingType.Value;
+                return true;
             }
 
-            if (!String.IsNullOrEmpty(customBuildingId))
+            var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<BuildingModel>(genericBuilding.Id);
+            if (buildingModel is null || buildingModel.Texture is null)
             {
-                var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<GenericBuilding>(customBuildingId);
-                if (buildingModel is null || buildingModel.Texture is null)
-                {
-                    return false;
-                }
-
-                __instance.texture = new Lazy<Texture2D>(delegate
-                {
-                    return buildingModel.Texture;
-                });
-
                 return false;
             }
 
-            return true;
+            __instance.texture = new Lazy<Texture2D>(delegate
+            {
+                return buildingModel.Texture;
+            });
+
+            return false;
         }
     }
 }

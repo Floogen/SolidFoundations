@@ -1,4 +1,4 @@
-﻿using BetterBuildings.Framework.Models.Buildings;
+﻿using BetterBuildings.Framework.Models.ContentPack;
 using BetterBuildings.Framework.Utilities;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -33,6 +33,7 @@ namespace BetterBuildings.Framework.Patches.Menus
         internal void Apply(Harmony harmony)
         {
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.setNewActiveBlueprint), null), prefix: new HarmonyMethod(GetType(), nameof(SetNewActiveBlueprintPrefix)));
+            harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.tryToBuild), null), prefix: new HarmonyMethod(GetType(), nameof(TryToBuildPrefix)));
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.draw), new[] { typeof(SpriteBatch) }), prefix: new HarmonyMethod(GetType(), nameof(DrawPrefix)));
             harmony.Patch(AccessTools.Constructor(typeof(CarpenterMenu), new[] { typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(CarpenterMenuPostfix)));
         }
@@ -44,33 +45,39 @@ namespace BetterBuildings.Framework.Patches.Menus
                 return true;
             }
 
-            var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<GenericBuilding>(genericBlueprint.name);
+            var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<BuildingModel>(genericBlueprint.name);
             if (buildingModel is null)
             {
                 return true;
             }
 
             // Set the building
-            var customBuilding = new Building(genericBlueprint, Vector2.Zero);
-            customBuilding.modData[ModDataKeys.GENERIC_BUILDING] = buildingModel.Id;
-            customBuilding.buildingType.Value = ModDataKeys.GENERIC_BUILDING;
-            ___currentBuilding.texture = new Lazy<Texture2D>(delegate
-            {
-                return buildingModel.Texture;
-            });
-            ___currentBuilding = customBuilding;
+            ___currentBuilding = buildingModel.CreateBuilding();
 
             // Set the building related properties
-            ___buildingName = buildingModel.Name;
+            ___buildingName = buildingModel.DisplayName;
             ___buildingDescription = buildingModel.Description;
-            ___price = genericBlueprint.RequiredMoney;
+            ___price = genericBlueprint.moneyRequired;
 
             // Set the required items needed to build
             ___ingredients.Clear();
-            foreach (var item in genericBlueprint.GetActualRequiredItems())
+            foreach (var item in genericBlueprint.RequiredItems)
             {
                 ___ingredients.Add(item);
             }
+
+            return false;
+        }
+
+        private static bool TryToBuildPrefix(CarpenterMenu __instance, ref bool __result)
+        {
+            if (__instance.CurrentBlueprint is not GenericBlueprint genericBlueprint)
+            {
+                return true;
+            }
+
+            // TODO: Replace Game1.getFarm() with flexible location, to enable building on the island farm
+            __result = AttemptToBuildStructure(Game1.getFarm(), genericBlueprint);
 
             return false;
         }
@@ -89,9 +96,8 @@ namespace BetterBuildings.Framework.Patches.Menus
             }
 
             // Draw banner
-            string message = (___upgrading ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Upgrade", genericBlueprint.NameOfBuildingToUpgrade) : (___demolishing ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Demolish") : ((!___painting) ? Game1.content.LoadString("Strings\\UI:Carpenter_ChooseLocation") : Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Paint"))));
+            string message = (___upgrading ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Upgrade", genericBlueprint.nameOfBuildingToUpgrade) : (___demolishing ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Demolish") : ((!___painting) ? Game1.content.LoadString("Strings\\UI:Carpenter_ChooseLocation") : Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Paint"))));
             SpriteText.drawStringWithScrollBackground(b, message, Game1.uiViewport.Width / 2 - SpriteText.getWidthOfString(message) / 2, 16);
-
 
             // Draw the building
             if (!___upgrading && !___demolishing && !___moving && !___painting)
@@ -141,12 +147,112 @@ namespace BetterBuildings.Framework.Patches.Menus
             return false;
         }
 
+        private static bool AttemptToBuildStructure(Farm farm, GenericBlueprint blueprint)
+        {
+            Vector2 tileLocation = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
+            if (!CanBuildHere(farm, blueprint, tileLocation))
+            {
+                return false;
+            }
+
+            var buildingModel = BetterBuildings.buildingManager.GetSpecificBuildingModel<BuildingModel>(blueprint.name);
+            if (buildingModel is null)
+            {
+                return false;
+            }
+
+            var customBuilding = buildingModel.CreateBuilding(farm, tileLocation);
+            customBuilding.owner.Value = Game1.player.UniqueMultiplayerID;
+
+            string finalCheckResult = customBuilding.isThereAnythingtoPreventConstruction(farm, tileLocation);
+            if (finalCheckResult != null)
+            {
+                Game1.addHUDMessage(new HUDMessage(finalCheckResult, Color.Red, 3500f));
+                return false;
+            }
+            for (int y = 0; y < blueprint.tilesHeight; y++)
+            {
+                for (int x = 0; x < blueprint.tilesWidth; x++)
+                {
+                    Vector2 currentGlobalTilePosition = new Vector2(tileLocation.X + (float)x, tileLocation.Y + (float)y);
+                    farm.terrainFeatures.Remove(currentGlobalTilePosition);
+                }
+            }
+
+            farm.buildings.Add(customBuilding);
+            customBuilding.performActionOnConstruction(farm);
+            BetterBuildings.multiplayer.globalChatInfoMessage("BuildingBuild", Game1.player.Name, Utility.AOrAn(blueprint.displayName), blueprint.displayName, Game1.player.farmName);
+
+            return true;
+        }
+
+        public static bool CanBuildHere(Farm farm, GenericBlueprint blueprint, Vector2 tileLocation)
+        {
+            for (int y5 = 0; y5 < blueprint.tilesHeight; y5++)
+            {
+                for (int x2 = 0; x2 < blueprint.tilesWidth; x2++)
+                {
+                    farm.pokeTileForConstruction(new Vector2(tileLocation.X + (float)x2, tileLocation.Y + (float)y5));
+                }
+            }
+            foreach (Point additionalPlacementTile in blueprint.additionalPlacementTiles)
+            {
+                int x5 = additionalPlacementTile.X;
+                int y4 = additionalPlacementTile.Y;
+                farm.pokeTileForConstruction(new Vector2(tileLocation.X + (float)x5, tileLocation.Y + (float)y4));
+            }
+            for (int y3 = 0; y3 < blueprint.tilesHeight; y3++)
+            {
+                for (int x3 = 0; x3 < blueprint.tilesWidth; x3++)
+                {
+                    Vector2 currentGlobalTilePosition2 = new Vector2(tileLocation.X + (float)x3, tileLocation.Y + (float)y3);
+                    if (!farm.isBuildable(currentGlobalTilePosition2))
+                    {
+                        return false;
+                    }
+                    foreach (Farmer farmer in farm.farmers)
+                    {
+                        if (farmer.GetBoundingBox().Intersects(new Rectangle(x3 * 64, y3 * 64, 64, 64)))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            foreach (Point additionalPlacementTile2 in blueprint.additionalPlacementTiles)
+            {
+                int x4 = additionalPlacementTile2.X;
+                int y2 = additionalPlacementTile2.Y;
+                Vector2 currentGlobalTilePosition3 = new Vector2(tileLocation.X + (float)x4, tileLocation.Y + (float)y2);
+                if (!farm.isBuildable(currentGlobalTilePosition3))
+                {
+                    return false;
+                }
+                foreach (Farmer farmer2 in farm.farmers)
+                {
+                    if (farmer2.GetBoundingBox().Intersects(new Rectangle(x4 * 64, y2 * 64, 64, 64)))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if (blueprint.humanDoor != new Point(-1, -1))
+            {
+                Vector2 doorPos = tileLocation + new Vector2(blueprint.humanDoor.X, blueprint.humanDoor.Y + 1);
+                if (!farm.isBuildable(doorPos) && !farm.isPath(doorPos))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private static void CarpenterMenuPostfix(CarpenterMenu __instance, ref List<BluePrint> ___blueprints)
         {
             foreach (var building in BetterBuildings.buildingManager.GetAllBuildingModels())
             {
-                ___blueprints.Add(building.Blueprint);
-                _monitor.Log(building.Blueprint.name, LogLevel.Debug);
+                ___blueprints.Add(building.Blueprint.CreateBlueprint());
             }
         }
     }

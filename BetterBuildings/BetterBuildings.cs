@@ -1,5 +1,6 @@
 ﻿using BetterBuildings.Framework.Managers;
-using BetterBuildings.Framework.Models.Buildings;
+using BetterBuildings.Framework.Models.ContentPack;
+using BetterBuildings.Framework.Models.General;
 using BetterBuildings.Framework.Patches.Buildings;
 using BetterBuildings.Framework.Patches.Menus;
 using BetterBuildings.Framework.Patches.Outliers;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace BetterBuildings
 {
@@ -24,6 +26,7 @@ namespace BetterBuildings
         // Shared static helpers
         internal static IMonitor monitor;
         internal static IModHelper modHelper;
+        internal static Multiplayer multiplayer;
 
         // Managers
         internal static BuildingManager buildingManager;
@@ -33,6 +36,7 @@ namespace BetterBuildings
             // Set up the monitor, helper and multiplayer
             monitor = Monitor;
             modHelper = helper;
+            multiplayer = helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
 
             // TODO: Implement the following building models: Functional (obelisk-like), Production (mill-like) and Enterable / Decoratable (shed-like)
             // TODO: For functional, make API to allow hooking into functional buildings to allow for C# usage
@@ -71,34 +75,84 @@ namespace BetterBuildings
 
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
+            var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "BetterBuildings", "buildings.json");
+            if (!Game1.IsMasterGame || !File.Exists(customBuildingsExternalSavePath))
+            {
+                return;
+            }
+
+            // Get the externally saved custom building objects
+            var externallySavedCustomBuildings = new List<GenericBuilding>();
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+            using (StreamReader textReader = new StreamReader(customBuildingsExternalSavePath))
+            {
+                externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(textReader);
+            }
+
+            // Process each buildable location and restore any installed custom buildings
             foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation && l.modData.ContainsKey(ModDataKeys.LOCATION_CUSTOM_BUILDINGS)))
             {
-                var customBuildings = JsonSerializer.Deserialize<List<Building>>(buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS]);
-                foreach (var building in customBuildings)
+                // Get the archived custom building data for this location
+                var archivedBuildingsData = JsonSerializer.Deserialize<List<ArchivedBuildingData>>(buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS]);
+
+                // Go through each ArchivedBuildingData to confirm that a) the Id exists via BuildingManager and b) there is a match in locationNamesToCustomBuildings to its Id and TileLocation
+                foreach (var archivedData in archivedBuildingsData)
                 {
-                    buildableLocation.buildings.Add(building);
+                    if (!buildingManager.DoesBuildingModelExist(archivedData.Id) || !externallySavedCustomBuildings.Any(b => b.LocationName == buildableLocation.NameOrUniqueName))
+                    {
+                        continue;
+                    }
+
+                    GenericBuilding customBuilding = externallySavedCustomBuildings.FirstOrDefault(b => b.Id == archivedData.Id && b.TileLocation.Equals(archivedData.TileLocation));
+                    if (customBuilding is null)
+                    {
+                        continue;
+                    }
+
+                    // Restore the archived custom building
+                    buildableLocation.buildings.Add(customBuilding);
                 }
             }
         }
 
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
+            if (!Game1.IsMasterGame)
+            {
+                return;
+            }
+
+            // Create the BetterBuildings folder near the save file, if one doesn't exist
+            var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "BetterBuildings");
+            if (!Directory.Exists(externalSaveFolderPath))
+            {
+                Directory.CreateDirectory(externalSaveFolderPath);
+            }
+
+            // Process each buildable location and archive the relevant data
+            var allExistingCustomBuildings = new List<GenericBuilding>();
             foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
             {
-                var customBuildings = new List<Building>();
-                foreach (var building in buildableLocation.buildings.ToList())
+                var archivedBuildingsData = new List<ArchivedBuildingData>();
+                foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
                 {
-                    var customBuilding = buildingManager.GetSpecificBuildingModel<GenericBuilding>(building.buildingType.Value);
-                    if (customBuilding is not null)
-                    {
+                    // Prepare the custom building objects for this location to be stored externally
+                    allExistingCustomBuildings.Add(customBuilding);
+                    archivedBuildingsData.Add(new ArchivedBuildingData() { Id = customBuilding.Id, TileLocation = customBuilding.TileLocation });
 
-                        monitor.Log("TEST 123", LogLevel.Debug);
-                        customBuildings.Add(building);
-                        buildableLocation.buildings.Remove(building);
-                    }
+                    // Remove the building from the location to avoid serialization issues
+                    buildableLocation.buildings.Remove(customBuilding);
                 }
 
-                buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(customBuildings);
+                // Archive the custom building data for this location
+                buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(archivedBuildingsData);
+            }
+
+            // Save the custom building objects externally, at the player's save file location
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+            using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
+            {
+                xmlSerializer.Serialize(writer, allExistingCustomBuildings);
             }
         }
 
@@ -151,7 +205,7 @@ namespace BetterBuildings
                         var modelPath = Path.Combine(parentFolderName, folder.Name, "building.json");
 
                         // Parse the model and assign it the content pack's owner
-                        GenericBuilding buildingModel = contentPack.ReadJsonFile<GenericBuilding>(modelPath);
+                        BuildingModel buildingModel = contentPack.ReadJsonFile<BuildingModel>(modelPath);
 
                         // Verify the required Name property is set
                         if (String.IsNullOrEmpty(buildingModel.Name))
@@ -166,7 +220,7 @@ namespace BetterBuildings
                         buildingModel.Id = String.Concat(buildingModel.Owner, "/", "/", buildingModel.Name);
 
                         // Verify that a building with the name doesn't exist in this pack
-                        if (buildingManager.GetSpecificBuildingModel<GenericBuilding>(buildingModel.Id) != null)
+                        if (buildingManager.GetSpecificBuildingModel<BuildingModel>(buildingModel.Id) != null)
                         {
                             Monitor.Log($"Unable to add building from {contentPack.Manifest.Name}: This pack already contains a building with the name of {buildingModel.Name}", LogLevel.Warn);
                             continue;

@@ -1,4 +1,4 @@
-﻿using BetterBuildings.Framework.Models.Buildings;
+﻿using BetterBuildings.Framework.Models.ContentPack;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
@@ -11,12 +11,12 @@ namespace BetterBuildings.Framework.Managers
     internal class BuildingManager
     {
         private IMonitor _monitor;
-        private List<GenericBuilding> _buildings;
+        private List<BuildingModel> _buildings;
 
         public BuildingManager(IMonitor monitor, IModHelper helper)
         {
             _monitor = monitor;
-            _buildings = new List<GenericBuilding>();
+            _buildings = new List<BuildingModel>();
         }
 
         public void Reset()
@@ -24,7 +24,7 @@ namespace BetterBuildings.Framework.Managers
             _buildings.Clear();
         }
 
-        public void AddBuilding(GenericBuilding model)
+        public void AddBuilding(BuildingModel model)
         {
             if (_buildings.Any(t => t.Id == model.Id))
             {
@@ -37,14 +37,19 @@ namespace BetterBuildings.Framework.Managers
             }
         }
 
-        public List<GenericBuilding> GetAllBuildingModels()
+        public List<BuildingModel> GetAllBuildingModels()
         {
             return _buildings;
         }
 
-        public T GetSpecificBuildingModel<T>(string buildingId) where T : GenericBuilding
+        public T GetSpecificBuildingModel<T>(string buildingId) where T : BuildingModel
         {
             return (T)_buildings.FirstOrDefault(t => String.Equals(t.Id, buildingId, StringComparison.OrdinalIgnoreCase) && t is T);
+        }
+
+        public bool DoesBuildingModelExist(string buildingId)
+        {
+            return _buildings.Any(t => String.Equals(t.Id, buildingId, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
