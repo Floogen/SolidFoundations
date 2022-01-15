@@ -17,23 +17,25 @@
       "Y": 4
     }
   ],
-  "Doorway": {
-    "Type": "Tunnel",
-    "ExitTile": {
-      "X": 2,
-      "Y": 4
-    },
-    "Tiles": [
-      {
+  "Doorways": [
+    {
+      "Type": "Tunnel",
+      "ExitTile": {
         "X": 2,
-        "Y": 4
+        "Y": 3
       },
-      {
-        "X": 3,
-        "Y": 4
-      }
-    ]
-  },
+      "Tiles": [
+        {
+          "X": 2,
+          "Y": 2
+        },
+        {
+          "X": 3,
+          "Y": 2
+        }
+      ]
+    }
+  ],
 
   "Blueprint": {
     "Vendor": "Robin",

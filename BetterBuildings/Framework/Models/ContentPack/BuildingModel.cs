@@ -31,7 +31,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public Dimensions Dimensions { get; set; }
         public bool ShowShadow { get; set; } = true;
         public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
-        public DoorTiles Doorway { get; set; }
+        public List<DoorTiles> Doorways { get; set; }
         public BlueprintModel Blueprint { get; set; }
 
         internal string Owner { get; set; }

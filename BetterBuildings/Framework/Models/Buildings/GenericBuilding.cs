@@ -44,11 +44,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 var indoorLocation = new GameLocation(Model.MapPath, Model.Id);
                 indoorLocation.uniqueName.Value = Model.Id + Guid.NewGuid().ToString();
 
-                if (Model.InteriorType == InteriorType.Greenhouse)
+                if (Model.InteriorType is InteriorType.Greenhouse)
                 {
                     indoorLocation.IsGreenhouse = true;
                 }
-                else if (Model.InteriorType == InteriorType.Coop || Model.InteriorType == InteriorType.Barn)
+                else if (Model.InteriorType is InteriorType.Coop or InteriorType.Barn)
                 {
                     indoorLocation.IsFarm = true;
                 }
@@ -62,14 +62,20 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         private void AttemptTunnelDoorTeleport()
         {
-            if (Model.Doorway is not null)
+            if (Model.Doorways is null || !Model.Doorways.Any(d => d.Type is DoorType.Tunnel))
             {
-                // Warp player inside
-                base.indoors.Value.isStructure.Value = true;
-                Game1.player.currentLocation.playSoundAt("doorClose", Game1.player.getTileLocation());
-                Game1.warpFarmer(this.indoors.Value.uniqueName.Value, this.indoors.Value.warps[0].X, this.indoors.Value.warps[0].Y - 1, Game1.player.FacingDirection, isStructure: true);
-
                 return;
+            }
+
+            foreach (var tile in Model.Doorways.First(d => d.Type == DoorType.Tunnel).Tiles)
+            {
+                if (base.tileX.Value + tile.X == Game1.player.getTileX() && base.tileY.Value + tile.Y == Game1.player.getTileY())
+                {
+                    // Warp player inside
+                    base.indoors.Value.isStructure.Value = true;
+                    Game1.player.currentLocation.playSoundAt("doorClose", Game1.player.getTileLocation());
+                    Game1.warpFarmer(this.indoors.Value.uniqueName.Value, this.indoors.Value.warps[0].X, this.indoors.Value.warps[0].Y - 1, Game1.player.FacingDirection, isStructure: true);
+                }
             }
         }
 
@@ -118,12 +124,18 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 interior = this.indoors.Value;
             }
 
-            if (Model.Doorway is not null && Model.Doorway.ExitTile is not null)
+            if (Model.Doorways is not null)
             {
+                TileLocation exitTile = new TileLocation() { X = 0, Y = base.tilesHigh.Value };
+                if (Model.Doorways.FirstOrDefault(d => d.Type is DoorType.Standard or DoorType.Tunnel) is DoorTiles humanDoorway && humanDoorway is not null && humanDoorway.ExitTile is not null)
+                {
+                    exitTile = humanDoorway.ExitTile;
+                }
+
                 foreach (Warp warp in interior.warps)
                 {
-                    warp.TargetX = base.tileX.Value + Model.Doorway.ExitTile.X;
-                    warp.TargetY = base.tileY.Value + Model.Doorway.ExitTile.Y;
+                    warp.TargetX = base.tileX.Value + exitTile.X;
+                    warp.TargetY = base.tileY.Value + exitTile.Y;
                 }
             }
         }

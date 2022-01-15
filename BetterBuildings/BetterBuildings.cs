@@ -250,9 +250,9 @@ namespace BetterBuildings
                         }
 
                         // Verify that we are given an interior.tmx if any InteractiveTiles
-                        if (buildingModel.Doorway is not null && !File.Exists(Path.Combine(folder.FullName, "interior.tmx")))
+                        if (buildingModel.Doorways is not null && !File.Exists(Path.Combine(folder.FullName, "interior.tmx")))
                         {
-                            Monitor.Log($"Unable to add building for {buildingModel.Name} from {contentPack.Manifest.Name}: The TunnelDoor property was used but no interior.tmx was found", LogLevel.Warn);
+                            Monitor.Log($"Unable to add building for {buildingModel.Name} from {contentPack.Manifest.Name}: The Doorways property was used but no interior.tmx was found", LogLevel.Warn);
                             continue;
                         }
 
