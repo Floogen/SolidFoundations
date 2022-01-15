@@ -181,6 +181,7 @@ namespace BetterBuildings.Framework.Patches.Menus
 
             farm.buildings.Add(customBuilding);
             customBuilding.performActionOnConstruction(farm);
+            customBuilding.updateInteriorWarps();
             BetterBuildings.multiplayer.globalChatInfoMessage("BuildingBuild", Game1.player.Name, Utility.AOrAn(blueprint.displayName), blueprint.displayName, Game1.player.farmName);
 
             return true;

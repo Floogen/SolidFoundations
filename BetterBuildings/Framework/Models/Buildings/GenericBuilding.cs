@@ -25,12 +25,44 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public GenericBuilding(BuildingModel model, GenericBlueprint genericBlueprint) : base(genericBlueprint, Vector2.Zero)
         {
-            Model = model;
+            RefreshModel(model);
         }
 
         public void RefreshModel(BuildingModel model)
         {
             Model = model;
+
+            if (!String.IsNullOrEmpty(model.MapPath) && indoors.Value is null)
+            {
+                var indoorLocation = new GameLocation(model.MapPath, model.Id);
+                indoorLocation.uniqueName.Value = model.Id + Guid.NewGuid().ToString();
+
+                if (Model.InteriorType == InteriorType.Greenhouse)
+                {
+                    indoorLocation.IsGreenhouse = true;
+                }
+                else if (Model.InteriorType == InteriorType.Coop || Model.InteriorType == InteriorType.Barn)
+                {
+                    indoorLocation.IsFarm = true;
+                }
+                indoorLocation.isStructure.Value = true;
+                base.indoors.Value = indoorLocation;
+            }
+
+            this.updateInteriorWarps();
+        }
+
+        private void AttemptTunnelDoorTeleport()
+        {
+            if (Model.Doorway is not null)
+            {
+                // Warp player inside
+                base.indoors.Value.isStructure.Value = true;
+                Game1.player.currentLocation.playSoundAt("doorClose", Game1.player.getTileLocation());
+                Game1.warpFarmer(this.indoors.Value.uniqueName.Value, this.indoors.Value.warps[0].X, this.indoors.Value.warps[0].Y - 1, Game1.player.FacingDirection, isStructure: true);
+
+                return;
+            }
         }
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
@@ -50,7 +82,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 {
                     if (boundingBox.X >= (tileLocation.X + base.tileX.Value) * 64 && boundingBox.Right <= (tileLocation.X + base.tileX.Value + 1) * 64 + (IsTileToTheRightWalkable(tileLocation) ? 64 : 0))
                     {
-                        return boundingBox.Y <= (tileLocation.Y + base.tileY.Value) * 64 && boundingBox.Bottom <= (tileLocation.Y + base.tileY.Value - 1) * 64;
+                        bool isOutsideYAxisBounds = boundingBox.Y <= (tileLocation.Y + base.tileY.Value) * 64 && boundingBox.Bottom <= (tileLocation.Y + base.tileY.Value - 1) * 64;
+                        if (!isOutsideYAxisBounds)
+                        {
+                            AttemptTunnelDoorTeleport();
+                        }
+
+                        return isOutsideYAxisBounds;
                     }
                 }
 
@@ -58,6 +96,28 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
 
             return base.intersects(boundingBox);
+        }
+
+        public override void updateInteriorWarps(GameLocation interior = null)
+        {
+            if (interior is null)
+            {
+                if (this.indoors.Value is null)
+                {
+                    return;
+                }
+
+                interior = this.indoors.Value;
+            }
+
+            if (Model.Doorway is not null && Model.Doorway.ExitTile is not null)
+            {
+                foreach (Warp warp in interior.warps)
+                {
+                    warp.TargetX = base.tileX.Value + Model.Doorway.ExitTile.X;
+                    warp.TargetY = base.tileY.Value + Model.Doorway.ExitTile.Y;
+                }
+            }
         }
 
         public override void drawShadow(SpriteBatch b, int localX = -1, int localY = -1)

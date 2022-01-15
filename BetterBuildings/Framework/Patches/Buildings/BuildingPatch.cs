@@ -31,13 +31,19 @@ namespace BetterBuildings.Framework.Patches.Buildings
 
         internal void Apply(Harmony harmony)
         {
-            harmony.Patch(AccessTools.Method(_entity, nameof(Building.Update), new[] { typeof(GameTime) }), postfix: new HarmonyMethod(GetType(), nameof(UpdatePostfix)));
+            harmony.Patch(AccessTools.Method(_entity, "getIndoors", new[] { typeof(string) }), prefix: new HarmonyMethod(GetType(), nameof(GetIndoorsPrefix)));
             harmony.Patch(AccessTools.Method(_entity, nameof(Building.resetTexture), null), prefix: new HarmonyMethod(GetType(), nameof(ResetTexturePrefix)));
         }
 
-        private static void UpdatePostfix(Building __instance, GameTime time)
+        private static bool GetIndoorsPrefix(Building __instance, string nameOfIndoorsWithoutUnique, ref GameLocation __result)
         {
-            return;
+            if (__instance is GenericBuilding)
+            {
+                __result = null;
+                return false;
+            }
+
+            return true;
         }
 
         internal static bool ResetTexturePrefix(Building __instance)

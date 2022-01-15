@@ -23,7 +23,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public GenericBlueprint(BuildingModel building) : this()
         {
-            base.displayName = building.Name;
+            base.displayName = building.DisplayName;
             base.name = building.Id;
             base.tilesHeight = building.Dimensions.Height;
             base.tilesWidth = building.Dimensions.Width;

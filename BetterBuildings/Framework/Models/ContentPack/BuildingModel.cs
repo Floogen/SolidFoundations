@@ -11,20 +11,33 @@ using System.Threading.Tasks;
 
 namespace BetterBuildings.Framework.Models.ContentPack
 {
+    public enum InteriorType
+    {
+        Basic,
+        Barn,
+        Coop,
+        Slime,
+        Decoratable,
+        Greenhouse
+    }
+
     public class BuildingModel
     {
         private string _displayName { get; set; }
         public string DisplayName { get { return String.IsNullOrEmpty(_displayName) ? Name : _displayName; } set { _displayName = value; } }
         public string Name { get; set; }
+        public InteriorType InteriorType { get; set; }
         public string Description { get; set; }
         public Dimensions Dimensions { get; set; }
         public bool ShowShadow { get; set; } = true;
-        public List<TileLocation> WalkableTiles { get; set; }
+        public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
+        public DoorTiles Doorway { get; set; }
         public BlueprintModel Blueprint { get; set; }
 
         internal string Owner { get; set; }
         internal string PackName { get; set; }
         internal string Id { get; set; }
+        internal string MapPath { get; set; }
         internal Texture2D Texture { get; set; }
         internal Texture2D PaintMask { get; set; }
 

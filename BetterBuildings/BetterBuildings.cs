@@ -246,6 +246,19 @@ namespace BetterBuildings
                             continue;
                         }
 
+                        // Verify that we are given an interior.tmx if any InteractiveTiles
+                        if (buildingModel.Doorway is not null && !File.Exists(Path.Combine(folder.FullName, "interior.tmx")))
+                        {
+                            Monitor.Log($"Unable to add building for {buildingModel.Name} from {contentPack.Manifest.Name}: The TunnelDoor property was used but no interior.tmx was found", LogLevel.Warn);
+                            continue;
+                        }
+
+                        // Cache the interior map
+                        if (File.Exists(Path.Combine(folder.FullName, "interior.tmx")))
+                        {
+                            buildingModel.MapPath = contentPack.GetActualAssetKey(Path.Combine(folder.Parent.Name, folder.Name, "interior.tmx"));
+                        }
+
                         // Load in the texture
                         buildingModel.Texture = contentPack.LoadAsset<Texture2D>(contentPack.GetActualAssetKey(Path.Combine(parentFolderName, folder.Name, "building.png")));
 
