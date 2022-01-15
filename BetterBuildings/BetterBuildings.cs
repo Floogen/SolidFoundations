@@ -112,6 +112,9 @@ namespace BetterBuildings
                     // Update the building's model
                     customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<BuildingModel>(customBuilding.Id));
 
+                    // Load the building
+                    customBuilding.load();
+
                     // Restore the archived custom building
                     buildableLocation.buildings.Add(customBuilding);
 

@@ -14,7 +14,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
     public class GenericBuilding : Building
     {
         public BuildingModel Model { get; set; }
-        public string Id { get { return Model is null ? String.Empty : Model.Id; } }
+        public string Id { get; set; }
         public string LocationName { get; set; }
         public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
 
@@ -26,16 +26,23 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public GenericBuilding(BuildingModel model, GenericBlueprint genericBlueprint) : base(genericBlueprint, Vector2.Zero)
         {
             RefreshModel(model);
+
+            base.indoors.Value = GetIndoors();
+            this.updateInteriorWarps();
         }
 
         public void RefreshModel(BuildingModel model)
         {
             Model = model;
+            Id = model.Id;
+        }
 
-            if (!String.IsNullOrEmpty(model.MapPath) && indoors.Value is null)
+        public GameLocation GetIndoors()
+        {
+            if (Model is not null && !String.IsNullOrEmpty(Model.MapPath))
             {
-                var indoorLocation = new GameLocation(model.MapPath, model.Id);
-                indoorLocation.uniqueName.Value = model.Id + Guid.NewGuid().ToString();
+                var indoorLocation = new GameLocation(Model.MapPath, Model.Id);
+                indoorLocation.uniqueName.Value = Model.Id + Guid.NewGuid().ToString();
 
                 if (Model.InteriorType == InteriorType.Greenhouse)
                 {
@@ -46,10 +53,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     indoorLocation.IsFarm = true;
                 }
                 indoorLocation.isStructure.Value = true;
-                base.indoors.Value = indoorLocation;
+
+                return indoorLocation;
             }
 
-            this.updateInteriorWarps();
+            return null;
         }
 
         private void AttemptTunnelDoorTeleport()

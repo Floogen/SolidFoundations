@@ -37,9 +37,9 @@ namespace BetterBuildings.Framework.Patches.Buildings
 
         private static bool GetIndoorsPrefix(Building __instance, string nameOfIndoorsWithoutUnique, ref GameLocation __result)
         {
-            if (__instance is GenericBuilding)
+            if (__instance is GenericBuilding genericBuilding)
             {
-                __result = null;
+                __result = genericBuilding.GetIndoors();
                 return false;
             }
 
