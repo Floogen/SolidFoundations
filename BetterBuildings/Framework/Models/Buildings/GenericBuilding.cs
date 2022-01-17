@@ -18,10 +18,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string LocationName { get; set; }
         public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
 
+        internal bool IsUsingEventOverride { get; set; }
         internal bool DrawOverPlayer { get; set; }
         internal float? AlphaOverride { get; set; }
-
-        private bool _debug = false;
 
         public GenericBuilding() : base()
         {
@@ -125,6 +124,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             AlphaOverride = null;
             DrawOverPlayer = false;
+
+            IsUsingEventOverride = false;
         }
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
@@ -149,22 +150,19 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 var boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Y / 64 };
                 if (IsNearbyTileWalkable(boundingTileLocation, -1))
                 {
+                    if (!AttemptTunnelDoorTeleport())
+                    {
+                        AttemptEventTileTrigger();
+                    }
+
                     var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
                     if (tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top)) || IsTileToTheRightWalkable(boundingTileLocation))
                     {
-                        if (!AttemptTunnelDoorTeleport())
-                        {
-                            AttemptEventTileTrigger();
-                        }
                         return false;
                     }
                 }
 
                 return true;
-            }
-            else
-            {
-                ResetEventOverrides();
             }
 
             return base.intersects(boundingBox);
@@ -208,11 +206,17 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
             else
             {
-                int tilesHigh = this.tilesHigh.Get();
-                if (this.fadeWhenPlayerIsBehind.Value && Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), this.tilesWide.Value * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64)))
+                var isPlayerNearTopOfBuilding = Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), this.tilesWide.Value * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64));
+
+                if (this.fadeWhenPlayerIsBehind.Value && isPlayerNearTopOfBuilding)
                 {
                     this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
                 }
+            }
+
+            if (IsUsingEventOverride && !base.intersects(Game1.player.GetBoundingBox()))
+            {
+                ResetEventOverrides();
             }
         }
 

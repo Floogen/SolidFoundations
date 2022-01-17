@@ -41,6 +41,7 @@ namespace BetterBuildings.Framework.Models.General
                 customBuilding.AlphaOverride = Math.Min(Fade.Percentage, 1f);
             }
 
+            customBuilding.IsUsingEventOverride = true;
         }
     }
 }

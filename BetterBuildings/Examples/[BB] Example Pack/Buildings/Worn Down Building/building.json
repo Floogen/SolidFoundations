@@ -2,7 +2,7 @@
   "Name": "Worn Down Building",
   "Description": "...",
   "ShowShadow": false,
-  "FadeWhenPlayerIsBehind": true,
+  "FadeWhenPlayerIsBehind": false,
   "Dimensions": {
     "Height": 4,
     "Width": 7
@@ -26,6 +26,26 @@
       "Tile": {
         "X": 1,
         "Y": 3
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 1,
+        "Y": 0
       }
     }
   ],
@@ -61,6 +81,14 @@
     {
       "X": 1,
       "Y": 0
+    },
+    {
+      "X": 0,
+      "Y": -1
+    },
+    {
+      "X": 1,
+      "Y": -1
     }
   ],
 
