@@ -31,6 +31,9 @@ namespace BetterBuildings
         // Managers
         internal static BuildingManager buildingManager;
 
+        // Flags
+        internal static bool showWalkableTiles;
+
         public override void Entry(IModHelper helper)
         {
             // Set up the monitor, helper and multiplayer
@@ -66,6 +69,7 @@ namespace BetterBuildings
 
             // Add in the debug commands
             helper.ConsoleCommands.Add("bb_reload", "Reloads all Better Buildings content packs.\n\nUsage: bb_reload", delegate { this.LoadContentPacks(); RefreshAllCustomBuildings(); });
+            helper.ConsoleCommands.Add("bb_debug", "Draws all WalkableTiles for all custom buildings.\n\nUsage: bb_debug", delegate { showWalkableTiles = !showWalkableTiles; });
 
             // Hook into the required events
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;

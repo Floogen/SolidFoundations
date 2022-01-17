@@ -1,4 +1,5 @@
-﻿using BetterBuildings.Framework.Models.Events;
+﻿using BetterBuildings.Framework.Models.ContentPack;
+using BetterBuildings.Framework.Models.Events;
 using StardewValley;
 using System;
 using System.Collections.Generic;
@@ -16,21 +17,30 @@ namespace BetterBuildings.Framework.Models.General
         Message,
         PlaySound,
         OpenShop,
-        //FadeBuilding
+        FadeBuilding
     }
 
     public class InteractiveTile
     {
         public WarpEvent Warp { get; set; }
+        public FadeEvent Fade { get; set; }
+        public bool DrawOverPlayer { get; set; }
         public TileLocation Tile { get; set; }
 
 
-        public void Trigger(Farmer who)
+        public void Trigger(GenericBuilding customBuilding, Farmer who)
         {
+            customBuilding.DrawOverPlayer = DrawOverPlayer;
+
             if (Warp is not null)
             {
                 Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Game1.player.FacingDirection);
             }
+            if (Fade is not null)
+            {
+                customBuilding.AlphaOverride = Math.Min(Fade.Percentage, 1f);
+            }
+
         }
     }
 }

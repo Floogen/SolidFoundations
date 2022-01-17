@@ -18,6 +18,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string LocationName { get; set; }
         public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
 
+        internal bool DrawOverPlayer { get; set; }
+        internal float? AlphaOverride { get; set; }
+
         private bool _debug = false;
 
         public GenericBuilding() : base()
@@ -109,13 +112,19 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 if (base.tileX.Value + eventTile.Tile.X == Game1.player.getTileX() && base.tileY.Value + eventTile.Tile.Y == Game1.player.getTileY())
                 {
                     // Trigger the tile
-                    eventTile.Trigger(Game1.player);
+                    eventTile.Trigger(this, Game1.player);
 
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private void ResetEventOverrides()
+        {
+            AlphaOverride = null;
+            DrawOverPlayer = false;
         }
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
@@ -153,6 +162,10 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
                 return true;
             }
+            else
+            {
+                ResetEventOverrides();
+            }
 
             return base.intersects(boundingBox);
         }
@@ -188,10 +201,18 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public override void Update(GameTime time)
         {
             this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
-            int tilesHigh = this.tilesHigh.Get();
-            if (this.fadeWhenPlayerIsBehind.Value && Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), this.tilesWide.Value * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64)))
+
+            if (AlphaOverride is not null)
             {
-                this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
+                this.alpha.Value = AlphaOverride.Value;
+            }
+            else
+            {
+                int tilesHigh = this.tilesHigh.Get();
+                if (this.fadeWhenPlayerIsBehind.Value && Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), this.tilesWide.Value * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64)))
+                {
+                    this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
+                }
             }
         }
 
@@ -214,10 +235,10 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
 
                 this.drawShadow(b);
-                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.texture.Value.Bounds, base.color.Value * base.alpha.Value, 0f, new Vector2(0f, base.texture.Value.Bounds.Height), 4f, SpriteEffects.None, (float)((base.tileY.Value + base.tilesHigh.Value - 3) * 64) / 10000f);
+                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.texture.Value.Bounds, base.color.Value * base.alpha.Value, 0f, new Vector2(0f, base.texture.Value.Bounds.Height), 4f, SpriteEffects.None, (float)((base.tileY.Value + base.tilesHigh.Value - 3) * 64) / (DrawOverPlayer ? 1000f : 10000f));
 
 
-                if (_debug)
+                if (BetterBuildings.showWalkableTiles)
                 {
                     var playerPosition = Game1.GlobalToLocal(Game1.viewport, new Vector2((Game1.player.GetBoundingBox().X), (Game1.player.GetBoundingBox().Y)));
                     b.Draw(Game1.staminaRect, new Rectangle((int)playerPosition.X, (int)playerPosition.Y, Game1.player.GetBoundingBox().Width, Game1.player.GetBoundingBox().Height), new Rectangle(0, 0, 1, 1), Color.Blue, 0f, Vector2.Zero, SpriteEffects.None, 100f);
