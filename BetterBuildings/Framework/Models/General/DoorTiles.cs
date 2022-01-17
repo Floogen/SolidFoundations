@@ -16,6 +16,7 @@ namespace BetterBuildings.Framework.Models.General
     public class DoorTiles
     {
         public DoorType Type { get; set; } = DoorType.Standard;
+        public TileLocation EntranceTile { get; set; }
         public TileLocation ExitTile { get; set; }
         public List<TileLocation> Tiles { get; set; }
     }

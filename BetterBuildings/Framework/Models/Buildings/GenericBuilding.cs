@@ -40,6 +40,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             base.tilesHigh.Value = model.Dimensions.Height;
             base.tilesWide.Value = model.Dimensions.Width;
+            base.fadeWhenPlayerIsBehind.Value = model.FadeWhenPlayerIsBehind;
         }
 
         public GameLocation GetIndoors()
@@ -65,23 +66,56 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return null;
         }
 
-        private void AttemptTunnelDoorTeleport()
+        private bool AttemptTunnelDoorTeleport()
         {
             if (Model.Doorways is null || !Model.Doorways.Any(d => d.Type is DoorType.Tunnel))
             {
-                return;
+                return false;
             }
 
-            foreach (var tile in Model.Doorways.First(d => d.Type == DoorType.Tunnel).Tiles)
+            var tunnelDoorway = Model.Doorways.First(d => d.Type == DoorType.Tunnel);
+            foreach (var tile in tunnelDoorway.Tiles)
             {
                 if (base.tileX.Value + tile.X == Game1.player.getTileX() && base.tileY.Value + tile.Y == Game1.player.getTileY())
                 {
                     // Warp player inside
                     base.indoors.Value.isStructure.Value = true;
                     Game1.player.currentLocation.playSoundAt("doorClose", Game1.player.getTileLocation());
-                    Game1.warpFarmer(this.indoors.Value.uniqueName.Value, this.indoors.Value.warps[0].X, this.indoors.Value.warps[0].Y - 1, Game1.player.FacingDirection, isStructure: true);
+
+                    // Get warp destination tile
+                    var destinationTile = new TileLocation() { X = this.indoors.Value.warps[0].X, Y = this.indoors.Value.warps[0].Y - 1 };
+                    if (tunnelDoorway.EntranceTile is not null)
+                    {
+                        destinationTile = tunnelDoorway.EntranceTile;
+                    }
+
+                    Game1.warpFarmer(this.indoors.Value.uniqueName.Value, destinationTile.X, destinationTile.Y, Game1.player.FacingDirection, isStructure: true);
+                    return true;
                 }
             }
+
+            return false;
+        }
+
+        private bool AttemptEventTileTrigger()
+        {
+            if (Model.EventTiles is null || Model.EventTiles.Count <= 0)
+            {
+                return false;
+            }
+
+            foreach (var eventTile in Model.EventTiles)
+            {
+                if (base.tileX.Value + eventTile.Tile.X == Game1.player.getTileX() && base.tileY.Value + eventTile.Tile.Y == Game1.player.getTileY())
+                {
+                    // Trigger the tile
+                    eventTile.Trigger(Game1.player);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
@@ -103,22 +137,16 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             if (base.intersects(boundingBox))
             {
-                //boundingBox = Game1.player.GetBoundingBox();
-
-                var playerTileLocation = new TileLocation() { X = Game1.player.getTileX(), Y = Game1.player.getTileY() };
                 var boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Y / 64 };
-                var targetTileLocation = new TileLocation() { X = Game1.player.nextPositionTile().X, Y = Game1.player.nextPositionTile().Y };
-                //BetterBuildings.monitor.Log($"{boundingTileLocation} vs {targetTileLocation} vs {playerTileLocation}", StardewModdingAPI.LogLevel.Debug);
                 if (IsNearbyTileWalkable(boundingTileLocation, -1))
                 {
                     var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
-
-                    BetterBuildings.monitor.Log($"{boundingTileLocation} vs {targetTileLocation}", StardewModdingAPI.LogLevel.Debug);
-
-
                     if (tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top)) || IsTileToTheRightWalkable(boundingTileLocation))
                     {
-                        AttemptTunnelDoorTeleport();
+                        if (!AttemptTunnelDoorTeleport())
+                        {
+                            AttemptEventTileTrigger();
+                        }
                         return false;
                     }
                 }
@@ -154,6 +182,16 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     warp.TargetX = base.tileX.Value + exitTile.X;
                     warp.TargetY = base.tileY.Value + exitTile.Y;
                 }
+            }
+        }
+
+        public override void Update(GameTime time)
+        {
+            this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
+            int tilesHigh = this.tilesHigh.Get();
+            if (this.fadeWhenPlayerIsBehind.Value && Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), this.tilesWide.Value * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64)))
+            {
+                this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
             }
         }
 

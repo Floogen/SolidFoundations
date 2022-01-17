@@ -30,7 +30,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string Description { get; set; }
         public Dimensions Dimensions { get; set; }
         public bool ShowShadow { get; set; } = true;
+        public bool FadeWhenPlayerIsBehind { get; set; } = true;
         public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
+        public List<InteractiveTile> EventTiles { get; set; } = new List<InteractiveTile>();
         public List<DoorTiles> Doorways { get; set; }
         public BlueprintModel Blueprint { get; set; }
 

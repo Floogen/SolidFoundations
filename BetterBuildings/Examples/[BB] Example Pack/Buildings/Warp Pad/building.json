@@ -1,0 +1,49 @@
+{
+  "Name": "Warp Pad",
+  "Description": "A warp pad. Teleports you to a random location.",
+  "ShowShadow": false,
+  "FadeWhenPlayerIsBehind": true,
+  "Dimensions": {
+    "Height": 3,
+    "Width": 5
+  },
+  "EventTiles": [
+    {
+      "Warp": {
+        "Map": "Farmhouse",
+        "DestinationTile": {
+          "X": 2,
+          "Y": 3
+        }
+      },
+      "Tile": {
+        "X": 2,
+        "Y": 3
+      }
+    }
+  ],
+  "WalkableTiles": [
+    {
+      "X": 1,
+      "Y": 0
+    },
+    {
+      "X": 2,
+      "Y": 0
+    },
+    {
+      "X": 1,
+      "Y": 1
+    },
+    {
+      "X": 1,
+      "Y": 2
+    }
+  ],
+
+  "Blueprint": {
+    "Vendor": "Robin",
+    "DaysToConstruct": 0,
+    "RequiredMoney": 2500
+  }
+}
