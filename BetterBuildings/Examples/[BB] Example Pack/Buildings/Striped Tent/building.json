@@ -10,17 +10,21 @@
   "WalkableTiles": [
     {
       "X": 2,
-      "Y": 4
+      "Y": 2
     },
     {
       "X": 3,
-      "Y": 4
+      "Y": 2
     }
   ],
   "Doorways": [
     {
       "Type": "Tunnel",
       "ExitTile": {
+        "X": 2,
+        "Y": 3
+      },
+      "EntranceTile": {
         "X": 2,
         "Y": 3
       },
