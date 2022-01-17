@@ -18,6 +18,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string LocationName { get; set; }
         public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
 
+        private bool _debug = false;
+
         public GenericBuilding() : base()
         {
 
@@ -35,6 +37,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             Model = model;
             Id = model.Id;
+
+            base.tilesHigh.Value = model.Dimensions.Height;
+            base.tilesWide.Value = model.Dimensions.Width;
         }
 
         public GameLocation GetIndoors()
@@ -81,7 +86,12 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
         {
-            return Model.WalkableTiles.Any(t => t.X == tileLocation.X + 1 && t.Y == tileLocation.Y);
+            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + 1 && t.Y + base.tileY.Value == tileLocation.Y);
+        }
+
+        private bool IsNearbyTileWalkable(TileLocation tileLocation, int direction)
+        {
+            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + (direction == 1 ? 1 : 0) + (direction == 3 ? -1 : 0) && t.Y + base.tileY.Value == tileLocation.Y + (direction == 0 ? -1 : 0) + (direction == 2 ? 1 : 0));
         }
 
         public override bool intersects(Rectangle boundingBox)
@@ -90,19 +100,26 @@ namespace BetterBuildings.Framework.Models.ContentPack
             {
                 return base.intersects(boundingBox);
             }
-            else if (base.intersects(boundingBox))
-            {
-                foreach (var tileLocation in Model.WalkableTiles)
-                {
-                    if (boundingBox.X >= (tileLocation.X + base.tileX.Value) * 64 && boundingBox.Right <= (tileLocation.X + base.tileX.Value + 1) * 64 + (IsTileToTheRightWalkable(tileLocation) ? 64 : 0))
-                    {
-                        bool isOutsideYAxisBounds = boundingBox.Y <= (tileLocation.Y + base.tileY.Value) * 64 && boundingBox.Bottom <= (tileLocation.Y + base.tileY.Value - 1) * 64;
-                        if (!isOutsideYAxisBounds)
-                        {
-                            AttemptTunnelDoorTeleport();
-                        }
 
-                        return isOutsideYAxisBounds;
+            if (base.intersects(boundingBox))
+            {
+                //boundingBox = Game1.player.GetBoundingBox();
+
+                var playerTileLocation = new TileLocation() { X = Game1.player.getTileX(), Y = Game1.player.getTileY() };
+                var boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Y / 64 };
+                var targetTileLocation = new TileLocation() { X = Game1.player.nextPositionTile().X, Y = Game1.player.nextPositionTile().Y };
+                //BetterBuildings.monitor.Log($"{boundingTileLocation} vs {targetTileLocation} vs {playerTileLocation}", StardewModdingAPI.LogLevel.Debug);
+                if (IsNearbyTileWalkable(boundingTileLocation, -1))
+                {
+                    var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
+
+                    BetterBuildings.monitor.Log($"{boundingTileLocation} vs {targetTileLocation}", StardewModdingAPI.LogLevel.Debug);
+
+
+                    if (tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top)) || IsTileToTheRightWalkable(boundingTileLocation))
+                    {
+                        AttemptTunnelDoorTeleport();
+                        return false;
                     }
                 }
 
@@ -159,7 +176,20 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
 
                 this.drawShadow(b);
-                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.texture.Value.Bounds, base.color.Value * base.alpha.Value, 0f, new Vector2(0f, base.texture.Value.Bounds.Height), 4f, SpriteEffects.None, (float)((base.tileY.Value + base.tilesHigh.Value - 1) * 64) / 10000f);
+                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.texture.Value.Bounds, base.color.Value * base.alpha.Value, 0f, new Vector2(0f, base.texture.Value.Bounds.Height), 4f, SpriteEffects.None, (float)((base.tileY.Value + base.tilesHigh.Value - 3) * 64) / 10000f);
+
+
+                if (_debug)
+                {
+                    var playerPosition = Game1.GlobalToLocal(Game1.viewport, new Vector2((Game1.player.GetBoundingBox().X), (Game1.player.GetBoundingBox().Y)));
+                    b.Draw(Game1.staminaRect, new Rectangle((int)playerPosition.X, (int)playerPosition.Y, Game1.player.GetBoundingBox().Width, Game1.player.GetBoundingBox().Height), new Rectangle(0, 0, 1, 1), Color.Blue, 0f, Vector2.Zero, SpriteEffects.None, 100f);
+
+                    foreach (var tileLocation in Model.WalkableTiles)
+                    {
+                        var position = Game1.GlobalToLocal(Game1.viewport, new Vector2((tileLocation.X + base.tileX.Value) * 64, (tileLocation.Y + base.tileY.Value) * 64));
+                        b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Red, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
+                    }
+                }
             }
         }
     }

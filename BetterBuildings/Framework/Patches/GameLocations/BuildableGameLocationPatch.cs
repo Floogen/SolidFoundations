@@ -22,7 +22,7 @@ namespace BetterBuildings.Framework.Patches.Buildings
 {
     internal class BuildableGameLocationPatch : PatchTemplate
     {
-        private readonly Type _entity = typeof(Building);
+        private readonly Type _entity = typeof(BuildableGameLocation);
 
         internal BuildableGameLocationPatch(IMonitor modMonitor, IModHelper modHelper) : base(modMonitor, modHelper)
         {
@@ -31,12 +31,33 @@ namespace BetterBuildings.Framework.Patches.Buildings
 
         internal void Apply(Harmony harmony)
         {
-            harmony.Patch(AccessTools.Method(_entity, nameof(BuildableGameLocation.buildStructure), new[] { typeof(GameTime) }), postfix: new HarmonyMethod(GetType(), nameof(UpdatePostfix)));
+            //harmony.Patch(AccessTools.Method(_entity, nameof(BuildableGameLocation.isCollidingPosition), new[] { typeof(Microsoft.Xna.Framework.Rectangle), typeof(xTile.Dimensions.Rectangle), typeof(bool), typeof(int), typeof(bool), typeof(Character), typeof(bool), typeof(bool), typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(IsCollidingPositionPostfix)));
         }
 
-        private static void UpdatePostfix(Building __instance, GameTime time)
+        private static void IsCollidingPositionPostfix(BuildableGameLocation __instance, ref bool __result, Microsoft.Xna.Framework.Rectangle position, xTile.Dimensions.Rectangle viewport, bool isFarmer, int damagesFarmer, bool glider, Character character, bool pathfinding, bool projectile = false, bool ignoreCharacterRequirement = false)
         {
-            return;
+            if (__result && isFarmer)
+            {
+                foreach (GenericBuilding customBuilding in __instance.buildings.Where(b => b is GenericBuilding genericBuilding && genericBuilding.Model is not null))
+                {
+                    if (customBuilding.Model.WalkableTiles.Count <= 0)
+                    {
+                        continue;
+                    }
+
+                    foreach (var tileLocation in customBuilding.Model.WalkableTiles)
+                    {
+                        var tileRectangle = new Rectangle((tileLocation.X + customBuilding.tileX.Value) * 64, (tileLocation.Y + customBuilding.tileY.Value) * 64, 64, 64);
+                        tileRectangle.Height += 64;
+                        _monitor.Log($"{tileRectangle.X}, {tileRectangle.Y} | {position.X}, {position.Y}", LogLevel.Debug);
+                        if (tileRectangle.Contains(position))
+                        {
+                            __result = false;
+                            return;
+                        }
+                    }
+                }
+            }
         }
     }
 }

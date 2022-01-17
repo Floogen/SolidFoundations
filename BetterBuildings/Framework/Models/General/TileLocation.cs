@@ -20,5 +20,10 @@ namespace BetterBuildings.Framework.Models.General
 
             return base.Equals(obj);
         }
+
+        public override string ToString()
+        {
+            return $"[{X}, {Y}]";
+        }
     }
 }
