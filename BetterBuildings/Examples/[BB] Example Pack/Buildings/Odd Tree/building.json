@@ -1,0 +1,21 @@
+{
+  "Name": "Odd Tree",
+  "Description": "...",
+  "ShowShadow": false,
+  "FadeWhenPlayerIsBehind": true,
+  "MinTileHeightBeforeFade": 1,
+  "TextureDimensions": {
+    "Height": 7,
+    "Width": 7
+  },
+  "PhysicalDimensions": {
+    "Height": 3,
+    "Width": 5
+  },
+
+  "Blueprint": {
+    "Vendor": "Robin",
+    "DaysToConstruct": 0,
+    "RequiredMoney": 2500
+  }
+}

@@ -3,8 +3,12 @@
   "Description": "...",
   "ShowShadow": false,
   "FadeWhenPlayerIsBehind": false,
-  "Dimensions": {
-    "Height": 4,
+  "TextureDimensions": {
+    "Height": 8,
+    "Width": 7
+  },
+  "PhysicalDimensions": {
+    "Height": 3,
     "Width": 7
   },
   "EventTiles": [
@@ -52,14 +56,6 @@
   "WalkableTiles": [
     {
       "X": 0,
-      "Y": 3
-    },
-    {
-      "X": 1,
-      "Y": 3
-    },
-    {
-      "X": 0,
       "Y": 2
     },
     {
@@ -81,14 +77,6 @@
     {
       "X": 1,
       "Y": 0
-    },
-    {
-      "X": 0,
-      "Y": -1
-    },
-    {
-      "X": 1,
-      "Y": -1
     }
   ],
 

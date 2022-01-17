@@ -40,8 +40,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
             Model = model;
             Id = model.Id;
 
-            base.tilesHigh.Value = model.Dimensions.Height;
-            base.tilesWide.Value = model.Dimensions.Width;
+            base.tilesHigh.Value = model.PhysicalDimensions.Height;
+            base.tilesWide.Value = model.PhysicalDimensions.Width;
             base.fadeWhenPlayerIsBehind.Value = model.FadeWhenPlayerIsBehind;
         }
 
@@ -130,12 +130,14 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         private bool IsTileToTheRightWalkable(TileLocation tileLocation)
         {
-            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + 1 && t.Y + base.tileY.Value == tileLocation.Y);
+            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + 1 && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y);
         }
 
         private bool IsNearbyTileWalkable(TileLocation tileLocation, int direction)
         {
-            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + (direction == 1 ? 1 : 0) + (direction == 3 ? -1 : 0) && t.Y + base.tileY.Value == tileLocation.Y + (direction == 0 ? -1 : 0) + (direction == 2 ? 1 : 0));
+            var xOffset = (direction == 1 ? 1 : 0) + (direction == 3 ? -1 : 0);
+            var yOffset = (direction == 0 ? -1 : 0) + (direction == 2 ? 1 : 0);
+            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + xOffset && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y + yOffset);
         }
 
         public override bool intersects(Rectangle boundingBox)
@@ -147,7 +149,18 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             if (base.intersects(boundingBox))
             {
+                // Handle certain directional quirks to detect boundary edges
                 var boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Y / 64 };
+                if (!IsNearbyTileWalkable(boundingTileLocation, -1) && Game1.player.movementDirections.Contains(2))
+                {
+                    boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Bottom / 64 };
+                }
+                if (!IsNearbyTileWalkable(boundingTileLocation, -1) && Game1.player.movementDirections.Contains(1))
+                {
+                    boundingTileLocation = new TileLocation() { X = boundingBox.Right / 64, Y = boundingBox.Y / 64 };
+                }
+
+                var buildingBounds = new Rectangle(base.tileX.Value * 64, base.tileY.Value * 64, base.tilesWide.Value * 64, base.tilesHigh.Value * 64);
                 if (IsNearbyTileWalkable(boundingTileLocation, -1))
                 {
                     if (!AttemptTunnelDoorTeleport())
@@ -155,11 +168,22 @@ namespace BetterBuildings.Framework.Models.ContentPack
                         AttemptEventTileTrigger();
                     }
 
+                    // First only applies to player inside walkable polygon
                     var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
-                    if (tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top)) || IsTileToTheRightWalkable(boundingTileLocation))
+                    if ((buildingBounds.Contains(boundingBox) && tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top))) || IsTileToTheRightWalkable(boundingTileLocation))
                     {
                         return false;
                     }
+                    // This only applies if the player is trying to enter the walkable area from open grounds
+                    else if (!buildingBounds.Contains(boundingBox) && tileRectangle.Contains(new Vector2(boundingBox.X, boundingBox.Y)))
+                    {
+                        return false;
+                    }
+                }
+                // Check if player is trying to leave from a walkable zone within the building's polygon to open ground
+                else if (!buildingBounds.Contains(boundingBox) && buildingBounds.Contains(Game1.player.GetBoundingBox()) && !IsNearbyTileWalkable(boundingTileLocation, -1))
+                {
+                    return false;
                 }
 
                 return true;
@@ -206,8 +230,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
             else
             {
-                var isPlayerNearTopOfBuilding = Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), this.tilesWide.Value * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64));
+                int tilesHigh = (this.getSourceRectForMenu().Height / 16) + base.tilesHigh.Value;
+                if (Model.MinTileHeightBeforeFade >= 0)
+                {
+                    tilesHigh = Model.MinTileHeightBeforeFade;
+                }
 
+                var isPlayerNearTopOfBuilding = Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value - tilesHigh), this.tilesWide.Value * 64, tilesHigh * 64));
                 if (this.fadeWhenPlayerIsBehind.Value && isPlayerNearTopOfBuilding)
                 {
                     this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
@@ -249,7 +278,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
                     foreach (var tileLocation in Model.WalkableTiles)
                     {
-                        var position = Game1.GlobalToLocal(Game1.viewport, new Vector2((tileLocation.X + base.tileX.Value) * 64, (tileLocation.Y + base.tileY.Value) * 64));
+
+                        var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(tileLocation.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).X * 64, tileLocation.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y * 64));
                         b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Red, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
                     }
                 }

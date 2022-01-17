@@ -3,7 +3,11 @@
   "DisplayName": "Striped Tent",
   "Description": "A striped tent. Can be used to store things.",
   "ShowShadow": false,
-  "Dimensions": {
+  "TextureDimensions": {
+    "Height": 5,
+    "Width": 6
+  },
+  "PhysicalDimensions": {
     "Height": 3,
     "Width": 6
   },

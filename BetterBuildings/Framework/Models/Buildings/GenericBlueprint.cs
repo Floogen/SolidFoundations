@@ -25,8 +25,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             base.displayName = building.DisplayName;
             base.name = building.Id;
-            base.tilesHeight = building.Dimensions.Height;
-            base.tilesWidth = building.Dimensions.Width;
+            base.tilesHeight = building.PhysicalDimensions.Height;
+            base.tilesWidth = building.PhysicalDimensions.Width;
 
             // TODO: Look into possibility including this as a part of the framework?
             base.additionalPlacementTiles = new List<Microsoft.Xna.Framework.Point>();

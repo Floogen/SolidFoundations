@@ -2,9 +2,13 @@
   "Name": "Warp Pad",
   "Description": "A warp pad. Teleports you to a random location.",
   "ShowShadow": false,
-  "FadeWhenPlayerIsBehind": true,
-  "Dimensions": {
-    "Height": 3,
+  "FadeWhenPlayerIsBehind": false,
+  "TextureDimensions": {
+    "Height": 5,
+    "Width": 5
+  },
+  "PhysicalDimensions": {
+    "Height": 4,
     "Width": 5
   },
   "EventTiles": [
@@ -18,26 +22,26 @@
       },
       "Tile": {
         "X": 2,
-        "Y": 0
+        "Y": 1
       }
     }
   ],
   "WalkableTiles": [
     {
       "X": 1,
-      "Y": 0
+      "Y": 1
     },
     {
       "X": 2,
-      "Y": 0
-    },
-    {
-      "X": 1,
       "Y": 1
     },
     {
       "X": 1,
       "Y": 2
+    },
+    {
+      "X": 1,
+      "Y": 3
     }
   ],
 
