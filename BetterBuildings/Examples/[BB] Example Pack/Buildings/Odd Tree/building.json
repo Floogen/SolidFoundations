@@ -15,7 +15,8 @@
   "InteractiveTiles": [
     {
       "ShopOpen": {
-        "Owner": "Krobus"
+        "Name": "Dwarf",
+        "Type": "Vanilla"
       },
       "Tile": {
         "X": 3,

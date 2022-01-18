@@ -7,8 +7,15 @@ using System.Threading.Tasks;
 
 namespace BetterBuildings.Framework.Models.Events
 {
+    public enum StoreType
+    {
+        Vanilla,
+        STF
+    }
+
     public class ShopOpenEvent
     {
-        public string ShopName { get; set; }
+        public string Name { get; set; }
+        public StoreType Type { get; set; } = StoreType.Vanilla;
     }
 }
