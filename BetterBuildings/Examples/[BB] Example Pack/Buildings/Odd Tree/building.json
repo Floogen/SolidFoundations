@@ -2,7 +2,7 @@
   "Name": "Odd Tree",
   "Description": "...",
   "ShowShadow": false,
-  "FadeWhenPlayerIsBehind": true,
+  "FadeWhenPlayerIsBehind": false,
   "MinTileHeightBeforeFade": 1,
   "TextureDimensions": {
     "Height": 7,
@@ -10,8 +10,111 @@
   },
   "PhysicalDimensions": {
     "Height": 3,
-    "Width": 5
+    "Width": 7
   },
+
+  "EventTiles": [
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 1,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 2,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 3,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 4,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 5,
+        "Y": 0
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Fade": {
+        "Percentage": 0.5
+      },
+      "Tile": {
+        "X": 6,
+        "Y": 0
+      }
+    }
+  ],
+  "WalkableTiles": [
+    {
+      "X": 0,
+      "Y": 0
+    },
+    {
+      "X": 1,
+      "Y": 0
+    },
+    {
+      "X": 2,
+      "Y": 0
+    },
+    {
+      "X": 3,
+      "Y": 0
+    },
+    {
+      "X": 4,
+      "Y": 0
+    },
+    {
+      "X": 5,
+      "Y": 0
+    },
+    {
+      "X": 6,
+      "Y": 0
+    }
+  ],
 
   "Blueprint": {
     "Vendor": "Robin",

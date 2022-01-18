@@ -68,7 +68,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return null;
         }
 
-        private bool AttemptTunnelDoorTeleport()
+        private bool AttemptTunnelDoorTeleport(TileLocation triggeredTile)
         {
             if (Model.Doorways is null || !Model.Doorways.Any(d => d.Type is DoorType.Tunnel))
             {
@@ -78,7 +78,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             var tunnelDoorway = Model.Doorways.First(d => d.Type == DoorType.Tunnel);
             foreach (var tile in tunnelDoorway.Tiles)
             {
-                if (base.tileX.Value + tile.X == Game1.player.getTileX() && base.tileY.Value + tile.Y == Game1.player.getTileY())
+                if (base.tileX.Value + tile.X == triggeredTile.X && base.tileY.Value + tile.Y == triggeredTile.Y)
                 {
                     // Warp player inside
                     base.indoors.Value.isStructure.Value = true;
@@ -99,7 +99,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return false;
         }
 
-        private bool AttemptEventTileTrigger()
+        private bool AttemptEventTileTrigger(TileLocation triggeredTile)
         {
             if (Model.EventTiles is null || Model.EventTiles.Count <= 0)
             {
@@ -108,7 +108,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             foreach (var eventTile in Model.EventTiles)
             {
-                if (base.tileX.Value + eventTile.Tile.X == Game1.player.getTileX() && base.tileY.Value + eventTile.Tile.Y == Game1.player.getTileY())
+                if (base.tileX.Value + eventTile.Tile.X == triggeredTile.X && base.tileY.Value + eventTile.Tile.Y == triggeredTile.Y)
                 {
                     // Trigger the tile
                     eventTile.Trigger(this, Game1.player);
@@ -163,10 +163,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 var buildingBounds = new Rectangle(base.tileX.Value * 64, base.tileY.Value * 64, base.tilesWide.Value * 64, base.tilesHigh.Value * 64);
                 if (IsNearbyTileWalkable(boundingTileLocation, -1))
                 {
-                    if (!AttemptTunnelDoorTeleport())
+                    if (!AttemptTunnelDoorTeleport(boundingTileLocation))
                     {
-                        AttemptEventTileTrigger();
+                        AttemptEventTileTrigger(boundingTileLocation);
                     }
+                    var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
 
                     // First only applies to player inside walkable polygon
                     var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
