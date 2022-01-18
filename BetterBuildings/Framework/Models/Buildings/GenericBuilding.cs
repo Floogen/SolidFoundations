@@ -133,10 +133,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + 1 && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y);
         }
 
-        private bool IsNearbyTileWalkable(TileLocation tileLocation, int direction)
+        private bool IsNearbyTileWalkable(TileLocation tileLocation, int xOffset = 0, int yOffset = 0)
         {
-            var xOffset = (direction == 1 ? 1 : 0) + (direction == 3 ? -1 : 0);
-            var yOffset = (direction == 0 ? -1 : 0) + (direction == 2 ? 1 : 0);
             return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + xOffset && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y + yOffset);
         }
 
@@ -151,17 +149,17 @@ namespace BetterBuildings.Framework.Models.ContentPack
             {
                 // Handle certain directional quirks to detect boundary edges
                 var boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Y / 64 };
-                if (!IsNearbyTileWalkable(boundingTileLocation, -1) && Game1.player.movementDirections.Contains(2))
+                if (!IsNearbyTileWalkable(boundingTileLocation) && Game1.player.movementDirections.Contains(2))
                 {
                     boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Bottom / 64 };
                 }
-                if (!IsNearbyTileWalkable(boundingTileLocation, -1) && Game1.player.movementDirections.Contains(1))
+                if (!IsNearbyTileWalkable(boundingTileLocation) && Game1.player.movementDirections.Contains(1))
                 {
                     boundingTileLocation = new TileLocation() { X = boundingBox.Right / 64, Y = boundingBox.Y / 64 };
                 }
 
                 var buildingBounds = new Rectangle(base.tileX.Value * 64, base.tileY.Value * 64, base.tilesWide.Value * 64, base.tilesHigh.Value * 64);
-                if (IsNearbyTileWalkable(boundingTileLocation, -1))
+                if (IsNearbyTileWalkable(boundingTileLocation))
                 {
                     if (!AttemptTunnelDoorTeleport(boundingTileLocation))
                     {
@@ -170,19 +168,18 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
 
                     // First only applies to player inside walkable polygon
-                    var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
-                    if ((buildingBounds.Contains(boundingBox) && tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top))) || IsTileToTheRightWalkable(boundingTileLocation))
+                    if (buildingBounds.Contains(boundingBox) && (tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top))) || IsTileToTheRightWalkable(boundingTileLocation))
                     {
                         return false;
                     }
                     // This only applies if the player is trying to enter the walkable area from open grounds
-                    else if (!buildingBounds.Contains(boundingBox) && tileRectangle.Contains(new Vector2(boundingBox.X, boundingBox.Y)))
+                    else if (!buildingBounds.Contains(boundingBox) && (tileRectangle.Intersects(boundingBox) || IsNearbyTileWalkable(boundingTileLocation, yOffset: 1)))
                     {
                         return false;
                     }
                 }
                 // Check if player is trying to leave from a walkable zone within the building's polygon to open ground
-                else if (!buildingBounds.Contains(boundingBox) && buildingBounds.Contains(Game1.player.GetBoundingBox()) && !IsNearbyTileWalkable(boundingTileLocation, -1))
+                else if (!buildingBounds.Contains(boundingBox) && buildingBounds.Contains(Game1.player.GetBoundingBox()) && !IsNearbyTileWalkable(boundingTileLocation))
                 {
                     return false;
                 }
