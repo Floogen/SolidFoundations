@@ -138,6 +138,24 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + xOffset && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y + yOffset);
         }
 
+        public override bool isActionableTile(int xTile, int yTile, Farmer who)
+        {
+            if (Model.InteractiveTiles is null || Model.InteractiveTiles.Count <= 0)
+            {
+                return false;
+            }
+
+            foreach (var interactiveTile in Model.InteractiveTiles)
+            {
+                if (base.tileX.Value + interactiveTile.Tile.X == xTile && base.tileY.Value + interactiveTile.Tile.Y == yTile)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public override bool intersects(Rectangle boundingBox)
         {
             if (base.daysOfConstructionLeft.Value > 0)
@@ -245,6 +263,27 @@ namespace BetterBuildings.Framework.Models.ContentPack
             {
                 ResetEventOverrides();
             }
+        }
+
+        public override bool doAction(Vector2 tileLocation, Farmer who)
+        {
+            if (Model.InteractiveTiles is null || Model.InteractiveTiles.Count <= 0)
+            {
+                return false;
+            }
+
+            foreach (var interactiveTile in Model.InteractiveTiles)
+            {
+                if (base.tileX.Value + interactiveTile.Tile.X == tileLocation.X && base.tileY.Value + interactiveTile.Tile.Y == tileLocation.Y)
+                {
+                    // Trigger the tile
+                    interactiveTile.Trigger(this, Game1.player);
+
+                    return true;
+                }
+            }
+
+            return base.doAction(tileLocation, who);
         }
 
         public override void drawShadow(SpriteBatch b, int localX = -1, int localY = -1)

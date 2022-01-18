@@ -28,6 +28,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string Name { get; set; }
         public InteriorType InteriorType { get; set; }
         public string Description { get; set; }
+        public bool IsLocked { get; set; }
         public Dimensions TextureDimensions { get; set; }
         private Dimensions _physicalDimensions { get; set; }
         public Dimensions PhysicalDimensions { get { return _physicalDimensions is null ? TextureDimensions : _physicalDimensions; } set { _physicalDimensions = value; } }
@@ -35,7 +36,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public bool FadeWhenPlayerIsBehind { get; set; } = true;
         public int MinTileHeightBeforeFade { get; set; } = -1;
         public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
-        public List<InteractiveTile> EventTiles { get; set; } = new List<InteractiveTile>();
+        public List<EventTile> EventTiles { get; set; } = new List<EventTile>();
+        public List<InteractiveTile> InteractiveTiles { get; set; } = new List<InteractiveTile>();
         public List<DoorTiles> Doorways { get; set; }
         public BlueprintModel Blueprint { get; set; }
 

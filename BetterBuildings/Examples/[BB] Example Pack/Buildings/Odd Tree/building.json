@@ -12,7 +12,17 @@
     "Height": 3,
     "Width": 7
   },
-
+  "InteractiveTiles": [
+    {
+      "ShopOpen": {
+        "Owner": "Krobus"
+      },
+      "Tile": {
+        "X": 3,
+        "Y": 2
+      }
+    }
+  ],
   "EventTiles": [
     {
       "DrawOverPlayer": true,
