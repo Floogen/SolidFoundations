@@ -248,13 +248,14 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
             else
             {
-                int tilesHigh = (this.getSourceRectForMenu().Height / 16) + base.tilesHigh.Value;
+                int adjustedTilesHigh = base.tilesHigh.Value;
                 if (Model.MinTileHeightBeforeFade >= 0)
                 {
-                    tilesHigh = Model.MinTileHeightBeforeFade;
+                    adjustedTilesHigh = Model.MinTileHeightBeforeFade;
                 }
 
-                var isPlayerNearTopOfBuilding = Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value - tilesHigh), this.tilesWide.Value * 64, tilesHigh * 64));
+                //new Rectangle(64 * (int)this.tileX, 64 * ((int)this.tileY + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), (int)this.tilesWide * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64 + 32))
+                var isPlayerNearTopOfBuilding = Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + this.tilesHigh.Value - adjustedTilesHigh), this.tilesWide.Value * 64, adjustedTilesHigh * 64));
                 if (this.fadeWhenPlayerIsBehind.Value && isPlayerNearTopOfBuilding)
                 {
                     this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
@@ -267,7 +268,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 var walkableTile = new TileLocation() { X = walkableRectangle.X / 64, Y = walkableRectangle.Y / 64 };
                 if (!AttemptTunnelDoorTeleport(walkableTile))
                 {
-                    AttemptEventTileTrigger(new TileLocation() { X = walkableRectangle.X / 64, Y = walkableRectangle .Y / 64 });
+                    AttemptEventTileTrigger(new TileLocation() { X = walkableRectangle.X / 64, Y = walkableRectangle.Y / 64 });
                 }
             }
         }
