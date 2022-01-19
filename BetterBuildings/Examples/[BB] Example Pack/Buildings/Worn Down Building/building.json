@@ -2,7 +2,9 @@
   "Name": "Worn Down Building",
   "Description": "...",
   "ShowShadow": false,
-  "FadeWhenPlayerIsBehind": false,
+  "Fade": {
+    "Enabled": false
+  },
   "TextureDimensions": {
     "Height": 8,
     "Width": 7

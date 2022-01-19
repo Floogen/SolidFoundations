@@ -47,7 +47,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             base.tilesHigh.Value = model.PhysicalDimensions.Height;
             base.tilesWide.Value = model.PhysicalDimensions.Width;
-            base.fadeWhenPlayerIsBehind.Value = model.FadeWhenPlayerIsBehind;
+            base.fadeWhenPlayerIsBehind.Value = model.Fade.Enabled;
 
             _walkableTileGroup = new BoundaryCollective();
             foreach (var tile in Model.WalkableTiles)
@@ -240,27 +240,26 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public override void Update(GameTime time)
         {
-            this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
 
             if (AlphaOverride is not null)
             {
-                this.alpha.Value = AlphaOverride.Value;
+                this.alpha.Value = Math.Max(AlphaOverride.Value, this.alpha.Value - 0.09f);
             }
             else
             {
                 int adjustedTilesHigh = base.tilesHigh.Value;
-                if (Model.MinTileHeightBeforeFade >= 0)
+                if (Model.Fade.MinTileHeightBeforeFade >= 0)
                 {
-                    adjustedTilesHigh = Model.MinTileHeightBeforeFade;
+                    adjustedTilesHigh = Model.Fade.MinTileHeightBeforeFade;
                 }
 
-                //new Rectangle(64 * (int)this.tileX, 64 * ((int)this.tileY + (-(this.getSourceRectForMenu().Height / 16) + tilesHigh)), (int)this.tilesWide * 64, (this.getSourceRectForMenu().Height / 16 - tilesHigh) * 64 + 32))
                 var isPlayerNearTopOfBuilding = Game1.player.GetBoundingBox().Intersects(new Rectangle(64 * this.tileX.Value, 64 * (this.tileY.Value + this.tilesHigh.Value - adjustedTilesHigh), this.tilesWide.Value * 64, adjustedTilesHigh * 64));
                 if (this.fadeWhenPlayerIsBehind.Value && isPlayerNearTopOfBuilding)
                 {
-                    this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
+                    this.alpha.Value = Math.Max(Model.Fade.AmountToFade == -1f ? 0.4f : Model.Fade.AmountToFade, this.alpha.Value - 0.09f);
                 }
             }
+            this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
 
             ResetEventOverrides();
             if (!Game1.isWarping && _walkableTileGroup.GetRectangleByPoint(Game1.player.GetBoundingBox()) is Rectangle walkableRectangle)
@@ -342,9 +341,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 if (BetterBuildings.showFadeBox)
                 {
                     int adjustedTilesHigh = base.tilesHigh.Value;
-                    if (Model.MinTileHeightBeforeFade >= 0)
+                    if (Model.Fade.MinTileHeightBeforeFade >= 0)
                     {
-                        adjustedTilesHigh = Model.MinTileHeightBeforeFade;
+                        adjustedTilesHigh = Model.Fade.MinTileHeightBeforeFade;
                     }
 
                     var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(64 * this.tileX.Value, 64 * (this.tileY.Value + this.tilesHigh.Value - adjustedTilesHigh)));

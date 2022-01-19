@@ -2,8 +2,12 @@
   "Name": "Odd Tree",
   "Description": "...",
   "ShowShadow": false,
-  "FadeWhenPlayerIsBehind": false,
-  "MinTileHeightBeforeFade": 1,
+
+  "Fade": {
+    "Enabled": true,
+    "MinTileHeightBeforeFade": 5,
+    "AmountToFade": 0.8
+  },
   "TextureDimensions": {
     "Height": 7,
     "Width": 7
