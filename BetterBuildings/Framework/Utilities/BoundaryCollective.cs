@@ -33,6 +33,48 @@ namespace BetterBuildings.Framework.Utilities
             return false;
         }
 
+        public Rectangle? GetRectangleByPoint(int x, int y)
+        {
+            foreach (Rectangle boundary in this.boundaries)
+            {
+                if (boundary.Contains(x, y))
+                {
+                    return boundary;
+                }
+            }
+
+            return null;
+        }
+
+        public Rectangle? GetRectangleByPoint(Rectangle rectangle)
+        {
+            var boundary = this.GetRectangleByPoint(rectangle.Left, rectangle.Top);
+            if (boundary is not null)
+            {
+                return boundary;
+            }
+
+            boundary = this.GetRectangleByPoint(rectangle.Right, rectangle.Top);
+            if (boundary is not null)
+            {
+                return boundary;
+            }
+
+            boundary = this.GetRectangleByPoint(rectangle.Left, rectangle.Bottom);
+            if (boundary is not null)
+            {
+                return boundary;
+            }
+
+            boundary = this.GetRectangleByPoint(rectangle.Right, rectangle.Bottom);
+            if (boundary is not null)
+            {
+                return boundary;
+            }
+
+            return null;
+        }
+
         public bool Contains(int x, int y)
         {
             foreach (Rectangle boundary in this.boundaries)
