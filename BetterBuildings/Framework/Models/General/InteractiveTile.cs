@@ -35,6 +35,10 @@ namespace BetterBuildings.Framework.Models.General
                 {
                     HandleVanillaShopMenu(ShopOpen.Name);
                 }
+                else if (ShopOpen.Type is StoreType.STF && BetterBuildings.apiManager.GetShopTileFrameworkApi() is not null)
+                {
+                    BetterBuildings.apiManager.GetShopTileFrameworkApi().OpenItemShop(ShopOpen.Name);
+                }
             }
         }
 

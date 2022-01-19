@@ -29,6 +29,7 @@ namespace BetterBuildings
         internal static Multiplayer multiplayer;
 
         // Managers
+        internal static ApiManager apiManager;
         internal static BuildingManager buildingManager;
 
         // Flags
@@ -45,6 +46,7 @@ namespace BetterBuildings
             // TODO: For functional, make API to allow hooking into functional buildings to allow for C# usage
 
             // Load managers
+            apiManager = new ApiManager(monitor);
             buildingManager = new BuildingManager(monitor, modHelper);
 
             // Load our Harmony patches
@@ -171,6 +173,16 @@ namespace BetterBuildings
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
+            // Hook into the APIs we utilize
+            if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
+            {
+                //apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "Building", new BuildingToken());
+            }
+            if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
+            {
+                // Do nothing
+            }
+
             // Load any owned content packs
             LoadContentPacks();
         }
