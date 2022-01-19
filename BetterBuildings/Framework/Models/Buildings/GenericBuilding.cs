@@ -315,24 +315,40 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 this.drawShadow(b);
                 b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.texture.Value.Bounds, base.color.Value * base.alpha.Value, 0f, new Vector2(0f, base.texture.Value.Bounds.Height), 4f, SpriteEffects.None, (float)((base.tileY.Value + base.tilesHigh.Value - 3) * 64) / (DrawOverPlayer ? 8000f : 10000f));
 
-
-                if (BetterBuildings.showWalkableTiles)
+                // Check if player's bounding box should be drawn
+                if (BetterBuildings.showWalkableTiles || BetterBuildings.showBuildingTiles || BetterBuildings.showFadeBox)
                 {
                     var playerPosition = Game1.GlobalToLocal(Game1.viewport, new Vector2((Game1.player.GetBoundingBox().X), (Game1.player.GetBoundingBox().Y)));
                     b.Draw(Game1.staminaRect, new Rectangle((int)playerPosition.X, (int)playerPosition.Y, Game1.player.GetBoundingBox().Width, Game1.player.GetBoundingBox().Height), new Rectangle(0, 0, 1, 1), Color.Blue, 0f, Vector2.Zero, SpriteEffects.None, 100f);
+                }
 
+                // Check if any of the debug boxes need to be drawn
+                if (BetterBuildings.showWalkableTiles)
+                {
                     foreach (var boundary in _walkableTileGroup.boundaries)
                     {
-
                         var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(boundary.X, boundary.Y));
                         b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Red, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
                     }
+                }
+                if (BetterBuildings.showBuildingTiles)
+                {
                     foreach (var boundary in _buildingTileGroup.boundaries)
                     {
-
                         var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(boundary.X, boundary.Y));
-                        //b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Yellow, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
+                        b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Yellow, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
                     }
+                }
+                if (BetterBuildings.showFadeBox)
+                {
+                    int adjustedTilesHigh = base.tilesHigh.Value;
+                    if (Model.MinTileHeightBeforeFade >= 0)
+                    {
+                        adjustedTilesHigh = Model.MinTileHeightBeforeFade;
+                    }
+
+                    var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(64 * this.tileX.Value, 64 * (this.tileY.Value + this.tilesHigh.Value - adjustedTilesHigh)));
+                    b.Draw(Game1.staminaRect, new Rectangle((int)position.X, (int)position.Y, this.tilesWide.Value * 64, adjustedTilesHigh * 64), new Rectangle(0, 0, 1, 1), Color.Orange, 0f, Vector2.Zero, SpriteEffects.None, 9f);
                 }
             }
         }

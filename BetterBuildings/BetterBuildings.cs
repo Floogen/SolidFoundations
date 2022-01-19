@@ -34,6 +34,8 @@ namespace BetterBuildings
 
         // Flags
         internal static bool showWalkableTiles;
+        internal static bool showBuildingTiles;
+        internal static bool showFadeBox;
 
         public override void Entry(IModHelper helper)
         {
@@ -71,7 +73,10 @@ namespace BetterBuildings
 
             // Add in the debug commands
             helper.ConsoleCommands.Add("bb_reload", "Reloads all Better Buildings content packs.\n\nUsage: bb_reload", delegate { this.LoadContentPacks(); RefreshAllCustomBuildings(); });
-            helper.ConsoleCommands.Add("bb_debug", "Draws all WalkableTiles for all custom buildings.\n\nUsage: bb_debug", delegate { showWalkableTiles = !showWalkableTiles; });
+            helper.ConsoleCommands.Add("bb_debug", "Draws all debug tiles for all custom buildings.\n\nUsage: bb_debug", delegate { showWalkableTiles = !showWalkableTiles; showBuildingTiles = !showBuildingTiles; showFadeBox = !showFadeBox; });
+            helper.ConsoleCommands.Add("bb_show_walkable", "Draws all WalkableTiles for all custom buildings.\n\nUsage: bb_show_walkable", delegate { showWalkableTiles = !showWalkableTiles; });
+            helper.ConsoleCommands.Add("bb_show_blocking", "Draws all WalkableTiles for all custom buildings.\n\nUsage: bb_show_blocking", delegate { showBuildingTiles = !showBuildingTiles; });
+            helper.ConsoleCommands.Add("bb_show_fade_box", "Draws all WalkableTiles for all custom buildings.\n\nUsage: bb_show_fade_box", delegate { showFadeBox = !showFadeBox; });
 
             // Hook into the required events
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
