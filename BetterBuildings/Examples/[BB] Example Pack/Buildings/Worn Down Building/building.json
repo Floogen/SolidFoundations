@@ -14,9 +14,6 @@
   "EventTiles": [
     {
       "DrawOverPlayer": true,
-      "Fade": {
-        "Percentage": 0.5
-      },
       "Tile": {
         "X": 0,
         "Y": 2
@@ -24,12 +21,23 @@
     },
     {
       "DrawOverPlayer": true,
-      "Fade": {
-        "Percentage": 0.5
-      },
       "Tile": {
         "X": 1,
         "Y": 2
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Tile": {
+        "X": 0,
+        "Y": 1
+      }
+    },
+    {
+      "DrawOverPlayer": true,
+      "Tile": {
+        "X": 1,
+        "Y": 1
       }
     },
     {
