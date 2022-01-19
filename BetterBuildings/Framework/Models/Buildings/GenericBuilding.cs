@@ -190,25 +190,9 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             if (base.intersects(boundingBox))
             {
-                // Handle certain directional quirks to detect boundary edges
-                var boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Y / 64 };
-                if (!IsNearbyTileWalkable(boundingTileLocation) && Game1.player.movementDirections.Contains(2))
-                {
-                    boundingTileLocation = new TileLocation() { X = boundingBox.X / 64, Y = boundingBox.Bottom / 64 };
-                }
-                if (!IsNearbyTileWalkable(boundingTileLocation) && Game1.player.movementDirections.Contains(1))
-                {
-                    boundingTileLocation = new TileLocation() { X = boundingBox.Right / 64, Y = boundingBox.Y / 64 };
-                }
-
                 var buildingBounds = new Rectangle(base.tileX.Value * 64, base.tileY.Value * 64, base.tilesWide.Value * 64, base.tilesHigh.Value * 64);
                 if (_walkableTileGroup.ContainsAtLeastOnePoint(boundingBox))
                 {
-                    if (!AttemptTunnelDoorTeleport(boundingTileLocation))
-                    {
-                        AttemptEventTileTrigger(boundingTileLocation);
-                    }
-
                     // These only applies to player inside walkable polygon
                     if (!_buildingTileGroup.Intersects(boundingBox) && _walkableTileGroup.Intersects(boundingBox))
                     {
@@ -277,9 +261,14 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
             }
 
-            if (IsUsingEventOverride && !base.intersects(Game1.player.GetBoundingBox()))
+            ResetEventOverrides();
+            if (!Game1.isWarping && _walkableTileGroup.GetRectangleByPoint(Game1.player.GetBoundingBox()) is Rectangle walkableRectangle)
             {
-                ResetEventOverrides();
+                var walkableTile = new TileLocation() { X = walkableRectangle.X / 64, Y = walkableRectangle.Y / 64 };
+                if (!AttemptTunnelDoorTeleport(walkableTile))
+                {
+                    AttemptEventTileTrigger(new TileLocation() { X = walkableRectangle.X / 64, Y = walkableRectangle .Y / 64 });
+                }
             }
         }
 
