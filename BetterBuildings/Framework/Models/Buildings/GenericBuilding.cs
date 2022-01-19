@@ -1,4 +1,5 @@
 ﻿using BetterBuildings.Framework.Models.General;
+using BetterBuildings.Framework.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
@@ -22,6 +23,10 @@ namespace BetterBuildings.Framework.Models.ContentPack
         internal bool DrawOverPlayer { get; set; }
         internal float? AlphaOverride { get; set; }
 
+        private BoundaryCollective _walkableTileGroup;
+        private BoundaryCollective _buildingTileGroup;
+
+
         public GenericBuilding() : base()
         {
 
@@ -43,6 +48,26 @@ namespace BetterBuildings.Framework.Models.ContentPack
             base.tilesHigh.Value = model.PhysicalDimensions.Height;
             base.tilesWide.Value = model.PhysicalDimensions.Width;
             base.fadeWhenPlayerIsBehind.Value = model.FadeWhenPlayerIsBehind;
+
+            _walkableTileGroup = new BoundaryCollective();
+            foreach (var tile in Model.WalkableTiles)
+            {
+                var adjustedTile = tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
+                _walkableTileGroup.Add(new Rectangle(adjustedTile.X * 64, adjustedTile.Y * 64, 64, 64));
+            }
+
+            _buildingTileGroup = new BoundaryCollective();
+            for (int x = 0; x < base.tilesWide.Value; x++)
+            {
+                for (int y = 0; y < base.tilesHigh.Value; y++)
+                {
+                    var boundaryTile = new Rectangle((base.tileX.Value + x) * 64, (base.tileY.Value + y) * 64, 64, 64);
+                    if (!_walkableTileGroup.Contains(boundaryTile.X, boundaryTile.Y))
+                    {
+                        _buildingTileGroup.Add(boundaryTile);
+                    }
+                }
+            }
         }
 
         public GameLocation GetIndoors()
@@ -177,29 +202,22 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
 
                 var buildingBounds = new Rectangle(base.tileX.Value * 64, base.tileY.Value * 64, base.tilesWide.Value * 64, base.tilesHigh.Value * 64);
-                if (IsNearbyTileWalkable(boundingTileLocation))
+                if (_walkableTileGroup.ContainsAtLeastOnePoint(boundingBox))
                 {
                     if (!AttemptTunnelDoorTeleport(boundingTileLocation))
                     {
                         AttemptEventTileTrigger(boundingTileLocation);
                     }
-                    var tileRectangle = new Rectangle(boundingTileLocation.X * 64, boundingTileLocation.Y * 64, 64, 64);
 
-                    // First only applies to player inside walkable polygon
-                    if (buildingBounds.Contains(boundingBox) && (tileRectangle.Contains(new Vector2(boundingBox.Right, boundingBox.Top))) || IsTileToTheRightWalkable(boundingTileLocation))
+                    // These only applies to player inside walkable polygon
+                    if (!_buildingTileGroup.Intersects(boundingBox) && _walkableTileGroup.Intersects(boundingBox))
                     {
                         return false;
                     }
-                    // This only applies if the player is trying to enter the walkable area from open grounds
-                    else if (!buildingBounds.Contains(boundingBox) && (tileRectangle.Intersects(boundingBox) || IsNearbyTileWalkable(boundingTileLocation, yOffset: 1)))
+                    else if (!buildingBounds.Contains(boundingBox) && _walkableTileGroup.ContainsAtLeastHalf(boundingBox))
                     {
                         return false;
                     }
-                }
-                // Check if player is trying to leave from a walkable zone within the building's polygon to open ground
-                else if (!buildingBounds.Contains(boundingBox) && buildingBounds.Contains(Game1.player.GetBoundingBox()) && !IsNearbyTileWalkable(boundingTileLocation))
-                {
-                    return false;
                 }
 
                 return true;
@@ -313,11 +331,17 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     var playerPosition = Game1.GlobalToLocal(Game1.viewport, new Vector2((Game1.player.GetBoundingBox().X), (Game1.player.GetBoundingBox().Y)));
                     b.Draw(Game1.staminaRect, new Rectangle((int)playerPosition.X, (int)playerPosition.Y, Game1.player.GetBoundingBox().Width, Game1.player.GetBoundingBox().Height), new Rectangle(0, 0, 1, 1), Color.Blue, 0f, Vector2.Zero, SpriteEffects.None, 100f);
 
-                    foreach (var tileLocation in Model.WalkableTiles)
+                    foreach (var boundary in _walkableTileGroup.boundaries)
                     {
 
-                        var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(tileLocation.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).X * 64, tileLocation.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y * 64));
+                        var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(boundary.X, boundary.Y));
                         b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Red, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
+                    }
+                    foreach (var boundary in _buildingTileGroup.boundaries)
+                    {
+
+                        var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(boundary.X, boundary.Y));
+                        //b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Yellow, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
                     }
                 }
             }
