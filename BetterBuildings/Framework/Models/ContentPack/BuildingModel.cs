@@ -34,6 +34,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public Dimensions PhysicalDimensions { get { return _physicalDimensions is null ? TextureDimensions : _physicalDimensions; } set { _physicalDimensions = value; } }
         public bool ShowShadow { get; set; } = true;
         public Fade Fade { get; set; } = new Fade();
+        public List<TextureAnimation> IdleAnimation { get; set; } = new List<TextureAnimation>();
         public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
         public List<EventTile> EventTiles { get; set; } = new List<EventTile>();
         public List<InteractiveTile> InteractiveTiles { get; set; } = new List<InteractiveTile>();

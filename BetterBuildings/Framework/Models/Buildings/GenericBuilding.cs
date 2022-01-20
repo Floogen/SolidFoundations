@@ -26,9 +26,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         private BoundaryCollective _walkableTileGroup;
         private BoundaryCollective _buildingTileGroup;
+
         private Texture2D _lavaTexture;
         private bool _lavaTileFlip;
         private float _lavaPosition;
+
+        private int _idleAnimationTimer;
+        private int _lastAnimationIndex;
 
 
         public GenericBuilding() : base()
@@ -252,6 +256,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 _lavaTileFlip = !_lavaTileFlip;
             }
 
+            // Handle alpha for fading
             if (AlphaOverride is not null)
             {
                 this.alpha.Value = Math.Max(AlphaOverride.Value, this.alpha.Value - 0.09f);
@@ -272,6 +277,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
             this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
 
+            // Handle any tile based events
             ResetEventOverrides();
             if (!Game1.isWarping && _walkableTileGroup.GetRectangleByPoint(Game1.player.GetBoundingBox()) is Rectangle walkableRectangle)
             {
@@ -280,6 +286,14 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 {
                     AttemptEventTileTrigger(new TileLocation() { X = walkableRectangle.X / 64, Y = walkableRectangle.Y / 64 });
                 }
+            }
+
+            // Handle updating any animations
+            _idleAnimationTimer -= time.ElapsedGameTime.Milliseconds;
+            if (Model.IdleAnimation.Count > 0 && _idleAnimationTimer <= 0)
+            {
+                _lastAnimationIndex = Model.IdleAnimation.Count <= _lastAnimationIndex + 1 ? 0 : _lastAnimationIndex + 1;
+                _idleAnimationTimer = Model.IdleAnimation[_lastAnimationIndex].Duration;
             }
         }
 
@@ -306,7 +320,17 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public override Rectangle getSourceRect()
         {
-            return new Rectangle(0, 0, Model.TextureDimensions.Width * 16, Model.TextureDimensions.Height * 16);
+            int x = 0;
+            int y = 0;
+            int width = Model.TextureDimensions.Width * 16;
+            int height = Model.TextureDimensions.Height * 16;
+
+            if (Model.IdleAnimation.Count > 0)
+            {
+                x = Model.IdleAnimation[_lastAnimationIndex].Frame * width;
+            }
+
+            return new Rectangle(x, y, width, height);
         }
 
         public override void drawShadow(SpriteBatch b, int localX = -1, int localY = -1)
