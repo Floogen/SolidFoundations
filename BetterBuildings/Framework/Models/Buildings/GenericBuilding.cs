@@ -357,7 +357,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                             int water_tile_upper_left_x = 0;
                             int water_tile_upper_left_y = 320;
 
-                            b.Draw(_lavaTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedWaterTile.X * 64, adjustedWaterTile.Y * 64)), new Rectangle(water_tile_upper_left_x + Game1.currentLocation.waterAnimationIndex * 16, water_tile_upper_left_y + (((gridTile.X + gridTile.Y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 32 : 0) : (Game1.currentLocation.waterTileFlip ? 32 : 0)), 16, 16), waterTile.ActualColor.Equals(Color.White) ? (waterTile.ActualColor) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 4f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            b.Draw(_lavaTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedWaterTile.X * 64, adjustedWaterTile.Y * 64)), new Rectangle(water_tile_upper_left_x + Game1.currentLocation.waterAnimationIndex * 16, water_tile_upper_left_y + (((gridTile.X + gridTile.Y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 32 : 0) : (Game1.currentLocation.waterTileFlip ? 32 : 0)) + ((int)Game1.currentLocation.waterPosition / 4), 16, 16), waterTile.ActualColor.Equals(Color.White) ? (waterTile.ActualColor) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 4f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
                         }
                         else
                         {
