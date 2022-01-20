@@ -328,6 +328,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             if (Model.IdleAnimation.Count > 0)
             {
                 x = Model.IdleAnimation[_lastAnimationIndex].Frame * width;
+                y = Model.IdleAnimation[_lastAnimationIndex].RowOffset * height;
             }
 
             return new Rectangle(x, y, width, height);
