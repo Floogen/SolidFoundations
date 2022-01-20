@@ -13,6 +13,27 @@
     "Height": 10,
     "Width": 10
   },
+  "IdleAnimation": [
+    {
+      "Frame": 0,
+      "Duration": 100
+    },
+    {
+      "Frame": 1,
+      "Duration": 100
+    },
+    {
+      "Frame": 2,
+      "Duration": 100
+    },
+    {
+      "Frame": 3,
+      "Duration": 100
+    }
+  ],
+
+
+
   "WaterTiles": [
     {
       "IsLava": true,
