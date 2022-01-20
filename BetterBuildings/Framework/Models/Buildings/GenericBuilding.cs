@@ -27,6 +27,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         private BoundaryCollective _walkableTileGroup;
         private BoundaryCollective _buildingTileGroup;
         private Texture2D _lavaTexture;
+        private bool _lavaTileFlip;
+        private float _lavaPosition;
 
 
         public GenericBuilding() : base()
@@ -242,6 +244,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public override void Update(GameTime time)
         {
+            // Lava update
+            _lavaPosition += (float)((Math.Sin((float)time.TotalGameTime.Milliseconds / 1000f) + 1.0) * 0.15000000596046448);
+            if (_lavaPosition >= 64f)
+            {
+                _lavaPosition -= 64f;
+                _lavaTileFlip = !_lavaTileFlip;
+            }
 
             if (AlphaOverride is not null)
             {
@@ -352,22 +361,38 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     {
                         var adjustedWaterTile = gridTile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
 
+                        int x = adjustedWaterTile.X;
+                        int y = adjustedWaterTile.Y;
+                        bool num = y == base.tileY.Value + tileGrid.StartingTile.Y + tileGrid.Height - 1;
+                        bool topY = y == base.tileY.Value + tileGrid.StartingTile.Y;
+
                         if (waterTile.IsLava && _lavaTexture is not null)
                         {
-                            int water_tile_upper_left_x = 0;
-                            int water_tile_upper_left_y = 320;
+                            int lava_tile_upper_x = 0;
+                            int lava_tile_upper_y = 320;
 
-                            b.Draw(_lavaTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedWaterTile.X * 64, adjustedWaterTile.Y * 64)), new Rectangle(water_tile_upper_left_x + Game1.currentLocation.waterAnimationIndex * 16, water_tile_upper_left_y + (((gridTile.X + gridTile.Y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 32 : 0) : (Game1.currentLocation.waterTileFlip ? 32 : 0)) + ((int)Game1.currentLocation.waterPosition / 4), 16, 16), waterTile.ActualColor.Equals(Color.White) ? (waterTile.ActualColor) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 4f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            b.Draw(_lavaTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(x * 64, y * 64 - (int)((!topY) ? _lavaPosition : 0f))), new Rectangle(lava_tile_upper_x + Game1.currentLocation.waterAnimationIndex * 16, lava_tile_upper_y + (((x + y) % 2 != 0) ? ((!_lavaTileFlip) ? 32 : 0) : (_lavaTileFlip ? 32 : 0)) + (topY ? ((int)_lavaPosition / 4) : 0), 16, 16 + (topY ? ((int)(0f - _lavaPosition) / 4) : 0)), waterTile.ActualColor.Equals(Color.White) ? Color.White : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 4f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            if (num)
+                            {
+                                b.Draw(_lavaTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(x * 64, (y + 1) * 64 - (int)_lavaPosition)), new Rectangle(lava_tile_upper_x + Game1.currentLocation.waterAnimationIndex * 16, lava_tile_upper_y + (((x + (y + 1)) % 2 != 0) ? ((!_lavaTileFlip) ? 32 : 0) : (_lavaTileFlip ? 32 : 0)), 16, 16 - (int)(16f - _lavaPosition / 4f) - 1), waterTile.ActualColor.Equals(Color.White) ? Color.White : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 4f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            }
                         }
                         else
                         {
-                            b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedWaterTile.X * 64, adjustedWaterTile.Y * 64)), new Rectangle(Game1.currentLocation.waterAnimationIndex * 64, 2064 + (((adjustedWaterTile.X + adjustedWaterTile.Y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 128 : 0) : (Game1.currentLocation.waterTileFlip ? 128 : 0)), 64, 64), waterTile.ActualColor.Equals(Color.White) ? (Game1.currentLocation.waterColor.Value) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 1f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            int water_tile_upper_x = 0;
+                            int water_tile_upper_y = 2064;
+
+                            b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2(x * 64, y * 64 - (int)((!topY) ? Game1.currentLocation.waterPosition : 0f))), new Rectangle(water_tile_upper_x + Game1.currentLocation.waterAnimationIndex * 64, water_tile_upper_y + (((x + y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 128 : 0) : (Game1.currentLocation.waterTileFlip ? 128 : 0)) + (topY ? ((int)Game1.currentLocation.waterPosition / 4) : 0), 64, 64 + (topY ? ((int)(0f - Game1.currentLocation.waterPosition)) : 0)), waterTile.ActualColor.Equals(Color.White) ? (Game1.currentLocation.waterColor.Value) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 1f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            if (num)
+                            {
+                                b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2(x * 64, (y + 1) * 64 - (int)Game1.currentLocation.waterPosition)), new Rectangle(water_tile_upper_x + Game1.currentLocation.waterAnimationIndex * 64, water_tile_upper_y + (((x + (y + 1)) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 128 : 0) : (Game1.currentLocation.waterTileFlip ? 128 : 0)), 64, 64 - (int)(64f - Game1.currentLocation.waterPosition) - 1), waterTile.ActualColor.Equals(Color.White) ? (Game1.currentLocation.waterColor.Value) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 1f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                            }
                         }
                     }
                 }
 
                 this.drawShadow(b);
-                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.getSourceRect(), base.color.Value * base.alpha.Value, 0f, new Vector2(0f, Model.TextureDimensions.Height * 16), 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (DrawOverPlayer ? 8000f : 10000f));
+                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), this.getSourceRect(), base.color.Value * base.alpha.Value, 0f, new Vector2(0f, Model.TextureDimensions.Height * 16), 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (DrawOverPlayer ? 8000f : 10000f));
 
                 // Check if player's bounding box should be drawn
                 if (BetterBuildings.showWalkableTiles || BetterBuildings.showBuildingTiles || BetterBuildings.showFadeBox)
