@@ -43,11 +43,6 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public GenericBuilding(BuildingModel model, GenericBlueprint genericBlueprint) : base(genericBlueprint, Vector2.Zero)
         {
             RefreshModel(model);
-
-            base.indoors.Value = GetIndoors();
-            this.updateInteriorWarps();
-
-            _lavaTexture = BetterBuildings.modHelper.Content.Load<Texture2D>("Maps/Mines/volcano_dungeon", ContentSource.GameContent);
         }
 
         public void RefreshModel()
@@ -86,6 +81,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     }
                 }
             }
+
+            base.indoors.Value = GetIndoors();
+            this.updateInteriorWarps();
+
+            _lavaTexture = BetterBuildings.modHelper.Content.Load<Texture2D>("Maps/Mines/volcano_dungeon", ContentSource.GameContent);
         }
 
         public GameLocation GetIndoors()
