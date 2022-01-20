@@ -2,6 +2,7 @@
 using BetterBuildings.Framework.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using System;
@@ -25,6 +26,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         private BoundaryCollective _walkableTileGroup;
         private BoundaryCollective _buildingTileGroup;
+        private Texture2D _lavaTexture;
 
 
         public GenericBuilding() : base()
@@ -38,6 +40,16 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             base.indoors.Value = GetIndoors();
             this.updateInteriorWarps();
+
+            _lavaTexture = BetterBuildings.modHelper.Content.Load<Texture2D>("Maps/Mines/volcano_dungeon", ContentSource.GameContent);
+        }
+
+        public void RefreshModel()
+        {
+            if (Model is not null)
+            {
+                RefreshModel(Model);
+            }
         }
 
         public void RefreshModel(BuildingModel model)
@@ -151,16 +163,6 @@ namespace BetterBuildings.Framework.Models.ContentPack
             DrawOverPlayer = false;
 
             IsUsingEventOverride = false;
-        }
-
-        private bool IsTileToTheRightWalkable(TileLocation tileLocation)
-        {
-            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + 1 && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y);
-        }
-
-        private bool IsNearbyTileWalkable(TileLocation tileLocation, int xOffset = 0, int yOffset = 0)
-        {
-            return Model.WalkableTiles.Any(t => t.X + base.tileX.Value == tileLocation.X + xOffset && t.GetAdjustedLocation(base.tileX.Value, base.tileY.Value).Y == tileLocation.Y + yOffset);
         }
 
         public override bool isActionableTile(int xTile, int yTile, Farmer who)
@@ -309,6 +311,33 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 {
                     this.drawInConstruction(b);
                     return;
+                }
+
+                foreach (var waterTile in Model.WaterTiles.Where(w => w.IsValid()))
+                {
+                    var tileGrid = waterTile.Grid;
+                    if (tileGrid is null)
+                    {
+                        tileGrid = new Grid() { StartingTile = waterTile.Tile, Height = 1, Width = 1 };
+                    }
+
+                    // Iterate through each water tile
+                    foreach (var gridTile in tileGrid.GetTiles())
+                    {
+                        var adjustedWaterTile = gridTile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
+
+                        if (waterTile.IsLava && _lavaTexture is not null)
+                        {
+                            int water_tile_upper_left_x = 0;
+                            int water_tile_upper_left_y = 320;
+
+                            b.Draw(_lavaTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedWaterTile.X * 64, adjustedWaterTile.Y * 64)), new Rectangle(water_tile_upper_left_x + Game1.currentLocation.waterAnimationIndex * 16, water_tile_upper_left_y + (((gridTile.X + gridTile.Y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 32 : 0) : (Game1.currentLocation.waterTileFlip ? 32 : 0)), 16, 16), waterTile.ActualColor.Equals(Color.White) ? (waterTile.ActualColor) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 4f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                        }
+                        else
+                        {
+                            b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedWaterTile.X * 64, adjustedWaterTile.Y * 64)), new Rectangle(Game1.currentLocation.waterAnimationIndex * 64, 2064 + (((adjustedWaterTile.X + adjustedWaterTile.Y) % 2 != 0) ? ((!Game1.currentLocation.waterTileFlip) ? 128 : 0) : (Game1.currentLocation.waterTileFlip ? 128 : 0)), 64, 64), waterTile.ActualColor.Equals(Color.White) ? (Game1.currentLocation.waterColor.Value) : (waterTile.ActualColor * 0.5f), 0f, Vector2.Zero, 1f, SpriteEffects.None, ((base.tileY.Value - 0.5f) * 64f - 2f) / 10000f);
+                        }
+                    }
                 }
 
                 this.drawShadow(b);

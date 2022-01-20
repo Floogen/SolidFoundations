@@ -37,6 +37,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
         public List<EventTile> EventTiles { get; set; } = new List<EventTile>();
         public List<InteractiveTile> InteractiveTiles { get; set; } = new List<InteractiveTile>();
+        public List<WaterTile> WaterTiles { get; set; } = new List<WaterTile>();
         public List<DoorTiles> Doorways { get; set; }
         public BlueprintModel Blueprint { get; set; }
 
