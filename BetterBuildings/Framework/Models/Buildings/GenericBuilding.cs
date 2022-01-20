@@ -295,6 +295,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return base.doAction(tileLocation, who);
         }
 
+        public override Rectangle getSourceRect()
+        {
+            return new Rectangle(0, 0, Model.TextureDimensions.Width * 16, Model.TextureDimensions.Height * 16);
+        }
+
         public override void drawShadow(SpriteBatch b, int localX = -1, int localY = -1)
         {
             if (Model.ShowShadow)
@@ -308,13 +313,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
             if (base.tilesWide.Value <= 8)
             {
                 this.drawShadow(b, x, y);
-                b.Draw(base.texture.Value, new Vector2(x, y), base.getSourceRect(), base.color.Value, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, 0.89f);
+                b.Draw(base.texture.Value, new Vector2(x, y), this.getSourceRect(), base.color.Value, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, 0.89f);
             }
             else if (base.tilesWide.Value >= 10)
             {
-                int xOffset = base.getSourceRect().Width / 2;
-                int yOffset = base.getSourceRect().Height / 2;
-                b.Draw(base.texture.Value, new Vector2(x + xOffset, y + yOffset), base.getSourceRect(), base.color.Value, 0f, new Vector2(0f, 0f), 3f, SpriteEffects.None, 0.89f);
+                int xOffset = this.getSourceRect().Width / 2;
+                int yOffset = this.getSourceRect().Height / 2;
+                b.Draw(base.texture.Value, new Vector2(x + xOffset, y + yOffset), this.getSourceRect(), base.color.Value, 0f, new Vector2(0f, 0f), 3f, SpriteEffects.None, 0.89f);
             }
             else
             {
@@ -362,7 +367,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
 
                 this.drawShadow(b);
-                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.texture.Value.Bounds, base.color.Value * base.alpha.Value, 0f, new Vector2(0f, base.texture.Value.Bounds.Height), 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (DrawOverPlayer ? 8000f : 10000f));
+                b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), base.getSourceRect(), base.color.Value * base.alpha.Value, 0f, new Vector2(0f, Model.TextureDimensions.Height * 16), 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (DrawOverPlayer ? 8000f : 10000f));
 
                 // Check if player's bounding box should be drawn
                 if (BetterBuildings.showWalkableTiles || BetterBuildings.showBuildingTiles || BetterBuildings.showFadeBox)
