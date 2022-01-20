@@ -36,6 +36,8 @@ namespace BetterBuildings.Framework.Patches.Menus
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.tryToBuild), null), prefix: new HarmonyMethod(GetType(), nameof(TryToBuildPrefix)));
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.draw), new[] { typeof(SpriteBatch) }), prefix: new HarmonyMethod(GetType(), nameof(DrawPrefix)));
             harmony.Patch(AccessTools.Constructor(typeof(CarpenterMenu), new[] { typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(CarpenterMenuPostfix)));
+
+            harmony.CreateReversePatcher(AccessTools.Method(_object, nameof(FarmerRenderer.draw), new[] { typeof(SpriteBatch) }), new HarmonyMethod(GetType(), nameof(DrawReversePatch))).Patch();
         }
 
         private static bool SetNewActiveBlueprintPrefix(CarpenterMenu __instance, int ___currentBlueprintIndex, List<BluePrint> ___blueprints, ref Building ___currentBuilding, ref int ___price, ref string ___buildingName, ref string ___buildingDescription, ref List<Item> ___ingredients)
@@ -82,15 +84,27 @@ namespace BetterBuildings.Framework.Patches.Menus
             return false;
         }
 
-        private static bool DrawPrefix(CarpenterMenu __instance, SpriteBatch b, bool ___onFarm, Building ___currentBuilding, Building ___buildingToMove, string ___hoverText, bool ___upgrading, bool ___painting, bool ___demolishing, bool ___moving)
+        private static bool DrawPrefix(CarpenterMenu __instance, SpriteBatch b, bool ___onFarm, Building ___currentBuilding, Building ___buildingToMove, string ___buildingName, string ___buildingDescription, string ___hoverText, bool ___upgrading, bool ___painting, bool ___demolishing, bool ___moving, List<Item> ___ingredients)
         {
-            if (!___onFarm || ___currentBuilding is null || !___currentBuilding.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
+            // Confirm that the blueprint is a GenericBlueprint
+            if (__instance.CurrentBlueprint is not GenericBlueprint genericBlueprint)
             {
                 return true;
             }
 
-            // Confirm that the blueprint is a GenericBlueprint
-            if (__instance.CurrentBlueprint is not GenericBlueprint genericBlueprint || Game1.currentLocation is not BuildableGameLocation buildableGameLocation)
+            // Apply catalogue specific logic
+            if (!___onFarm)
+            {
+                DrawActualMenu(__instance, b, ___currentBuilding, ___buildingName, ___buildingDescription, genericBlueprint.magical, ___ingredients, genericBlueprint.moneyRequired);
+                return false;
+            }
+
+            // Verify that we're working with a custom building
+            if (___currentBuilding is null || !___currentBuilding.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
+            {
+                return true;
+            }
+            if (Game1.currentLocation is not BuildableGameLocation buildableGameLocation)
             {
                 return true;
             }
@@ -147,6 +161,74 @@ namespace BetterBuildings.Framework.Patches.Menus
             return false;
         }
 
+        private static void DrawActualMenu(CarpenterMenu menu, SpriteBatch b, Building currentBuilding, string buildingName, string buildingDescription, bool magicalConstruction, List<Item> ingredients, int price)
+        {
+            DrawReversePatch(menu, b);
+            IClickableMenu.drawTextureBox(b, menu.xPositionOnScreen - 96, menu.yPositionOnScreen - 16, menu.maxWidthOfBuildingViewer + 64, menu.maxHeightOfBuildingViewer + 64, magicalConstruction ? Color.RoyalBlue : Color.White);
+            currentBuilding.drawInMenu(b, menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer / 2 - currentBuilding.tilesWide.Value * 64 / 2 - 64, menu.yPositionOnScreen + menu.maxHeightOfBuildingViewer / 2 - currentBuilding.getSourceRectForMenu().Height * 4 / 2);
+            if (menu.CurrentBlueprint.isUpgrade())
+            {
+                menu.upgradeIcon.draw(b);
+            }
+            string placeholder = " Deluxe  Barn   ";
+            if (SpriteText.getWidthOfString(buildingName) >= SpriteText.getWidthOfString(placeholder))
+            {
+                placeholder = buildingName + " ";
+            }
+            SpriteText.drawStringWithScrollCenteredAt(b, buildingName, menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer - IClickableMenu.spaceToClearSideBorder - 16 + 64 + (menu.width - (menu.maxWidthOfBuildingViewer + 128)) / 2, menu.yPositionOnScreen, SpriteText.getWidthOfString(placeholder));
+            int descriptionWidth = LocalizedContentManager.CurrentLanguageCode switch
+            {
+                LocalizedContentManager.LanguageCode.es => menu.maxWidthOfDescription + 64 + ((menu.CurrentBlueprint?.name == "Deluxe Barn") ? 96 : 0),
+                LocalizedContentManager.LanguageCode.it => menu.maxWidthOfDescription + 96,
+                LocalizedContentManager.LanguageCode.fr => menu.maxWidthOfDescription + 96 + ((menu.CurrentBlueprint?.name == "Slime Hutch" || menu.CurrentBlueprint?.name == "Deluxe Coop" || menu.CurrentBlueprint?.name == "Deluxe Barn") ? 72 : 0),
+                LocalizedContentManager.LanguageCode.ko => menu.maxWidthOfDescription + 96 + ((menu.CurrentBlueprint?.name == "Slime Hutch") ? 64 : ((menu.CurrentBlueprint?.name == "Deluxe Coop") ? 96 : ((menu.CurrentBlueprint?.name == "Deluxe Barn") ? 112 : ((menu.CurrentBlueprint?.name == "Big Barn") ? 64 : 0)))),
+                _ => menu.maxWidthOfDescription + 64,
+            };
+            IClickableMenu.drawTextureBox(b, menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer - 16, menu.yPositionOnScreen + 80, descriptionWidth, menu.maxHeightOfBuildingViewer - 32, magicalConstruction ? Color.RoyalBlue : Color.White);
+            if (magicalConstruction)
+            {
+                Utility.drawTextWithShadow(b, Game1.parseText(buildingDescription, Game1.dialogueFont, descriptionWidth - 32), Game1.dialogueFont, new Vector2(menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer - 4, menu.yPositionOnScreen + 80 + 16 + 4), Game1.textColor * 0.25f, 1f, -1f, -1, -1, 0f);
+                Utility.drawTextWithShadow(b, Game1.parseText(buildingDescription, Game1.dialogueFont, descriptionWidth - 32), Game1.dialogueFont, new Vector2(menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer - 1, menu.yPositionOnScreen + 80 + 16 + 4), Game1.textColor * 0.25f, 1f, -1f, -1, -1, 0f);
+            }
+            Utility.drawTextWithShadow(b, Game1.parseText(buildingDescription, Game1.dialogueFont, descriptionWidth - 32), Game1.dialogueFont, new Vector2(menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer, menu.yPositionOnScreen + 80 + 16), magicalConstruction ? Color.PaleGoldenrod : Game1.textColor, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.75f);
+            Vector2 ingredientsPosition = new Vector2(menu.xPositionOnScreen + menu.maxWidthOfBuildingViewer + 16, menu.yPositionOnScreen + 256 + 32);
+            if (ingredients.Count < 3 && (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.fr || LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ko || LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.pt))
+            {
+                ingredientsPosition.Y += 64f;
+            }
+            if (price >= 0)
+            {
+                SpriteText.drawString(b, "$", (int)ingredientsPosition.X, (int)ingredientsPosition.Y);
+                string price_string = Utility.getNumberWithCommas(price);
+                if (magicalConstruction)
+                {
+                    Utility.drawTextWithShadow(b, Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", price_string), Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f, ingredientsPosition.Y + 8f), Game1.textColor * 0.5f, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
+                    Utility.drawTextWithShadow(b, Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", price_string), Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f + 4f - 1f, ingredientsPosition.Y + 8f), Game1.textColor * 0.25f, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
+                }
+                Utility.drawTextWithShadow(b, Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", price_string), Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f + 4f, ingredientsPosition.Y + 4f), (Game1.player.Money < price) ? Color.Red : (magicalConstruction ? Color.PaleGoldenrod : Game1.textColor), 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
+            }
+            ingredientsPosition.X -= 16f;
+            ingredientsPosition.Y -= 21f;
+            foreach (Item i in ingredients)
+            {
+                ingredientsPosition.Y += 68f;
+                i.drawInMenu(b, ingredientsPosition, 1f);
+                bool hasItem = ((!(i is StardewValley.Object) || Game1.player.hasItemInInventory((i as StardewValley.Object).parentSheetIndex, i.Stack)) ? true : false);
+                if (magicalConstruction)
+                {
+                    Utility.drawTextWithShadow(b, i.DisplayName, Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f + 12f, ingredientsPosition.Y + 24f), Game1.textColor * 0.25f, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
+                    Utility.drawTextWithShadow(b, i.DisplayName, Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f + 16f - 1f, ingredientsPosition.Y + 24f), Game1.textColor * 0.25f, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
+                }
+                Utility.drawTextWithShadow(b, i.DisplayName, Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f + 16f, ingredientsPosition.Y + 20f), hasItem ? (magicalConstruction ? Color.PaleGoldenrod : Game1.textColor) : Color.Red, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
+            }
+            menu.backButton.draw(b);
+            menu.forwardButton.draw(b);
+            menu.okButton.draw(b, menu.CurrentBlueprint.doesFarmerHaveEnoughResourcesToBuild() ? Color.White : (Color.Gray * 0.8f), 0.88f);
+            menu.demolishButton.draw(b, menu.CanDemolishThis(menu.CurrentBlueprint) ? Color.White : (Color.Gray * 0.8f), 0.88f);
+            menu.moveButton.draw(b);
+            menu.paintButton.draw(b);
+        }
+
         private static bool AttemptToBuildStructure(Farm farm, GenericBlueprint blueprint)
         {
             Vector2 tileLocation = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
@@ -180,6 +262,7 @@ namespace BetterBuildings.Framework.Patches.Menus
             }
 
             farm.buildings.Add(customBuilding);
+            customBuilding.RefreshModel();
             customBuilding.performActionOnConstruction(farm);
             customBuilding.updateInteriorWarps();
             BetterBuildings.multiplayer.globalChatInfoMessage("BuildingBuild", Game1.player.Name, Utility.AOrAn(blueprint.displayName), blueprint.displayName, Game1.player.farmName);
@@ -255,6 +338,11 @@ namespace BetterBuildings.Framework.Patches.Menus
             {
                 ___blueprints.Add(building.Blueprint.CreateBlueprint());
             }
+        }
+
+        private static void DrawReversePatch(CarpenterMenu __instance, SpriteBatch b)
+        {
+            new NotImplementedException("It's a stub!");
         }
     }
 }
