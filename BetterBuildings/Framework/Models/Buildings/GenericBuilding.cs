@@ -303,6 +303,27 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
         }
 
+        public override void drawInMenu(SpriteBatch b, int x, int y)
+        {
+            if (base.tilesWide.Value <= 8)
+            {
+                this.drawShadow(b, x, y);
+                b.Draw(base.texture.Value, new Vector2(x, y), base.getSourceRect(), base.color.Value, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, 0.89f);
+            }
+            else if (base.tilesWide.Value >= 10)
+            {
+                int xOffset = base.getSourceRect().Width / 2;
+                int yOffset = base.getSourceRect().Height / 2;
+                b.Draw(base.texture.Value, new Vector2(x + xOffset, y + yOffset), base.getSourceRect(), base.color.Value, 0f, new Vector2(0f, 0f), 3f, SpriteEffects.None, 0.89f);
+            }
+            else
+            {
+                int xOffset = 108;
+                int yOffset = 28;
+                b.Draw(base.texture.Value, new Vector2(x + xOffset, y + yOffset), new Rectangle(this.getSourceRect().Width / 2 - 64, this.getSourceRect().Height - 136 - 2, 122, 138), base.color.Value, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, 0.89f);
+            }
+        }
+
         public override void draw(SpriteBatch b)
         {
             if (!base.isMoving)

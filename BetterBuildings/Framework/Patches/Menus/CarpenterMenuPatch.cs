@@ -96,59 +96,60 @@ namespace BetterBuildings.Framework.Patches.Menus
             if (!___onFarm)
             {
                 DrawActualMenu(__instance, b, ___currentBuilding, ___buildingName, ___buildingDescription, genericBlueprint.magical, ___ingredients, genericBlueprint.moneyRequired);
-                return false;
             }
-
-            // Verify that we're working with a custom building
-            if (___currentBuilding is null || !___currentBuilding.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
+            else
             {
-                return true;
-            }
-            if (Game1.currentLocation is not BuildableGameLocation buildableGameLocation)
-            {
-                return true;
-            }
-
-            // Draw banner
-            string message = (___upgrading ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Upgrade", genericBlueprint.nameOfBuildingToUpgrade) : (___demolishing ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Demolish") : ((!___painting) ? Game1.content.LoadString("Strings\\UI:Carpenter_ChooseLocation") : Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Paint"))));
-            SpriteText.drawStringWithScrollBackground(b, message, Game1.uiViewport.Width / 2 - SpriteText.getWidthOfString(message) / 2, 16);
-
-            // Draw the building
-            if (!___upgrading && !___demolishing && !___moving && !___painting)
-            {
-                Vector2 mousePositionTile2 = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
-                for (int y4 = 0; y4 < genericBlueprint.tilesHeight; y4++)
+                // Verify that we're working with a custom building
+                if (___currentBuilding is null || !___currentBuilding.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING))
                 {
-                    for (int x3 = 0; x3 < genericBlueprint.tilesWidth; x3++)
+                    return true;
+                }
+                if (Game1.currentLocation is not BuildableGameLocation buildableGameLocation)
+                {
+                    return true;
+                }
+
+                // Draw banner
+                string message = (___upgrading ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Upgrade", genericBlueprint.nameOfBuildingToUpgrade) : (___demolishing ? Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Demolish") : ((!___painting) ? Game1.content.LoadString("Strings\\UI:Carpenter_ChooseLocation") : Game1.content.LoadString("Strings\\UI:Carpenter_SelectBuilding_Paint"))));
+                SpriteText.drawStringWithScrollBackground(b, message, Game1.uiViewport.Width / 2 - SpriteText.getWidthOfString(message) / 2, 16);
+
+                // Draw the building
+                if (!___upgrading && !___demolishing && !___moving && !___painting)
+                {
+                    Vector2 mousePositionTile2 = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
+                    for (int y4 = 0; y4 < genericBlueprint.tilesHeight; y4++)
                     {
-                        int sheetIndex3 = genericBlueprint.getTileSheetIndexForStructurePlacementTile(x3, y4);
-                        Vector2 currentGlobalTilePosition3 = new Vector2(mousePositionTile2.X + (float)x3, mousePositionTile2.Y + (float)y4);
-                        if (!buildableGameLocation.isBuildable(currentGlobalTilePosition3))
+                        for (int x3 = 0; x3 < genericBlueprint.tilesWidth; x3++)
                         {
-                            sheetIndex3++;
+                            int sheetIndex3 = genericBlueprint.getTileSheetIndexForStructurePlacementTile(x3, y4);
+                            Vector2 currentGlobalTilePosition3 = new Vector2(mousePositionTile2.X + (float)x3, mousePositionTile2.Y + (float)y4);
+                            if (!buildableGameLocation.isBuildable(currentGlobalTilePosition3))
+                            {
+                                sheetIndex3++;
+                            }
+                            b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, currentGlobalTilePosition3 * 64f), new Rectangle(194 + sheetIndex3 * 16, 388, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.999f);
                         }
-                        b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, currentGlobalTilePosition3 * 64f), new Rectangle(194 + sheetIndex3 * 16, 388, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.999f);
                     }
-                }
 
-                foreach (Point additionalPlacementTile in genericBlueprint.additionalPlacementTiles)
-                {
-                    int x4 = additionalPlacementTile.X;
-                    int y3 = additionalPlacementTile.Y;
-                    int sheetIndex4 = genericBlueprint.getTileSheetIndexForStructurePlacementTile(x4, y3);
-                    Vector2 currentGlobalTilePosition4 = new Vector2(mousePositionTile2.X + (float)x4, mousePositionTile2.Y + (float)y3);
-                    if (!(Game1.currentLocation as BuildableGameLocation).isBuildable(currentGlobalTilePosition4))
+                    foreach (Point additionalPlacementTile in genericBlueprint.additionalPlacementTiles)
                     {
-                        sheetIndex4++;
+                        int x4 = additionalPlacementTile.X;
+                        int y3 = additionalPlacementTile.Y;
+                        int sheetIndex4 = genericBlueprint.getTileSheetIndexForStructurePlacementTile(x4, y3);
+                        Vector2 currentGlobalTilePosition4 = new Vector2(mousePositionTile2.X + (float)x4, mousePositionTile2.Y + (float)y3);
+                        if (!(Game1.currentLocation as BuildableGameLocation).isBuildable(currentGlobalTilePosition4))
+                        {
+                            sheetIndex4++;
+                        }
+                        b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, currentGlobalTilePosition4 * 64f), new Rectangle(194 + sheetIndex4 * 16, 388, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.999f);
                     }
-                    b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, currentGlobalTilePosition4 * 64f), new Rectangle(194 + sheetIndex4 * 16, 388, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.999f);
                 }
+                else if (!___painting && ___moving && ___buildingToMove != null)
+                {
+                    // TODO: Implement moving
+                }
+                Game1.EndWorldDrawInUI(b);
             }
-            else if (!___painting && ___moving && ___buildingToMove != null)
-            {
-                // TODO: Implement moving
-            }
-            Game1.EndWorldDrawInUI(b);
 
             // Draw the interactable UI
             __instance.cancelButton.draw(b);
@@ -221,6 +222,7 @@ namespace BetterBuildings.Framework.Patches.Menus
                 }
                 Utility.drawTextWithShadow(b, i.DisplayName, Game1.dialogueFont, new Vector2(ingredientsPosition.X + 64f + 16f, ingredientsPosition.Y + 20f), hasItem ? (magicalConstruction ? Color.PaleGoldenrod : Game1.textColor) : Color.Red, 1f, -1f, -1, -1, magicalConstruction ? 0f : 0.25f);
             }
+
             menu.backButton.draw(b);
             menu.forwardButton.draw(b);
             menu.okButton.draw(b, menu.CurrentBlueprint.doesFarmerHaveEnoughResourcesToBuild() ? Color.White : (Color.Gray * 0.8f), 0.88f);
