@@ -336,7 +336,7 @@ namespace BetterBuildings.Framework.Patches.Menus
 
         private static void CarpenterMenuPostfix(CarpenterMenu __instance, ref List<BluePrint> ___blueprints)
         {
-            foreach (var building in BetterBuildings.buildingManager.GetAllBuildingModels())
+            foreach (var building in BetterBuildings.buildingManager.GetAllBuildingModels().Where(b => !b.IsLocked))
             {
                 ___blueprints.Add(building.Blueprint.CreateBlueprint());
             }
