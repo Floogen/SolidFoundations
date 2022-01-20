@@ -1,0 +1,101 @@
+{
+  "Name": "Forge",
+  "Description": "...",
+  "ShowShadow": false,
+  "Fade": {
+    "Enabled": false
+  },
+  "TextureDimensions": {
+    "Height": 10,
+    "Width": 10
+  },
+  "PhysicalDimensions": {
+    "Height": 10,
+    "Width": 10
+  },
+  "WaterTiles": [
+    {
+      "IsLava": true,
+      "Grid": {
+        "StartingTile": {
+          "X": 0,
+          "Y": 0
+        },
+        "Height": 10,
+        "Width": 10
+      }
+    }
+  ],
+  "WalkableTiles": [
+    {
+      "X": 4,
+      "Y": 9
+    },
+    {
+      "X": 5,
+      "Y": 9
+    },
+    {
+      "X": 4,
+      "Y": 8
+    },
+    {
+      "X": 5,
+      "Y": 8
+    },
+    {
+      "X": 4,
+      "Y": 7
+    },
+    {
+      "X": 5,
+      "Y": 7
+    },
+    {
+      "X": 4,
+      "Y": 6
+    },
+    {
+      "X": 5,
+      "Y": 6
+    },
+    {
+      "X": 3,
+      "Y": 6
+    },
+    {
+      "X": 6,
+      "Y": 6
+    },
+    {
+      "X": 4,
+      "Y": 5
+    },
+    {
+      "X": 5,
+      "Y": 5
+    },
+    {
+      "X": 3,
+      "Y": 5
+    },
+    {
+      "X": 6,
+      "Y": 5
+    },
+    {
+      "X": 4,
+      "Y": 4
+    },
+    {
+      "X": 5,
+      "Y": 4
+    }
+  ],
+
+  "Blueprint": {
+    "Vendor": "Robin",
+    "DaysToConstruct": 0,
+    "RequiredMoney": 2500
+  }
+}
