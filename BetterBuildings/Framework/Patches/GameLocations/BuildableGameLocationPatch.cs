@@ -45,15 +45,18 @@ namespace BetterBuildings.Framework.Patches.Buildings
                         continue;
                     }
 
-                    foreach (var tileLocation in customBuilding.Model.WalkableTiles)
+                    foreach (var walkableTile in customBuilding.Model.WalkableTiles)
                     {
-                        var tileRectangle = new Rectangle((tileLocation.X + customBuilding.tileX.Value) * 64, (tileLocation.Y + customBuilding.tileY.Value) * 64, 64, 64);
-                        tileRectangle.Height += 64;
-                        _monitor.Log($"{tileRectangle.X}, {tileRectangle.Y} | {position.X}, {position.Y}", LogLevel.Debug);
-                        if (tileRectangle.Contains(position))
+                        foreach (var tileLocation in walkableTile.GetActualGrid().GetTiles())
                         {
-                            __result = false;
-                            return;
+                            var tileRectangle = new Rectangle((tileLocation.X + customBuilding.tileX.Value) * 64, (tileLocation.Y + customBuilding.tileY.Value) * 64, 64, 64);
+                            tileRectangle.Height += 64;
+                            _monitor.Log($"{tileRectangle.X}, {tileRectangle.Y} | {position.X}, {position.Y}", LogLevel.Debug);
+                            if (tileRectangle.Contains(position))
+                            {
+                                __result = false;
+                                return;
+                            }
                         }
                     }
                 }

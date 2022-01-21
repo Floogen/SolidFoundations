@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterBuildings.Framework.Models.General
+namespace BetterBuildings.Framework.Models.General.Tiles
 {
     public class WaterTile
     {
@@ -36,6 +36,16 @@ namespace BetterBuildings.Framework.Models.General
         internal bool IsValid()
         {
             return Tile is not null || Grid is not null;
+        }
+
+        internal Grid GetActualGrid()
+        {
+            if (Grid is null)
+            {
+                return new Grid() { StartingTile = Tile, Height = 1, Width = 1 };
+            }
+
+            return Grid;
         }
     }
 }

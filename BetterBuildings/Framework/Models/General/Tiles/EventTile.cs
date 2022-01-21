@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterBuildings.Framework.Models.General
+namespace BetterBuildings.Framework.Models.General.Tiles
 {
     public class EventTile
     {
@@ -15,6 +15,7 @@ namespace BetterBuildings.Framework.Models.General
         public FadeEvent Fade { get; set; }
         public bool DrawOverPlayer { get; set; }
         public TileLocation Tile { get; set; }
+        public Grid Grid { get; set; }
 
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)

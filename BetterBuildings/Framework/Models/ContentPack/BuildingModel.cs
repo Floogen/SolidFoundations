@@ -1,4 +1,5 @@
-﻿using BetterBuildings.Framework.Models.General;
+﻿using BetterBuildings.Framework.Models.General.Tiles;
+using BetterBuildings.Framework.Models.General;
 using BetterBuildings.Framework.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -35,7 +36,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public bool ShowShadow { get; set; } = true;
         public Fade Fade { get; set; } = new Fade();
         public List<TextureAnimation> IdleAnimation { get; set; } = new List<TextureAnimation>();
-        public List<TileLocation> WalkableTiles { get; set; } = new List<TileLocation>();
+        public List<WalkableTile> WalkableTiles { get; set; } = new List<WalkableTile>();
         public List<EventTile> EventTiles { get; set; } = new List<EventTile>();
         public List<InteractiveTile> InteractiveTiles { get; set; } = new List<InteractiveTile>();
         public List<WaterTile> WaterTiles { get; set; } = new List<WaterTile>();

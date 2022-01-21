@@ -1,4 +1,4 @@
-﻿using BetterBuildings.Framework.Models.General;
+﻿using BetterBuildings.Framework.Models.General.Tiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;

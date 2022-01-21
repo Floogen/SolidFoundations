@@ -1,4 +1,4 @@
-﻿using BetterBuildings.Framework.Models.General;
+﻿using BetterBuildings.Framework.Models.General.Tiles;
 using BetterBuildings.Framework.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -63,10 +63,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
             base.fadeWhenPlayerIsBehind.Value = model.Fade.Enabled;
 
             _walkableTileGroup = new BoundaryCollective();
-            foreach (var tile in Model.WalkableTiles)
+            foreach (var walkableTile in Model.WalkableTiles)
             {
-                var adjustedTile = tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
-                _walkableTileGroup.Add(new Rectangle(adjustedTile.X * 64, adjustedTile.Y * 64, 64, 64));
+                foreach (var tile in walkableTile.GetActualGrid().GetTiles())
+                {
+                    var adjustedTile = tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
+                    _walkableTileGroup.Add(new Rectangle(adjustedTile.X * 64, adjustedTile.Y * 64, 64, 64));
+                }
             }
 
             _buildingTileGroup = new BoundaryCollective();
@@ -375,11 +378,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
                 foreach (var waterTile in Model.WaterTiles.Where(w => w.IsValid()))
                 {
-                    var tileGrid = waterTile.Grid;
-                    if (tileGrid is null)
-                    {
-                        tileGrid = new Grid() { StartingTile = waterTile.Tile, Height = 1, Width = 1 };
-                    }
+                    var tileGrid = waterTile.GetActualGrid();
 
                     // Iterate through each water tile
                     foreach (var gridTile in tileGrid.GetTiles())

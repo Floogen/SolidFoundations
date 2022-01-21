@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterBuildings.Framework.Models.General
+namespace BetterBuildings.Framework.Models.General.Tiles
 {
     public enum DoorType
     {
