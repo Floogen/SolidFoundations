@@ -1,0 +1,18 @@
+{
+  "Recipes": [
+    {
+      "InputItems": [
+        {
+          "Name": "Cloth",
+          "Quantity": 25
+        }
+      ],
+      "OutputItems": [
+        {
+          "Name": "Coal",
+          "Quantity": 25
+        }
+      ]
+    }
+  ]
+}

@@ -36,13 +36,20 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public Dimensions PhysicalDimensions { get { return _physicalDimensions is null ? TextureDimensions : _physicalDimensions; } set { _physicalDimensions = value; } }
         public bool ShowShadow { get; set; } = true;
         public Fade Fade { get; set; } = new Fade();
+
+        // Visual related
         public List<TextureAnimation> IdleAnimation { get; set; } = new List<TextureAnimation>();
         public List<GenericEffect> Effects { get; set; } = new List<GenericEffect>();
+
+        // Tile related
         public List<WalkableTile> WalkableTiles { get; set; } = new List<WalkableTile>();
         public List<EventTile> EventTiles { get; set; } = new List<EventTile>();
         public List<InteractiveTile> InteractiveTiles { get; set; } = new List<InteractiveTile>();
         public List<WaterTile> WaterTiles { get; set; } = new List<WaterTile>();
         public List<DoorTiles> Doorways { get; set; }
+
+        // Others
+        public FactoryModel Factory { get; set; }
         public BlueprintModel Blueprint { get; set; }
 
         internal string Owner { get; set; }

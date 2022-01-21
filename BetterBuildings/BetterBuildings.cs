@@ -401,6 +401,12 @@ namespace BetterBuildings
                         effectData.Model = effectModel;
                     }
 
+                    // Load in the factory, if given
+                    if (File.Exists(Path.Combine(folder.FullName, "factory.json")))
+                    {
+                        buildingModel.Factory = contentPack.ReadJsonFile<FactoryModel>(Path.Combine(parentFolderName, folder.Name, "factory.json"));
+                    }
+
                     // Track the model
                     buildingManager.AddBuilding(buildingModel);
 

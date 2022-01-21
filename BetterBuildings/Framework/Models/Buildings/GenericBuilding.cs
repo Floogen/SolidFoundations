@@ -6,6 +6,7 @@ using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Menus;
 using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             RefreshModel(model);
 
+            // Set the storage related properties
+            InputStorage.Value = new Chest(playerChest: true);
+            OutputStorage.Value = new Chest(playerChest: true);
+
+            // Set the indoor related properties
             base.indoors.Value = GetIndoors();
             this.updateInteriorWarps();
         }
@@ -125,7 +131,49 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public void StartProduction()
         {
+            if (Model.Factory is null)
+            {
+                BetterBuildings.monitor.Log($"Attempted to start production on the building {Model.DisplayName} which has no associated factory", LogLevel.Trace);
+                return;
+            }
+            else if (Model.Factory.Recipes.Count == 0)
+            {
+                BetterBuildings.monitor.Log($"Attempted to start production on the building {Model.DisplayName} which has no recipes within its factory", LogLevel.Trace);
+                return;
+            }
 
+            // Find the first recipe that matches the input items
+            if (Model.Factory.GetEligibleRecipe(InputStorage.Value.items.ToList()) is RecipeModel recipe && recipe is not null)
+            {
+                foreach (var item in InventoryTools.GetActualRequiredItems(recipe.InputItems))
+                {
+                    InputStorage.Value.items.Remove(item);
+                }
+
+                if (recipe.ProcessingTimeInGameMinutes == 0 && !recipe.FinishAtDayStart)
+                {
+                    var outputItems = InventoryTools.GetActualRequiredItems(recipe.OutputItems);
+                    if (outputItems.Count == 1 && Game1.player.couldInventoryAcceptThisItem(outputItems.First()))
+                    {
+                        Game1.player.addItemToInventory(outputItems.First());
+                    }
+                    else
+                    {
+                        Game1.activeClickableMenu = new ItemGrabMenu(outputItems, null);
+                    }
+                }
+                else
+                {
+                    // TODO: Enable timer for when to finish production, unless recipe.FinishAtDayStart is given
+                    foreach (var item in InventoryTools.GetActualRequiredItems(recipe.OutputItems))
+                    {
+                        if (Utility.canItemBeAddedToThisInventoryList(item, OutputStorage.Value.items, 36))
+                        {
+                            _ = Utility.addItemToThisInventoryList(item, OutputStorage.Value.items, 36);
+                        }
+                    }
+                }
+            }
         }
 
         private bool AttemptTunnelDoorTeleport(TileLocation triggeredTile)
@@ -189,6 +237,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
             DrawOverPlayer = false;
 
             IsUsingEventOverride = false;
+        }
+
+        public override void dayUpdate(int dayOfMonth)
+        {
+            base.dayUpdate(dayOfMonth);
+
+            // TODO: Do production logic here
         }
 
         public override bool isActionableTile(int xTile, int yTile, Farmer who)

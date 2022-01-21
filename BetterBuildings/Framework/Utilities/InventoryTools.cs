@@ -64,7 +64,12 @@ namespace BetterBuildings.Framework.Utilities
 
         public static bool HasInventoryItemWithRequiredQuantityAndQuality(Item targetItem, int quantity, int quality = -1)
         {
-            foreach (var item in Game1.player.Items.Where(i => i is not null && i.Name.Equals(targetItem.Name)))
+            return HasItemWithRequiredQuantityAndQuality(Game1.player.Items.ToList(), targetItem, quantity, quality);
+        }
+
+        public static bool HasItemWithRequiredQuantityAndQuality(List<Item> inputItems, Item targetItem, int quantity, int quality = -1)
+        {
+            foreach (var item in inputItems.Where(i => i is not null && i.Name.Equals(targetItem.Name)))
             {
                 if (item.Stack >= quantity)
                 {
