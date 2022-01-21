@@ -50,6 +50,26 @@
 
 
 
+  "InteractiveTiles": [
+    {
+      "Input": {
+        "RequiredItems": [
+          {
+            "Name": "Cloth",
+            "Quantity": 25
+          }
+        ]
+      },
+      "Grid": {
+        "StartingTile": {
+          "X": 4,
+          "Y": 3
+        },
+        "Height": 1,
+        "Width": 2
+      }
+    }
+  ],
   "WaterTiles": [
     {
       "IsLava": true,
