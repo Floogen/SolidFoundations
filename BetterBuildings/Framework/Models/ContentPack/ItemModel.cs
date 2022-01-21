@@ -19,7 +19,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
     {
         public string Name { get; set; }
         public bool IsVanillaItem { get; set; } = true;
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = 1;
         public Quality Quality { get; set; }
 
         internal int GetActualQuality()
