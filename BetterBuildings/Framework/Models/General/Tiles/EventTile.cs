@@ -9,13 +9,11 @@ using System.Threading.Tasks;
 
 namespace BetterBuildings.Framework.Models.General.Tiles
 {
-    public class EventTile
+    public class EventTile : TileBase
     {
         public WarpEvent Warp { get; set; }
         public FadeEvent Fade { get; set; }
         public bool DrawOverPlayer { get; set; }
-        public TileLocation Tile { get; set; }
-        public Grid Grid { get; set; }
 
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)

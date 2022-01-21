@@ -10,13 +10,11 @@ using System.Threading.Tasks;
 
 namespace BetterBuildings.Framework.Models.General.Tiles
 {
-    public class WaterTile
+    public class WaterTile : TileBase
     {
         public bool IsLava { get; set; }
         internal Color ActualColor { get; set; } = Microsoft.Xna.Framework.Color.White;
         public int[] Color { set { ActualColor = GetColor(value); } }
-        public TileLocation Tile { get; set; }
-        public Grid Grid { get; set; }
 
         private int GetColorIndex(int[] colorArray, int position)
         {
@@ -36,16 +34,6 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         internal bool IsValid()
         {
             return Tile is not null || Grid is not null;
-        }
-
-        internal Grid GetActualGrid()
-        {
-            if (Grid is null)
-            {
-                return new Grid() { StartingTile = Tile, Height = 1, Width = 1 };
-            }
-
-            return Grid;
         }
     }
 }
