@@ -448,7 +448,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public void DrawDebug(SpriteBatch b)
         {
             // Check if player's bounding box should be drawn
-            if (BetterBuildings.showWalkableTiles || BetterBuildings.showBuildingTiles || BetterBuildings.showFadeBox)
+            if (BetterBuildings.showWalkableTiles || BetterBuildings.showBuildingTiles || BetterBuildings.showFadeBox || BetterBuildings.showInteractiveTiles)
             {
                 var playerPosition = Game1.GlobalToLocal(Game1.viewport, new Vector2((Game1.player.GetBoundingBox().X), (Game1.player.GetBoundingBox().Y)));
                 b.Draw(Game1.staminaRect, new Rectangle((int)playerPosition.X, (int)playerPosition.Y, Game1.player.GetBoundingBox().Width, Game1.player.GetBoundingBox().Height), new Rectangle(0, 0, 1, 1), Color.Blue, 0f, Vector2.Zero, SpriteEffects.None, 100f);
@@ -469,6 +469,15 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 {
                     var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(boundary.X, boundary.Y));
                     b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Yellow, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
+                }
+            }
+            if (BetterBuildings.showInteractiveTiles)
+            {
+                foreach (var tile in Model.InteractiveTiles.SelectMany(s => s.GetActualTiles()))
+                {
+                    var adjustedTile = tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
+                    var position = Game1.GlobalToLocal(Game1.viewport, new Vector2(adjustedTile.X * 64, adjustedTile.Y * 64));
+                    b.Draw(Game1.staminaRect, position, new Rectangle(0, 0, 1, 1), Color.Green, 0f, Vector2.Zero, 64, SpriteEffects.None, 10f);
                 }
             }
             if (BetterBuildings.showFadeBox)
