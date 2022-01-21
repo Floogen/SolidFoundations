@@ -66,7 +66,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                 }
                 else
                 {
-                    var missingItemsDialogue = new DialogueEvent() { Text = "The building requires the following items:^" };
+                    var missingItemsDialogue = new DialogueEvent() { Text = "Input requires the following items:^" };
                     foreach (Object item in requiredItems)
                     {
                         missingItemsDialogue.Text += String.Concat("- ", item.Name, " x", item.Stack);
