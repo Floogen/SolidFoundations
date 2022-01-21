@@ -186,9 +186,12 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             foreach (var interactiveTile in Model.InteractiveTiles)
             {
-                if (base.tileX.Value + interactiveTile.Tile.X == xTile && base.tileY.Value + interactiveTile.Tile.Y == yTile)
+                foreach (var tile in interactiveTile.GetActualTiles())
                 {
-                    return true;
+                    if (base.tileX.Value + tile.X == xTile && base.tileY.Value + tile.Y == yTile)
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -318,12 +321,15 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             foreach (var interactiveTile in Model.InteractiveTiles)
             {
-                if (base.tileX.Value + interactiveTile.Tile.X == tileLocation.X && base.tileY.Value + interactiveTile.Tile.Y == tileLocation.Y)
+                foreach (var tile in interactiveTile.GetActualTiles())
                 {
-                    // Trigger the tile
-                    interactiveTile.Trigger(this, Game1.player);
+                    if (base.tileX.Value + tile.X == tileLocation.X && base.tileY.Value + tile.Y == tileLocation.Y)
+                    {
+                        // Trigger the tile
+                        interactiveTile.Trigger(this, Game1.player);
 
-                    return true;
+                        return true;
+                    }
                 }
             }
 

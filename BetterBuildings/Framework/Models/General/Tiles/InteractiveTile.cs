@@ -22,10 +22,9 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         OpenShop
     }
 
-    public class InteractiveTile
+    public class InteractiveTile : TileBase
     {
         public ShopOpenEvent ShopOpen { get; set; }
-        public TileLocation Tile { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
         {
