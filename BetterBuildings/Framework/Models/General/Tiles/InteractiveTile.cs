@@ -29,6 +29,8 @@ namespace BetterBuildings.Framework.Models.General.Tiles
     {
         public ShopOpenEvent ShopOpen { get; set; }
         public InputEvent Input { get; set; }
+        public DialogueEvent Dialogue { get; set; }
+        public MessageEvent Message { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
         {
@@ -72,6 +74,14 @@ namespace BetterBuildings.Framework.Models.General.Tiles
 
                     Game1.activeClickableMenu = new DialogueBox(missingItemsDialogue.Text);
                 }
+            }
+            if (Dialogue is not null)
+            {
+                Game1.activeClickableMenu = new DialogueBox(Dialogue.Text);
+            }
+            if (Message is not null)
+            {
+                Game1.addHUDMessage(new HUDMessage(Message.Text, (int)Message.Icon + 1));
             }
         }
 
