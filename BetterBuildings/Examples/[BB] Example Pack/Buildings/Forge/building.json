@@ -31,6 +31,22 @@
       "Duration": 100
     }
   ],
+  "Effects": [
+    {
+      "Name": "SmokePuff",
+      "Tile": {
+        "X": 3,
+        "Y": 1
+      }
+    },
+    {
+      "Name": "SmokePuff",
+      "Tile": {
+        "X": 6,
+        "Y": 1
+      }
+    }
+  ],
 
 
 

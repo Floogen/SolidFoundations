@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BetterBuildings.Framework.Models.Effects;
 
 namespace BetterBuildings.Framework.Models.ContentPack
 {
@@ -36,6 +37,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public bool ShowShadow { get; set; } = true;
         public Fade Fade { get; set; } = new Fade();
         public List<TextureAnimation> IdleAnimation { get; set; } = new List<TextureAnimation>();
+        public List<GenericEffect> Effects { get; set; } = new List<GenericEffect>();
         public List<WalkableTile> WalkableTiles { get; set; } = new List<WalkableTile>();
         public List<EventTile> EventTiles { get; set; } = new List<EventTile>();
         public List<InteractiveTile> InteractiveTiles { get; set; } = new List<InteractiveTile>();
