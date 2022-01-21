@@ -1,5 +1,6 @@
 ﻿using BetterBuildings.Framework.Models.ContentPack;
 using BetterBuildings.Framework.Models.Events;
+using BetterBuildings.Framework.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Object = StardewValley.Object;
 
 namespace BetterBuildings.Framework.Models.General.Tiles
 {
@@ -16,6 +18,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
     {
         Input,
         Output,
+        Storage, // May be same as output?
         Warp,
         Message,
         PlaySound,
@@ -25,6 +28,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
     public class InteractiveTile : TileBase
     {
         public ShopOpenEvent ShopOpen { get; set; }
+        public InputEvent Input { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
         {
@@ -37,6 +41,36 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                 else if (ShopOpen.Type is StoreType.STF && BetterBuildings.apiManager.GetShopTileFrameworkApi() is not null)
                 {
                     BetterBuildings.apiManager.GetShopTileFrameworkApi().OpenItemShop(ShopOpen.Name);
+                }
+            }
+            if (Input is not null)
+            {
+                var requiredItems = InventoryTools.GetActualRequiredItems(Input.RequiredItems);
+                if (who.ActiveObject is not null && !InventoryTools.IsHoldingRequiredItem(requiredItems))
+                {
+                    if (Input.BadInputMessage is not null)
+                    {
+                        Game1.addHUDMessage(new HUDMessage(Input.BadInputMessage.Text, (int)Input.BadInputMessage.Icon + 1));
+                    }
+                }
+                else if (InventoryTools.IsHoldingRequiredItem(requiredItems) && InventoryTools.HasRequiredItemsInInventory(requiredItems))
+                {
+                    foreach (Object item in requiredItems)
+                    {
+                        InventoryTools.ConsumeItemBasedOnQuantityAndQuality(item, item.Stack, item.Quality);
+                    }
+
+                    // TODO: Start production for the called customBuilding
+                }
+                else
+                {
+                    var missingItemsDialogue = new DialogueEvent() { Text = "The building requires the following items:^" };
+                    foreach (Object item in requiredItems)
+                    {
+                        missingItemsDialogue.Text += String.Concat("- ", item.Name, " x", item.Stack);
+                    }
+
+                    Game1.activeClickableMenu = new DialogueBox(missingItemsDialogue.Text);
                 }
             }
         }
