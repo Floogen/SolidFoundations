@@ -2,14 +2,17 @@
 using BetterBuildings.Framework.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace BetterBuildings.Framework.Models.ContentPack
 {
@@ -19,6 +22,12 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public string Id { get; set; }
         public string LocationName { get; set; }
         public TileLocation TileLocation { get { return new TileLocation() { X = base.tileX.Value, Y = base.tileY.Value }; } }
+
+        [XmlElement("input")]
+        public readonly NetRef<Chest> InputStorage = new NetRef<Chest>();
+
+        [XmlElement("output")]
+        public readonly NetRef<Chest> OutputStorage = new NetRef<Chest>();
 
         internal bool IsUsingEventOverride { get; set; }
         internal bool DrawOverPlayer { get; set; }
@@ -112,6 +121,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
 
             return null;
+        }
+
+        public void StartProduction()
+        {
+
         }
 
         private bool AttemptTunnelDoorTeleport(TileLocation triggeredTile)

@@ -59,10 +59,18 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                 {
                     foreach (Object item in requiredItems)
                     {
+                        // Consume the item from the player's inventory
                         InventoryTools.ConsumeItemBasedOnQuantityAndQuality(item, item.Stack, item.Quality);
+
+                        // Add the consumed items to the building's input chest
+                        customBuilding.InputStorage.Value.addItem(item);
                     }
 
-                    // TODO: Start production for the called customBuilding
+                    // Start production if this input has it enabled
+                    if (Input.StartProduction)
+                    {
+                        customBuilding.StartProduction();
+                    }
                 }
                 else
                 {
