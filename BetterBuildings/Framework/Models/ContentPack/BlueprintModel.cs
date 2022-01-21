@@ -31,25 +31,10 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             var blueprint = new GenericBlueprint(DaysToConstruct, RequiredMoney, NameOfBuildingToUpgrade, AssociatedBuildingModel)
             {
-                RequiredItems = GetActualRequiredItems()
+                RequiredItems = InventoryTools.GetActualRequiredItems(this.RequiredItems)
             };
 
             return blueprint;
-        }
-
-        public List<Item> GetActualRequiredItems()
-        {
-            List<Item> items = new List<Item>();
-            foreach (var genericItem in RequiredItems)
-            {
-                KeyValuePair<int, string>? gameObjectData = Game1.objectInformation.FirstOrDefault(pair => pair.Value.Split('/')[0].Equals(genericItem.Name, StringComparison.OrdinalIgnoreCase));
-                if (gameObjectData is not null)
-                {
-                    items.Add(new Object((int)(gameObjectData?.Key), genericItem.Quantity) { Quality = genericItem.GetActualQuality() });
-                }
-            }
-
-            return items;
         }
     }
 }

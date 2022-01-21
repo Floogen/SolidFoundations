@@ -44,7 +44,7 @@ namespace BetterBuildings.Framework.Patches.Outliers
 
             foreach (Object item in genericBlueprint.RequiredItems)
             {
-                ConsomeItemBasedOnQuantityAndQuality(item, item.Stack, item.Quality);
+                InventoryTools.ConsumeItemBasedOnQuantityAndQuality(item, item.Stack, item.Quality);
             }
             Game1.player.Money -= genericBlueprint.moneyRequired;
 
@@ -58,56 +58,13 @@ namespace BetterBuildings.Framework.Patches.Outliers
                 return true;
             }
 
-            __result = true;
-            foreach (Object item in genericBlueprint.RequiredItems)
-            {
-                if (!HasInventoryItemWithRequiredQuantityAndQuality(item, item.Stack, item.Quality))
-                {
-                    __result = false;
-                }
-            }
+            __result = InventoryTools.HasRequiredItemsInInventory(genericBlueprint.RequiredItems);
             if (Game1.player.Money < genericBlueprint.moneyRequired)
             {
                 __result = false;
             }
 
             return false;
-        }
-
-        private static bool HasInventoryItemWithRequiredQuantityAndQuality(Item targetItem, int quantity, int quality = -1)
-        {
-            foreach (var item in Game1.player.Items.Where(i => i is not null && i.Name.Equals(targetItem.Name)))
-            {
-                if (item.Stack >= quantity)
-                {
-                    if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private static void ConsomeItemBasedOnQuantityAndQuality(Item targetItem, int quantity, int quality = -1)
-        {
-            foreach (var item in Game1.player.Items.Where(i => i is not null && i.Name.Equals(targetItem.Name)).ToList())
-            {
-                if (item.Stack >= quantity)
-                {
-                    if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
-                    {
-                        item.Stack -= quantity;
-                        if (item.Stack <= 0)
-                        {
-                            Game1.player.Items.Remove(item);
-                        }
-
-                        return;
-                    }
-                }
-            }
         }
 
         private static bool BluePrintPrefix(BluePrint __instance, string name)
