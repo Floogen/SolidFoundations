@@ -21,5 +21,20 @@ namespace BetterBuildings.Framework.Models.General.Tiles
 
             return Grid;
         }
+
+        public List<TileLocation> GetActualTiles()
+        {
+            var tiles = new List<TileLocation>();
+            if (Tile is not null)
+            {
+                tiles.Add(Tile);
+            }
+            else if (Grid is not null)
+            {
+                tiles = Grid.GetTiles();
+            }
+
+            return tiles;
+        }
     }
 }

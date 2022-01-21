@@ -65,7 +65,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             _walkableTileGroup = new BoundaryCollective();
             foreach (var walkableTile in Model.WalkableTiles)
             {
-                foreach (var tile in walkableTile.GetActualGrid().GetTiles())
+                foreach (var tile in walkableTile.GetActualTiles())
                 {
                     var adjustedTile = tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
                     _walkableTileGroup.Add(new Rectangle(adjustedTile.X * 64, adjustedTile.Y * 64, 64, 64));
@@ -154,12 +154,15 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             foreach (var eventTile in Model.EventTiles)
             {
-                if (base.tileX.Value + eventTile.Tile.X == triggeredTile.X && base.tileY.Value + eventTile.Tile.Y == triggeredTile.Y)
+                foreach (var tile in eventTile.GetActualTiles())
                 {
-                    // Trigger the tile
-                    eventTile.Trigger(this, Game1.player);
+                    if (base.tileX.Value + tile.X == triggeredTile.X && base.tileY.Value + tile.Y == triggeredTile.Y)
+                    {
+                        // Trigger the tile
+                        eventTile.Trigger(this, Game1.player);
 
-                    return true;
+                        return true;
+                    }
                 }
             }
 
