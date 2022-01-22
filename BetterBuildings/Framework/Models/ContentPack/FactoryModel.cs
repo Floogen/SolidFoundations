@@ -16,6 +16,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
     {
         public List<RecipeModel> Recipes { get; set; } = new List<RecipeModel>();
 
+        public bool HasEligibleRecipe(List<Item> currentItems)
+        {
+            return GetEligibleRecipe(currentItems) is not null ? true : false;
+        }
+
         public RecipeModel GetEligibleRecipe(List<Item> currentItems)
         {
             foreach (var recipe in Recipes)

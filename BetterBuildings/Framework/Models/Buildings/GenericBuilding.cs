@@ -197,6 +197,12 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             CurrentRecipe = null;
             MinutesUntilProductionFinishes = 0;
+
+            // Attempt to start production again, if eligible
+            if (Model.Factory is not null && Model.Factory.HasEligibleRecipe(InputStorage.Value.items.ToList()))
+            {
+                StartProduction();
+            }
         }
 
         private bool AttemptTunnelDoorTeleport(TileLocation triggeredTile)
