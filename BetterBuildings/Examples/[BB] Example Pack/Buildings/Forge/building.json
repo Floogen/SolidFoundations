@@ -13,40 +13,62 @@
     "Height": 10,
     "Width": 10
   },
-  "IdleAnimation": [
-    {
-      "Frame": 0,
-      "Duration": 100
-    },
-    {
-      "Frame": 1,
-      "Duration": 100
-    },
-    {
-      "Frame": 2,
-      "Duration": 100
-    },
-    {
-      "Frame": 3,
-      "Duration": 100
-    }
-  ],
-  "Effects": [
-    {
-      "Name": "SmokePuff",
-      "Tile": {
-        "X": 3,
-        "Y": 1
+  "IdleAnimation": {
+    "Sequences": [
+      {
+        "Frame": 0,
+        "Duration": 100
+      },
+      {
+        "Frame": 1,
+        "Duration": 100
+      },
+      {
+        "Frame": 2,
+        "Duration": 100
+      },
+      {
+        "Frame": 3,
+        "Duration": 100
       }
-    },
-    {
-      "Name": "SmokePuff",
-      "Tile": {
-        "X": 6,
-        "Y": 1
+    ]
+  },
+  "WorkingAnimation": {
+    "Sequences": [
+      {
+        "Frame": 0,
+        "Duration": 100
+      },
+      {
+        "Frame": 1,
+        "Duration": 100
+      },
+      {
+        "Frame": 2,
+        "Duration": 100
+      },
+      {
+        "Frame": 3,
+        "Duration": 100
       }
-    }
-  ],
+    ],
+    "Effects": [
+      {
+        "Name": "SmokePuff",
+        "Tile": {
+          "X": 3,
+          "Y": 1
+        }
+      },
+      {
+        "Name": "SmokePuff",
+        "Tile": {
+          "X": 6,
+          "Y": 1
+        }
+      }
+    ]
+  },
   "InteractiveTiles": [
     {
       "Input": {

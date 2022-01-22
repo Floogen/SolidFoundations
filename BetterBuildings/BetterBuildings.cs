@@ -408,18 +408,21 @@ namespace BetterBuildings
                     buildingModel.EstablishBlueprint();
 
                     // Load in any effects
-                    foreach (GenericEffect effectData in buildingModel.Effects.ToList())
+                    foreach (AnimationModel animation in buildingModel.GetAnimations())
                     {
-                        var effectModel = effectManager.GetSpecificEffectModel<EffectModel>(String.Concat(String.Concat(buildingModel.Owner, "/", "/", effectData.Name)));
-                        if (effectModel is null)
+                        foreach (GenericEffect effectData in animation.Effects.ToList())
                         {
-                            Monitor.Log($"The building {buildingModel.Name} attempted to load an effect ({effectData.Name}) that doesn't exist under the Effects folder from {contentPack.Manifest.Name}", LogLevel.Warn);
-                            buildingModel.Effects.Remove(effectData);
+                            var effectModel = effectManager.GetSpecificEffectModel<EffectModel>(String.Concat(String.Concat(buildingModel.Owner, "/", "/", effectData.Name)));
+                            if (effectModel is null)
+                            {
+                                Monitor.Log($"The building {buildingModel.Name} attempted to load an effect ({effectData.Name}) that doesn't exist under the Effects folder from {contentPack.Manifest.Name}", LogLevel.Warn);
+                                animation.Effects.Remove(effectData);
 
-                            continue;
+                                continue;
+                            }
+
+                            effectData.Model = effectModel;
                         }
-
-                        effectData.Model = effectModel;
                     }
 
                     // Load in the factory, if given

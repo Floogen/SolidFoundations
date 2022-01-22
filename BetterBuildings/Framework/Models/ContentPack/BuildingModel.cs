@@ -38,8 +38,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         public Fade Fade { get; set; } = new Fade();
 
         // Visual related
-        public List<TextureAnimation> IdleAnimation { get; set; } = new List<TextureAnimation>();
-        public List<GenericEffect> Effects { get; set; } = new List<GenericEffect>();
+        public AnimationModel IdleAnimation { get; set; } = new AnimationModel();
+        public AnimationModel WorkingAnimation { get; set; } = new AnimationModel();
 
         // Tile related
         public List<WalkableTile> WalkableTiles { get; set; } = new List<WalkableTile>();
@@ -92,6 +92,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
             building.LocationName = gamelocation.NameOrUniqueName;
 
             return building;
+        }
+
+        internal List<AnimationModel> GetAnimations()
+        {
+            return new List<AnimationModel>() { IdleAnimation, WorkingAnimation };
         }
 
         public override string ToString()

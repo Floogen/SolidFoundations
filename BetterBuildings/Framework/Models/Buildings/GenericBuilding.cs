@@ -33,6 +33,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         internal bool IsUsingEventOverride { get; set; }
         internal bool DrawOverPlayer { get; set; }
         internal float? AlphaOverride { get; set; }
+        internal bool IsWorking { get; set; }
         internal int MinutesUntilProductionFinishes { get; set; }
         internal RecipeModel CurrentRecipe { get; set; }
 
@@ -43,7 +44,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         private bool _lavaTileFlip;
         private float _lavaPosition;
 
-        private int _idleAnimationTimer;
+        private int _animationTimer;
         private int _lastAnimationIndex;
 
 
@@ -131,6 +132,16 @@ namespace BetterBuildings.Framework.Models.ContentPack
             return null;
         }
 
+        public AnimationModel GetActiveAnimation()
+        {
+            if (IsWorking && Model.WorkingAnimation.Sequences.Count > 0)
+            {
+                return Model.WorkingAnimation;
+            }
+
+            return Model.IdleAnimation;
+        }
+
         public void StartProduction()
         {
             if (Model.Factory is null)
@@ -154,15 +165,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
                 if (recipe.ProcessingTimeInGameMinutes == 0 && !recipe.FinishAtDayStart)
                 {
-                    var outputItems = InventoryTools.GetActualRequiredItems(recipe.OutputItems);
-                    if (outputItems.Count == 1 && Game1.player.couldInventoryAcceptThisItem(outputItems.First()))
-                    {
-                        Game1.player.addItemToInventory(outputItems.First());
-                    }
-                    else
-                    {
-                        Game1.activeClickableMenu = new ItemGrabMenu(outputItems, null);
-                    }
+                    FinishProduction();
                 }
                 else
                 {
@@ -175,6 +178,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
                     {
                         MinutesUntilProductionFinishes = int.MaxValue;
                     }
+
+                    IsWorking = true;
                 }
             }
         }
@@ -195,8 +200,17 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
             }
 
+            // Clear production related properties
             CurrentRecipe = null;
             MinutesUntilProductionFinishes = 0;
+
+            // Reset animation related properties
+            IsWorking = false;
+            if (Model.WorkingAnimation.Sequences.Count > 0)
+            {
+                _animationTimer = 0;
+                _lastAnimationIndex = 0;
+            }
 
             // Attempt to start production again, if eligible
             if (Model.Factory is not null && Model.Factory.HasEligibleRecipe(InputStorage.Value.items.ToList()))
@@ -399,15 +413,15 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
 
             // Handle updating any building related animations
-            _idleAnimationTimer -= time.ElapsedGameTime.Milliseconds;
-            if (Model.IdleAnimation.Count > 0 && _idleAnimationTimer <= 0)
+            _animationTimer -= time.ElapsedGameTime.Milliseconds;
+            if (GetActiveAnimation().Sequences.Count > 0 && _animationTimer <= 0)
             {
-                _lastAnimationIndex = Model.IdleAnimation.Count <= _lastAnimationIndex + 1 ? 0 : _lastAnimationIndex + 1;
-                _idleAnimationTimer = Model.IdleAnimation[_lastAnimationIndex].Duration;
+                _lastAnimationIndex = GetActiveAnimation().Sequences.Count <= _lastAnimationIndex + 1 ? 0 : _lastAnimationIndex + 1;
+                _animationTimer = GetActiveAnimation().Sequences[_lastAnimationIndex].Duration;
             }
 
             // Handle updating any effect related animations
-            foreach (var effect in Model.Effects)
+            foreach (var effect in GetActiveAnimation().Effects)
             {
                 effect.UpdateTimer(time.ElapsedGameTime.Milliseconds);
             }
@@ -444,10 +458,10 @@ namespace BetterBuildings.Framework.Models.ContentPack
             int width = Model.TextureDimensions.Width * 16;
             int height = Model.TextureDimensions.Height * 16;
 
-            if (Model.IdleAnimation.Count > 0)
+            if (GetActiveAnimation().Sequences.Count > 0)
             {
-                x = Model.IdleAnimation[_lastAnimationIndex].Frame * width;
-                y = Model.IdleAnimation[_lastAnimationIndex].RowOffset * height;
+                x = GetActiveAnimation().Sequences[_lastAnimationIndex].Frame * width;
+                y = GetActiveAnimation().Sequences[_lastAnimationIndex].RowOffset * height;
             }
 
             return new Rectangle(x, y, width, height);
@@ -535,7 +549,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), this.getSourceRect(), base.color.Value * base.alpha.Value, 0f, new Vector2(0f, Model.TextureDimensions.Height * 16), 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (DrawOverPlayer ? 8000f : 9500f));
 
                 // Draw effects
-                foreach (var effect in Model.Effects.Where(e => e.Model is not null))
+                foreach (var effect in GetActiveAnimation().Effects.Where(e => e.Model is not null))
                 {
                     var adjustedTile = effect.Tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
                     b.Draw(effect.Model.Texture, Game1.GlobalToLocal(Game1.viewport, new Vector2((adjustedTile.X + effect.OffsetInPixels.Width) * 64, (adjustedTile.Y + effect.OffsetInPixels.Height) * 64)), effect.GetSourceRectangle(), effect.ActualColor, 0f, Vector2.Zero, 4f, SpriteEffects.None, 10000f);
