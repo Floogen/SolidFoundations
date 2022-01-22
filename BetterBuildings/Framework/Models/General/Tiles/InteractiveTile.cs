@@ -92,7 +92,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                     }
 
                     // Start production if this input has it enabled
-                    if (Input.StartProduction)
+                    if (Input.StartProduction && !customBuilding.IsWorking)
                     {
                         customBuilding.StartProduction();
                     }
