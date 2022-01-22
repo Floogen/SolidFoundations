@@ -1,6 +1,7 @@
 {
   "Recipes": [
     {
+      "ProcessingTimeInGameMinutes": 10,
       "InputItems": [
         {
           "Name": "Cloth",

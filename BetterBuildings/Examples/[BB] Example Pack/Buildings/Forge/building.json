@@ -31,6 +31,15 @@
         "Frame": 3,
         "Duration": 100
       }
+    ],
+    "Effects": [
+      {
+        "Name": "ForgeChest",
+        "Tile": {
+          "X": 5,
+          "Y": 3
+        }
+      }
     ]
   },
   "WorkingAnimation": {
@@ -53,6 +62,13 @@
       }
     ],
     "Effects": [
+      {
+        "Name": "ForgeChest",
+        "Tile": {
+          "X": 5,
+          "Y": 3
+        }
+      },
       {
         "Name": "SmokePuff",
         "Tile": {

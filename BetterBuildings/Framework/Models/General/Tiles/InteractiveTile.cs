@@ -30,6 +30,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         public ShopOpenEvent ShopOpen { get; set; }
         public InputEvent Input { get; set; }
         public OutputEvent Output { get; set; }
+        public StorageEvent Storage { get; set; }
         public DialogueEvent Dialogue { get; set; }
         public MessageEvent Message { get; set; }
 
@@ -105,6 +106,17 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                     }
 
                     Game1.activeClickableMenu = new DialogueBox(missingItemsDialogue.Text);
+                }
+            }
+            if (Storage is not null)
+            {
+                if (Storage.Type is StorageType.Input)
+                {
+                    customBuilding.InputStorage.Value.ShowMenu();
+                }
+                else
+                {
+                    customBuilding.OutputStorage.Value.ShowMenu();
                 }
             }
             if (Dialogue is not null)
