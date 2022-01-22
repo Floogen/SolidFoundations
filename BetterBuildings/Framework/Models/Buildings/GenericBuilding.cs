@@ -33,6 +33,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
         internal bool IsUsingEventOverride { get; set; }
         internal bool DrawOverPlayer { get; set; }
         internal float? AlphaOverride { get; set; }
+        internal int MinutesUntilProductionFinishes { get; set; }
+        internal RecipeModel CurrentRecipe { get; set; }
 
         private BoundaryCollective _walkableTileGroup;
         private BoundaryCollective _buildingTileGroup;
@@ -164,16 +166,37 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 }
                 else
                 {
-                    // TODO: Enable timer for when to finish production, unless recipe.FinishAtDayStart is given
-                    foreach (var item in InventoryTools.GetActualRequiredItems(recipe.OutputItems))
+                    // Store the recipe
+                    CurrentRecipe = recipe;
+
+                    // Set the in-game minutes needed to produce this item
+                    MinutesUntilProductionFinishes = recipe.ProcessingTimeInGameMinutes;
+                    if (recipe.FinishAtDayStart)
                     {
-                        if (Utility.canItemBeAddedToThisInventoryList(item, OutputStorage.Value.items, 36))
-                        {
-                            _ = Utility.addItemToThisInventoryList(item, OutputStorage.Value.items, 36);
-                        }
+                        MinutesUntilProductionFinishes = int.MaxValue;
                     }
                 }
             }
+        }
+
+        public void FinishProduction()
+        {
+            if (CurrentRecipe is null)
+            {
+                return;
+            }
+
+            // Place the output recipe items into the output chest
+            foreach (var item in InventoryTools.GetActualRequiredItems(CurrentRecipe.OutputItems))
+            {
+                if (Utility.canItemBeAddedToThisInventoryList(item, OutputStorage.Value.items, 36))
+                {
+                    _ = Utility.addItemToThisInventoryList(item, OutputStorage.Value.items, 36);
+                }
+            }
+
+            CurrentRecipe = null;
+            MinutesUntilProductionFinishes = 0;
         }
 
         private bool AttemptTunnelDoorTeleport(TileLocation triggeredTile)
@@ -243,7 +266,10 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             base.dayUpdate(dayOfMonth);
 
-            // TODO: Do production logic here
+            if (CurrentRecipe is not null && CurrentRecipe.FinishAtDayStart)
+            {
+                FinishProduction();
+            }
         }
 
         public override bool isActionableTile(int xTile, int yTile, Farmer who)

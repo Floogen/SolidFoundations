@@ -48,6 +48,22 @@ namespace BetterBuildings.Framework.Utilities
             return false;
         }
 
+        public static bool HasRoomForItems(List<Item> RequiredItems)
+        {
+            int freeSpace = Game1.player.freeSpotsInInventory();
+            foreach (var item in RequiredItems)
+            {
+                freeSpace -= 1;
+
+                if (freeSpace < 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static bool HasRequiredItemsInInventory(List<Item> RequiredItems)
         {
             bool hasEverythingRequired = true;

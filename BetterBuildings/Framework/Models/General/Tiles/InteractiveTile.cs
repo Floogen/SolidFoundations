@@ -18,7 +18,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
     {
         Input,
         Output,
-        Storage, // May be same as output?
+        Storage, // Can accept Input or Output as parameter, allows player to see chest storage
         Warp,
         Message,
         PlaySound,
@@ -29,6 +29,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
     {
         public ShopOpenEvent ShopOpen { get; set; }
         public InputEvent Input { get; set; }
+        public OutputEvent Output { get; set; }
         public DialogueEvent Dialogue { get; set; }
         public MessageEvent Message { get; set; }
 
@@ -38,14 +39,37 @@ namespace BetterBuildings.Framework.Models.General.Tiles
             {
                 if (ShopOpen.Type is StoreType.Vanilla)
                 {
-                    HandleVanillaShopMenu(ShopOpen.Name);
+                    HandleVanillaShopMenu(ShopOpen.Name, who);
                 }
                 else if (ShopOpen.Type is StoreType.STF && BetterBuildings.apiManager.GetShopTileFrameworkApi() is not null)
                 {
                     BetterBuildings.apiManager.GetShopTileFrameworkApi().OpenItemShop(ShopOpen.Name);
                 }
             }
-            if (Input is not null)
+
+            // Input and Output tiles can be on same tile, however Output has priority when the building has items left OutputStorage
+            if (Output is not null && customBuilding.OutputStorage.Value.items.Count(i => i is not null) > 0)
+            {
+                // Give all possible output items to the player
+                if (Output.AlwaysDisplayMenu || who.isInventoryFull() || !InventoryTools.HasRoomForItems(customBuilding.OutputStorage.Value.items.ToList()))
+                {
+                    customBuilding.OutputStorage.Value.ShowMenu();
+                }
+                else
+                {
+                    foreach (var item in customBuilding.OutputStorage.Value.items.ToList())
+                    {
+                        who.addItemToInventory(item);
+                        customBuilding.OutputStorage.Value.items.Remove(item);
+                    }
+                }
+
+                if (Output.Message is not null)
+                {
+                    Game1.addHUDMessage(new HUDMessage(Output.Message.Text, (int)Output.Message.Icon + 1));
+                }
+            }
+            else if (Input is not null)
             {
                 var requiredItems = InventoryTools.GetActualRequiredItems(Input.RequiredItems);
                 if (who.ActiveObject is not null && !InventoryTools.IsHoldingRequiredItem(requiredItems))
@@ -94,7 +118,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         }
 
         // Vanilla shop related
-        private void HandleVanillaShopMenu(string shopName)
+        private void HandleVanillaShopMenu(string shopName, Farmer who)
         {
             switch (shopName.ToLower())
             {
@@ -102,7 +126,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                     Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithStock(), 0, "Clint");
                     return;
                 case "desertmerchant":
-                    Game1.activeClickableMenu = new ShopMenu(Desert.getDesertMerchantTradeStock(Game1.player), 0, "DesertTrade", onDesertTraderPurchase);
+                    Game1.activeClickableMenu = new ShopMenu(Desert.getDesertMerchantTradeStock(who), 0, "DesertTrade", onDesertTraderPurchase);
                     return;
                 case "dwarf":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getDwarfShopStock(), 0, "Dwarf");
@@ -144,10 +168,10 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                     Game1.activeClickableMenu = new ShopMenu(Utility.getTravelingMerchantStock((int)((long)Game1.uniqueIDForThisGame + Game1.stats.DaysPlayed)), 0, "Traveler", Utility.onTravelingMerchantShopPurchase);
                     return;
                 case "toolupgrades":
-                    Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithUpgradeStock(Game1.player), 0, "ClintUpgrade");
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithUpgradeStock(who), 0, "ClintUpgrade");
                     return;
                 case "willy":
-                    Game1.activeClickableMenu = new ShopMenu(Utility.getFishShopStock(Game1.player), 0, "Willy");
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getFishShopStock(who), 0, "Willy");
                     return;
             }
         }
@@ -163,7 +187,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
 
         private bool onGenericPurchase(SynchronizedShopStock.SynchedShop synchedShop, ISalable item, Farmer who, int amount)
         {
-            Game1.player.team.synchronizedShopStock.OnItemPurchased(synchedShop, item, amount);
+            who.team.synchronizedShopStock.OnItemPurchased(synchedShop, item, amount);
             return false;
         }
     }

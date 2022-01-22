@@ -47,8 +47,7 @@ namespace BetterBuildings
             modHelper = helper;
             multiplayer = helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
 
-            // TODO: Implement the following building models: Functional (obelisk-like), Production (mill-like) and Enterable / Decoratable (shed-like)
-            // TODO: For functional, make API to allow hooking into functional buildings to allow for C# usage
+            // TODO: Implement API to allow hooking into functional buildings to allow for C# usage
 
             // Load managers
             apiManager = new ApiManager(monitor);
@@ -86,7 +85,29 @@ namespace BetterBuildings
             // Hook into the required events
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
             modHelper.Events.GameLoop.DayStarted += OnDayStarted;
+            modHelper.Events.GameLoop.TimeChanged += OnTimeChanged;
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
+        }
+
+        private void OnTimeChanged(object sender, TimeChangedEventArgs e)
+        {
+            // Go through each custom building and check if it is time to call FinishProduction
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
+            {
+                foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
+                {
+                    if (customBuilding.CurrentRecipe is null || customBuilding.CurrentRecipe.FinishAtDayStart)
+                    {
+                        continue;
+                    }
+
+                    customBuilding.MinutesUntilProductionFinishes -= 10;
+                    if (customBuilding.MinutesUntilProductionFinishes <= 0)
+                    {
+                        customBuilding.FinishProduction();
+                    }
+                }
+            }
         }
 
         private void OnDayStarted(object sender, DayStartedEventArgs e)
