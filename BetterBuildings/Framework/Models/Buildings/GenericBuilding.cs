@@ -158,9 +158,13 @@ namespace BetterBuildings.Framework.Models.ContentPack
             // Find the first recipe that matches the input items
             if (Model.Factory.GetEligibleRecipe(InputStorage.Value.items.ToList()) is RecipeModel recipe && recipe is not null)
             {
-                foreach (var item in InventoryTools.GetActualRequiredItems(recipe.InputItems))
+                var requiredItems = InventoryTools.GetActualRequiredItems(recipe.InputItems);
+                foreach (var item in InputStorage.Value.items.ToList())
                 {
-                    InputStorage.Value.items.Remove(item);
+                    if (InventoryTools.IsRequiredItem(item, requiredItems))
+                    {
+                        InputStorage.Value.items.Remove(item);
+                    }
                 }
 
                 if (recipe.ProcessingTimeInGameMinutes == 0 && !recipe.FinishAtDayStart)

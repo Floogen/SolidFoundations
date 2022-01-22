@@ -26,6 +26,27 @@ namespace BetterBuildings.Framework.Utilities
             return items;
         }
 
+        public static bool IsRequiredItem(Item targetItem, List<Item> RequiredItems)
+        {
+            if (targetItem is null)
+            {
+                return false;
+            }
+
+            foreach (Object requiredItem in RequiredItems)
+            {
+                if (requiredItem.Name.Equals(targetItem.Name) && targetItem.Stack >= requiredItem.Stack)
+                {
+                    if (requiredItem.Quality == -1 || (targetItem is Object itemObject && itemObject is not null && itemObject.Quality >= (int)requiredItem.Quality))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static bool IsHoldingRequiredItem(List<Item> RequiredItems)
         {
             if (Game1.player.ActiveObject is null)
