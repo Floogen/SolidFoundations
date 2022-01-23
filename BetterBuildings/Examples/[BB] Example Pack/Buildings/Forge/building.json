@@ -181,12 +181,6 @@
           }
         ]
       },
-      "Output": {
-        "AlwaysDisplayMenu": false,
-        "Message": {
-          "Text": "Retrieved items from forge"
-        }
-      },
       "Grid": {
         "StartingTile": {
           "X": 4,
