@@ -36,9 +36,52 @@
       {
         "Name": "ForgeChest",
         "Tile": {
-          "X": 5,
-          "Y": 3
-        }
+          "X": 2,
+          "Y": 5
+        },
+        "AnimationOverride": [
+          {
+            "Frame": 0,
+            "Duration": 100
+          },
+          {
+            "Frame": 2,
+            "Duration": 100,
+            "OverrideStartingIndex": true,
+            "Conditions": [
+              {
+                "Name": "InputItemCount",
+                "Operator": "GreaterThan",
+                "Value": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Name": "ForgeChest",
+        "Tile": {
+          "X": 7,
+          "Y": 5
+        },
+        "AnimationOverride": [
+          {
+            "Frame": 0,
+            "Duration": 100
+          },
+          {
+            "Frame": 1,
+            "Duration": 100,
+            "OverrideStartingIndex": true,
+            "Conditions": [
+              {
+                "Name": "OutputItemCount",
+                "Operator": "GreaterThan",
+                "Value": 0
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -65,9 +108,52 @@
       {
         "Name": "ForgeChest",
         "Tile": {
-          "X": 5,
-          "Y": 3
-        }
+          "X": 2,
+          "Y": 5
+        },
+        "AnimationOverride": [
+          {
+            "Frame": 0,
+            "Duration": 100
+          },
+          {
+            "Frame": 2,
+            "Duration": 100,
+            "OverrideStartingIndex": true,
+            "Conditions": [
+              {
+                "Name": "InputItemCount",
+                "Operator": "GreaterThan",
+                "Value": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Name": "ForgeChest",
+        "Tile": {
+          "X": 7,
+          "Y": 5
+        },
+        "AnimationOverride": [
+          {
+            "Frame": 0,
+            "Duration": 100
+          },
+          {
+            "Frame": 1,
+            "Duration": 100,
+            "OverrideStartingIndex": true,
+            "Conditions": [
+              {
+                "Name": "OutputItemCount",
+                "Operator": "GreaterThan",
+                "Value": 0
+              }
+            ]
+          }
+        ]
       },
       {
         "Name": "SmokePuff",
@@ -90,7 +176,7 @@
       "Input": {
         "RequiredItems": [
           {
-            "Name": "Cloth",
+            "Name": "Wood",
             "Quantity": 25
           }
         ]
@@ -108,6 +194,24 @@
         },
         "Height": 1,
         "Width": 2
+      }
+    },
+    {
+      "Storage": {
+        "Type": "Input"
+      },
+      "Tile": {
+        "X": 2,
+        "Y": 5
+      }
+    },
+    {
+      "Storage": {
+        "Type": "Output"
+      },
+      "Tile": {
+        "X": 7,
+        "Y": 5
       }
     }
   ],
@@ -148,12 +252,6 @@
     {
       "Tile": {
         "X": 2,
-        "Y": 5
-      }
-    },
-    {
-      "Tile": {
-        "X": 7,
         "Y": 5
       }
     }
