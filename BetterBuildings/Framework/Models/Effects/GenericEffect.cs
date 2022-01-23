@@ -20,6 +20,10 @@ namespace BetterBuildings.Framework.Models.Effects
         public string Name { get; set; }
         public TileLocation Tile { get; set; } = new TileLocation();
         public Dimensions OffsetInPixels { get; set; } = new Dimensions();
+        public List<Condition> Conditions { get; set; }
+        public bool Reverse { get; set; } // TODO: Implement the Reverse property
+        public bool StopAtFinish { get; set; } // TODO: Implement the StopAtFinish property
+        public bool DespawnAtFinish { get; set; } // TODO: Implement the DespawnAtFinish property
         internal Color ActualColor { get; set; } = Microsoft.Xna.Framework.Color.White;
         public int[] Color { set { ActualColor = GetColor(value); } }
 
@@ -54,6 +58,24 @@ namespace BetterBuildings.Framework.Models.Effects
             }
 
             return new Rectangle(x, y, width, height);
+        }
+
+        public bool PassesAllConditions(GenericBuilding customBuilding)
+        {
+            if (Conditions is null)
+            {
+                return true;
+            }
+
+            foreach (var condition in Conditions)
+            {
+                if (!condition.IsValid(customBuilding))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private int GetColorIndex(int[] colorArray, int position)
