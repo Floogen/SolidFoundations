@@ -45,9 +45,6 @@ namespace BetterBuildings.Framework.Models.ContentPack
         private bool _lavaTileFlip;
         private float _lavaPosition;
 
-        private int _animationTimer;
-        private int _lastAnimationIndex;
-
 
         public GenericBuilding() : base()
         {
@@ -213,8 +210,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             IsWorking = false;
             if (Model.WorkingAnimation.Sequences.Count > 0)
             {
-                _animationTimer = 0;
-                _lastAnimationIndex = 0;
+                Model.WorkingAnimation.Reset();
             }
 
             // Attempt to start production again, if eligible
@@ -418,17 +414,15 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
 
             // Handle updating any building related animations
-            _animationTimer -= time.ElapsedGameTime.Milliseconds;
-            if (GetActiveAnimation().Sequences.Count > 0 && _animationTimer <= 0)
+            if (GetActiveAnimation().Sequences.Count > 0)
             {
-                _lastAnimationIndex = GetActiveAnimation().Sequences.Count <= _lastAnimationIndex + 1 ? 0 : _lastAnimationIndex + 1;
-                _animationTimer = GetActiveAnimation().Sequences[_lastAnimationIndex].Duration;
+                GetActiveAnimation().UpdateTimer(this, time.ElapsedGameTime.Milliseconds);
             }
 
             // Handle updating any effect related animations
             foreach (var effect in GetActiveAnimation().Effects)
             {
-                effect.UpdateTimer(time.ElapsedGameTime.Milliseconds);
+                effect.UpdateTimer(this, time.ElapsedGameTime.Milliseconds);
             }
         }
 
@@ -465,8 +459,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
             if (GetActiveAnimation().Sequences.Count > 0)
             {
-                x = GetActiveAnimation().Sequences[_lastAnimationIndex].Frame * width;
-                y = GetActiveAnimation().Sequences[_lastAnimationIndex].RowOffset * height;
+                x = GetActiveAnimation().GetCurrentTextureAnimation().Frame * width;
+                y = GetActiveAnimation().GetCurrentTextureAnimation().RowOffset * height;
             }
 
             return new Rectangle(x, y, width, height);

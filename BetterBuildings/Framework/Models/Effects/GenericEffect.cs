@@ -20,6 +20,7 @@ namespace BetterBuildings.Framework.Models.Effects
         public string Name { get; set; }
         public TileLocation Tile { get; set; } = new TileLocation();
         public Dimensions OffsetInPixels { get; set; } = new Dimensions();
+        public List<TextureAnimation> AnimationOverride { get; set; }
         public List<Condition> Conditions { get; set; }
         public bool Reverse { get; set; } // TODO: Implement the Reverse property
         public bool StopAtFinish { get; set; } // TODO: Implement the StopAtFinish property
@@ -31,17 +32,17 @@ namespace BetterBuildings.Framework.Models.Effects
 
         private int _animationTimer { get; set; }
         private int _animationIndex { get; set; }
+        private int _animationStartingIndex { get; set; }
 
 
-        public void UpdateTimer(int milliseconds)
+        public List<TextureAnimation> GetAnimations()
         {
-            _animationTimer -= milliseconds;
-
-            if (Model.Animation.Count > 0 && _animationTimer <= 0)
+            if (AnimationOverride is null || AnimationOverride.Count == 0)
             {
-                _animationIndex = Model.Animation.Count <= _animationIndex + 1 ? 0 : _animationIndex + 1;
-                _animationTimer = Model.Animation[_animationIndex].Duration;
+                return Model.Animation;
             }
+
+            return AnimationOverride;
         }
 
         public Rectangle GetSourceRectangle()
@@ -51,13 +52,46 @@ namespace BetterBuildings.Framework.Models.Effects
             int width = Model.TextureDimensions.Width * 16;
             int height = Model.TextureDimensions.Height * 16;
 
-            if (Model.Animation.Count > 0)
+            if (GetAnimations().Count > 0)
             {
-                x = Model.Animation[_animationIndex].Frame * width;
-                y = Model.Animation[_animationIndex].RowOffset * height;
+                x = GetAnimations()[_animationIndex].Frame * width;
+                y = GetAnimations()[_animationIndex].RowOffset * height;
             }
 
             return new Rectangle(x, y, width, height);
+        }
+
+        public void UpdateTimer(GenericBuilding customBuilding, int milliseconds)
+        {
+            _animationTimer -= milliseconds;
+
+            if (GetAnimations().Count > 0 && _animationTimer <= 0)
+            {
+                UpdateAnimationIndex(customBuilding);
+                _animationTimer = GetAnimations()[_animationIndex].Duration;
+            }
+        }
+
+        public void UpdateAnimationIndex(GenericBuilding customBuilding, bool hasDoneFullLoop = false)
+        {
+            _animationIndex = GetAnimations().Count <= _animationIndex + 1 ? _animationStartingIndex : _animationIndex + 1;
+
+            var passedConditions = GetAnimations()[_animationIndex].PassesAllConditions(customBuilding);
+            if (GetAnimations()[_animationIndex].OverrideStartingIndex)
+            {
+                _animationStartingIndex = _animationIndex;
+            }
+            _animationStartingIndex = passedConditions is false && _animationIndex == _animationStartingIndex ? 0 : _animationStartingIndex;
+
+            if (!passedConditions && (_animationIndex > _animationStartingIndex || hasDoneFullLoop is false))
+            {
+                if (_animationIndex == _animationStartingIndex)
+                {
+                    hasDoneFullLoop = true;
+                }
+
+                UpdateAnimationIndex(customBuilding, hasDoneFullLoop);
+            }
         }
 
         public bool PassesAllConditions(GenericBuilding customBuilding)

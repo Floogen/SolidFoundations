@@ -47,6 +47,10 @@ namespace BetterBuildings.Framework.Models.General
                     return customBuilding.InputStorage.Value.items.Any(i => IsValid(i.Name));
                 case Type.InputItemCount:
                     return IsValid(customBuilding.InputStorage.Value.items.Count(i => i is not null));
+                case Type.OutputItemNames:
+                    return customBuilding.OutputStorage.Value.items.Any(i => IsValid(i.Name));
+                case Type.OutputItemCount:
+                    return IsValid(customBuilding.OutputStorage.Value.items.Count(i => i is not null));
             }
 
             return false;
