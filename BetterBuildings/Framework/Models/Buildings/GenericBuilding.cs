@@ -420,7 +420,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
 
             // Handle updating any effect related animations
-            foreach (var effect in GetActiveAnimation().Effects)
+            foreach (var effect in GetActiveAnimation().Effects.Where(e => !e.HasFinished()))
             {
                 effect.UpdateTimer(this, time.ElapsedGameTime.Milliseconds);
             }
@@ -548,7 +548,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 b.Draw(base.texture.Value, Game1.GlobalToLocal(Game1.viewport, new Vector2(base.tileX.Value * 64, base.tileY.Value * 64 + base.tilesHigh.Value * 64)), this.getSourceRect(), base.color.Value * base.alpha.Value, 0f, new Vector2(0f, Model.TextureDimensions.Height * 16), 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (DrawOverPlayer ? 8000f : 9500f));
 
                 // Draw effects
-                foreach (var effect in GetActiveAnimation().Effects.Where(e => e.Model is not null && e.PassesAllConditions(this)))
+                foreach (var effect in GetActiveAnimation().Effects.Where(e => e.Model is not null && e.PassesAllConditions(this) && !e.HasFinished()))
                 {
                     var adjustedTile = effect.Tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
                     b.Draw(effect.Model.Texture, Game1.GlobalToLocal(Game1.viewport, new Vector2((adjustedTile.X + effect.OffsetInPixels.Width) * 64, (adjustedTile.Y + effect.OffsetInPixels.Height) * 64)), effect.GetSourceRectangle(), effect.ActualColor, 0f, Vector2.Zero, 4f, SpriteEffects.None, 10000f);

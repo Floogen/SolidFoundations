@@ -22,9 +22,7 @@ namespace BetterBuildings.Framework.Models.Effects
         public Dimensions OffsetInPixels { get; set; } = new Dimensions();
         public List<TextureAnimation> AnimationOverride { get; set; }
         public List<Condition> Conditions { get; set; }
-        public bool Reverse { get; set; } // TODO: Implement the Reverse property
-        public bool StopAtFinish { get; set; } // TODO: Implement the StopAtFinish property
-        public bool DespawnAtFinish { get; set; } // TODO: Implement the DespawnAtFinish property
+        public bool StopAtFinish { get; set; }
         internal Color ActualColor { get; set; } = Microsoft.Xna.Framework.Color.White;
         public int[] Color { set { ActualColor = GetColor(value); } }
 
@@ -72,9 +70,20 @@ namespace BetterBuildings.Framework.Models.Effects
             }
         }
 
+        public void Reset()
+        {
+            _animationIndex = 0;
+            _animationStartingIndex = -1;
+            _animationTimer = GetAnimations()[_animationIndex].Duration;
+        }
+
         public void UpdateAnimationIndex(GenericBuilding customBuilding, bool hasDoneFullLoop = false)
         {
             _animationIndex = GetAnimations().Count <= _animationIndex + 1 ? _animationStartingIndex : _animationIndex + 1;
+            if (_animationStartingIndex == -1)
+            {
+                _animationStartingIndex = 0;
+            }
 
             var passedConditions = GetAnimations()[_animationIndex].PassesAllConditions(customBuilding);
             if (GetAnimations()[_animationIndex].OverrideStartingIndex)
@@ -110,6 +119,16 @@ namespace BetterBuildings.Framework.Models.Effects
             }
 
             return true;
+        }
+
+        public bool HasFinished()
+        {
+            if (StopAtFinish && _animationIndex == _animationStartingIndex)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private int GetColorIndex(int[] colorArray, int position)

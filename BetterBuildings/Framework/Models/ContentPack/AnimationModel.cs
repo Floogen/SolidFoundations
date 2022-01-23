@@ -62,6 +62,11 @@ namespace BetterBuildings.Framework.Models.ContentPack
         {
             _animationIndex = 0;
             _animationTimer = 0;
+
+            foreach (var effect in Effects)
+            {
+                effect.Reset();
+            }
         }
     }
 }
