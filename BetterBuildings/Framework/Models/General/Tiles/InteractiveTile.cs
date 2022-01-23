@@ -4,6 +4,7 @@ using BetterBuildings.Framework.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
+using StardewValley.Tools;
 using StardewValley.Util;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         public DialogueEvent Dialogue { get; set; }
         public MessageEvent Message { get; set; }
         public WarpEvent Warp { get; set; }
+        public bool IsWaterSource { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
         {
@@ -131,6 +133,12 @@ namespace BetterBuildings.Framework.Models.General.Tiles
             if (Warp is not null)
             {
                 Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Game1.player.FacingDirection);
+            }
+            if (IsWaterSource && who.CurrentTool is not null && who.CurrentTool is WateringCan wateringCan)
+            {
+                wateringCan.WaterLeft = wateringCan.waterCanMax;
+                who.currentLocation.playSound("slosh");
+                DelayedAction.playSoundAfterDelay("glug", 250, who.currentLocation);
             }
         }
 
