@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Object = StardewValley.Object;
 
 namespace BetterBuildings.Framework.Models.ContentPack
 {
@@ -159,31 +160,31 @@ namespace BetterBuildings.Framework.Models.ContentPack
             if (Model.Factory.GetEligibleRecipe(InputStorage.Value.items.ToList()) is RecipeModel recipe && recipe is not null)
             {
                 var requiredItems = InventoryTools.GetActualRequiredItems(recipe.InputItems);
-                foreach (var item in InputStorage.Value.items.ToList())
+                if (InventoryTools.HasRequiredItems(InputStorage.Value.items.ToList(), requiredItems))
                 {
-                    if (InventoryTools.IsRequiredItem(item, requiredItems))
+                    foreach (Object item in requiredItems)
                     {
-                        InputStorage.Value.items.Remove(item);
-                    }
-                }
-
-                if (recipe.ProcessingTimeInGameMinutes == 0 && !recipe.FinishAtDayStart)
-                {
-                    FinishProduction();
-                }
-                else
-                {
-                    // Store the recipe
-                    CurrentRecipe = recipe;
-
-                    // Set the in-game minutes needed to produce this item
-                    MinutesUntilProductionFinishes = recipe.ProcessingTimeInGameMinutes;
-                    if (recipe.FinishAtDayStart)
-                    {
-                        MinutesUntilProductionFinishes = int.MaxValue;
+                        InventoryTools.ConsumeItemBasedOnQuantityAndQuality(InputStorage, item, item.Stack, item.Quality);
                     }
 
-                    IsWorking = true;
+                    if (recipe.ProcessingTimeInGameMinutes == 0 && !recipe.FinishAtDayStart)
+                    {
+                        FinishProduction();
+                    }
+                    else
+                    {
+                        // Store the recipe
+                        CurrentRecipe = recipe;
+
+                        // Set the in-game minutes needed to produce this item
+                        MinutesUntilProductionFinishes = recipe.ProcessingTimeInGameMinutes;
+                        if (recipe.FinishAtDayStart)
+                        {
+                            MinutesUntilProductionFinishes = int.MaxValue;
+                        }
+
+                        IsWorking = true;
+                    }
                 }
             }
         }

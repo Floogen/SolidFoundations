@@ -44,7 +44,7 @@ namespace BetterBuildings.Framework.Patches.Outliers
 
             foreach (Object item in genericBlueprint.RequiredItems)
             {
-                InventoryTools.ConsumeItemBasedOnQuantityAndQuality(item, item.Stack, item.Quality);
+                InventoryTools.ConsumeItemBasedOnQuantityAndQuality(Game1.player, item, item.Stack, item.Quality);
             }
             Game1.player.Money -= genericBlueprint.moneyRequired;
 

@@ -85,7 +85,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                     foreach (Object item in requiredItems)
                     {
                         // Consume the item from the player's inventory
-                        InventoryTools.ConsumeItemBasedOnQuantityAndQuality(item, item.Stack, item.Quality);
+                        InventoryTools.ConsumeItemBasedOnQuantityAndQuality(who, item, item.Stack, item.Quality);
 
                         // Add the consumed items to the building's input chest
                         customBuilding.InputStorage.Value.addItem(item);

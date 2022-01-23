@@ -1,5 +1,6 @@
 ﻿using BetterBuildings.Framework.Models.ContentPack;
 using StardewValley;
+using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,10 @@ namespace BetterBuildings.Framework.Utilities
 {
     public class InventoryTools
     {
-        public static List<Item> GetActualRequiredItems(List<ItemModel> RequiredItems)
+        public static List<Item> GetActualRequiredItems(List<ItemModel> requiredItems)
         {
             List<Item> items = new List<Item>();
-            foreach (var genericItem in RequiredItems)
+            foreach (var genericItem in requiredItems)
             {
                 KeyValuePair<int, string>? gameObjectData = Game1.objectInformation.FirstOrDefault(pair => pair.Value.Split('/')[0].Equals(genericItem.Name, StringComparison.OrdinalIgnoreCase));
                 if (gameObjectData is not null)
@@ -26,14 +27,14 @@ namespace BetterBuildings.Framework.Utilities
             return items;
         }
 
-        public static bool IsRequiredItem(Item targetItem, List<Item> RequiredItems)
+        public static bool IsRequiredItem(Item targetItem, List<Item> requiredItems)
         {
             if (targetItem is null)
             {
                 return false;
             }
 
-            foreach (Object requiredItem in RequiredItems)
+            foreach (Object requiredItem in requiredItems)
             {
                 if (requiredItem.Name.Equals(targetItem.Name) && targetItem.Stack >= requiredItem.Stack)
                 {
@@ -47,7 +48,7 @@ namespace BetterBuildings.Framework.Utilities
             return false;
         }
 
-        public static bool IsHoldingRequiredItem(List<Item> RequiredItems)
+        public static bool IsHoldingRequiredItem(List<Item> requiredItems)
         {
             if (Game1.player.ActiveObject is null)
             {
@@ -55,7 +56,7 @@ namespace BetterBuildings.Framework.Utilities
             }
 
             var activeItem = Game1.player.ActiveObject;
-            foreach (Object requiredItem in RequiredItems)
+            foreach (Object requiredItem in requiredItems)
             {
                 if (requiredItem.Name.Equals(activeItem.Name) && activeItem.Stack >= requiredItem.Stack)
                 {
@@ -69,10 +70,10 @@ namespace BetterBuildings.Framework.Utilities
             return false;
         }
 
-        public static bool HasRoomForItems(List<Item> RequiredItems)
+        public static bool HasRoomForItems(List<Item> requiredItems)
         {
             int freeSpace = Game1.player.freeSpotsInInventory();
-            foreach (var item in RequiredItems)
+            foreach (var item in requiredItems)
             {
                 freeSpace -= 1;
 
@@ -85,10 +86,24 @@ namespace BetterBuildings.Framework.Utilities
             return true;
         }
 
-        public static bool HasRequiredItemsInInventory(List<Item> RequiredItems)
+        public static bool HasRequiredItems(List<Item> sourceItems, List<Item> requiredItems)
         {
             bool hasEverythingRequired = true;
-            foreach (Object item in RequiredItems)
+            foreach (Object item in requiredItems)
+            {
+                if (!HasItemWithRequiredQuantityAndQuality(sourceItems, item, item.Stack, item.Quality))
+                {
+                    hasEverythingRequired = false;
+                }
+            }
+
+            return hasEverythingRequired;
+        }
+
+        public static bool HasRequiredItemsInInventory(List<Item> requiredItems)
+        {
+            bool hasEverythingRequired = true;
+            foreach (Object item in requiredItems)
             {
                 if (!HasInventoryItemWithRequiredQuantityAndQuality(item, item.Stack, item.Quality))
                 {
@@ -106,35 +121,65 @@ namespace BetterBuildings.Framework.Utilities
 
         public static bool HasItemWithRequiredQuantityAndQuality(List<Item> inputItems, Item targetItem, int quantity, int quality = -1)
         {
+            int requiredCount = quantity;
             foreach (var item in inputItems.Where(i => i is not null && i.Name.Equals(targetItem.Name)))
             {
-                if (item.Stack >= quantity)
+                if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
                 {
-                    if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
-                    {
-                        return true;
-                    }
+                    requiredCount -= item.Stack;
                 }
             }
 
-            return false;
+            return requiredCount <= 0;
         }
 
-        public static void ConsumeItemBasedOnQuantityAndQuality(Item targetItem, int quantity, int quality = -1)
+        public static void ConsumeItemBasedOnQuantityAndQuality(Chest chest, Item targetItem, int quantity, int quality = -1)
         {
-            foreach (var item in Game1.player.Items.Where(i => i is not null && i.Name.Equals(targetItem.Name)).ToList())
+            int requiredCount = quantity;
+            foreach (var item in chest.items.Where(i => i is not null && i.Name.Equals(targetItem.Name)).ToList())
             {
-                if (item.Stack >= quantity)
+                if (requiredCount <= 0)
                 {
-                    if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
-                    {
-                        item.Stack -= quantity;
-                        if (item.Stack <= 0)
-                        {
-                            Game1.player.Items.Remove(item);
-                        }
+                    break;
+                }
 
-                        return;
+                if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
+                {
+                    if (item.Stack <= requiredCount)
+                    {
+                        requiredCount -= item.Stack;
+                        chest.items.Remove(item);
+                    }
+                    else
+                    {
+                        item.Stack -= requiredCount;
+                        break;
+                    }
+                }
+            }
+        }
+
+        public static void ConsumeItemBasedOnQuantityAndQuality(Farmer who, Item targetItem, int quantity, int quality = -1)
+        {
+            int requiredCount = quantity;
+            foreach (var item in who.Items.Where(i => i is not null && i.Name.Equals(targetItem.Name)).ToList())
+            {
+                if (requiredCount <= 0)
+                {
+                    break;
+                }
+
+                if (quality == -1 || (item is Object itemObject && itemObject is not null && itemObject.Quality >= (int)quality))
+                {
+                    if (item.Stack <= requiredCount)
+                    {
+                        requiredCount -= item.Stack;
+                        who.Items.Remove(item);
+                    }
+                    else
+                    {
+                        item.Stack -= requiredCount;
+                        break;
                     }
                 }
             }
