@@ -33,6 +33,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         public StorageEvent Storage { get; set; }
         public DialogueEvent Dialogue { get; set; }
         public MessageEvent Message { get; set; }
+        public WarpEvent Warp { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
         {
@@ -126,6 +127,10 @@ namespace BetterBuildings.Framework.Models.General.Tiles
             if (Message is not null)
             {
                 Game1.addHUDMessage(new HUDMessage(Message.Text, (int)Message.Icon + 1));
+            }
+            if (Warp is not null)
+            {
+                Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Game1.player.FacingDirection);
             }
         }
 
