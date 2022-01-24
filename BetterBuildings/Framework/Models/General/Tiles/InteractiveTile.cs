@@ -35,6 +35,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         public DialogueEvent Dialogue { get; set; }
         public MessageEvent Message { get; set; }
         public WarpEvent Warp { get; set; }
+        public QuestionResponseEvent DialogueWithChoices { get; set; }
         public bool IsWaterSource { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
@@ -126,6 +127,16 @@ namespace BetterBuildings.Framework.Models.General.Tiles
             {
                 Game1.activeClickableMenu = new DialogueBox(Dialogue.Text);
             }
+            if (DialogueWithChoices is not null)
+            {
+                List<Response> responses = new List<Response>();
+                foreach (var response in DialogueWithChoices.Responses.Where(r => r.Action is not null))
+                {
+                    responses.Add(new Response(responses.Count.ToString(), response.Text));
+                }
+
+                who.currentLocation.createQuestionDialogue(DialogueWithChoices.Question, responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(customBuilding, who, whichAnswer)));
+            }
             if (Message is not null)
             {
                 Game1.addHUDMessage(new HUDMessage(Message.Text, (int)Message.Icon + 1));
@@ -140,6 +151,24 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                 who.currentLocation.playSound("slosh");
                 DelayedAction.playSoundAfterDelay("glug", 250, who.currentLocation);
             }
+        }
+
+        private void DialogueResponsePicked(GenericBuilding customBuilding, Farmer who, string answerTextIndex)
+        {
+            int answerIndex = -1;
+
+            if (!int.TryParse(answerTextIndex, out answerIndex) || DialogueWithChoices is null)
+            {
+                return;
+            }
+
+            ResponseEvent response = DialogueWithChoices.Responses[answerIndex];
+            if (response.Action is null)
+            {
+                return;
+            }
+
+            response.Action.Trigger(customBuilding, who);
         }
 
         // Vanilla shop related
