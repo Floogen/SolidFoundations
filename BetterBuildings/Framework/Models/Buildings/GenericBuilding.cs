@@ -31,6 +31,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         [XmlElement("output")]
         public readonly NetRef<Chest> OutputStorage = new NetRef<Chest>();
+        public List<Flag> Flags { get; set; } = new List<Flag>();
 
         internal bool IsUsingEventOverride { get; set; }
         internal bool DrawOverPlayer { get; set; }
@@ -38,7 +39,6 @@ namespace BetterBuildings.Framework.Models.ContentPack
         internal bool IsWorking { get; set; }
         internal int MinutesUntilProductionFinishes { get; set; }
         internal RecipeModel CurrentRecipe { get; set; }
-        internal List<Flag> Flags { get; set; } = new List<Flag>();
 
         private BoundaryCollective _walkableTileGroup;
         private BoundaryCollective _buildingTileGroup;
@@ -293,6 +293,8 @@ namespace BetterBuildings.Framework.Models.ContentPack
             {
                 FinishProduction();
             }
+
+            Flags.RemoveAll(f => f.Type is FlagType.Temporary);
         }
 
         public override bool isActionableTile(int xTile, int yTile, Farmer who)

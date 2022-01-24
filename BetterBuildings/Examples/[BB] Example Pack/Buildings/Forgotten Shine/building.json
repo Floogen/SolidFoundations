@@ -51,6 +51,7 @@
             "Action": {
               "ModifyFlag": {
                 "Name": "PassedTest",
+                "Type": "Permanent",
                 "Operation": "Add"
               },
               "Dialogue": {
@@ -61,6 +62,10 @@
           {
             "Text": "Yellow?",
             "Action": {
+              "ModifyFlag": {
+                "Name": "PassedTest",
+                "Operation": "Remove"
+              },
               "Warp": {
                 "Map": "Mountain",
                 "DestinationTile": {
