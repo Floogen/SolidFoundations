@@ -37,6 +37,8 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         public WarpEvent Warp { get; set; }
         public QuestionResponseEvent DialogueWithChoices { get; set; }
         public ModifyFlagEvent ModifyFlag { get; set; }
+        public ModifyMailReceivedEvent ModifyMailReceived { get; set; }
+        public ModifyCutsceneSeenEvent ModifyCutsceneSeen { get; set; }
         public bool IsWaterSource { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
@@ -155,6 +157,28 @@ namespace BetterBuildings.Framework.Models.General.Tiles
                 else if (ModifyFlag.Operation is Operation.Remove)
                 {
                     customBuilding.Flags.RemoveAll(f => f.Name.Equals(ModifyFlag.Name, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            if (ModifyMailReceived is not null)
+            {
+                if (ModifyMailReceived.Operation is Operation.Add)
+                {
+                    Game1.addMail(ModifyMailReceived.Name, true);
+                }
+                else if (ModifyFlag.Operation is Operation.Remove)
+                {
+                    Game1.MasterPlayer.RemoveMail(ModifyMailReceived.Name);
+                }
+            }
+            if (ModifyCutsceneSeen is not null)
+            {
+                if (ModifyCutsceneSeen.Operation is Operation.Add)
+                {
+                    Game1.MasterPlayer.eventsSeen.Add(ModifyCutsceneSeen.Id);
+                }
+                else if (ModifyCutsceneSeen.Operation is Operation.Remove)
+                {
+                    Game1.MasterPlayer.eventsSeen.Remove(ModifyCutsceneSeen.Id);
                 }
             }
             if (IsWaterSource && who.CurrentTool is not null && who.CurrentTool is WateringCan wateringCan)

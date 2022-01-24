@@ -28,6 +28,8 @@ namespace BetterBuildings.Framework.Models.General
             OutputItemNames,
             OutputItemCount,
             HasFlag,
+            HasReceivedMail,
+            HasSeenEvent,
             IsPlayerOnWalkableTile
         }
 
@@ -54,6 +56,10 @@ namespace BetterBuildings.Framework.Models.General
                     return IsValid(customBuilding.OutputStorage.Value.items.Count(i => i is not null));
                 case Type.HasFlag:
                     return customBuilding.Flags.Any(i => IsValid(i.Name));
+                case Type.HasReceivedMail:
+                    return Game1.MasterPlayer.mailReceived.Any(m => IsValid(m));
+                case Type.HasSeenEvent:
+                    return Game1.MasterPlayer.eventsSeen.Any(m => IsValid(m));
             }
 
             return false;
