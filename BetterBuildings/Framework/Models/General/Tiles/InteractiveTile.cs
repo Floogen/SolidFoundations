@@ -36,6 +36,7 @@ namespace BetterBuildings.Framework.Models.General.Tiles
         public MessageEvent Message { get; set; }
         public WarpEvent Warp { get; set; }
         public QuestionResponseEvent DialogueWithChoices { get; set; }
+        public ModifyFlagEvent ModifyFlag { get; set; }
         public bool IsWaterSource { get; set; }
 
         public void Trigger(GenericBuilding customBuilding, Farmer who)
@@ -144,6 +145,17 @@ namespace BetterBuildings.Framework.Models.General.Tiles
             if (Warp is not null)
             {
                 Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Game1.player.FacingDirection);
+            }
+            if (ModifyFlag is not null)
+            {
+                if (ModifyFlag.Operation is Operation.Add && !customBuilding.Flags.Any(f => f.Name.Equals(ModifyFlag.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    customBuilding.Flags.Add(new Flag() { Name = ModifyFlag.Name, Type = ModifyFlag.Type });
+                }
+                else if (ModifyFlag.Operation is Operation.Remove)
+                {
+                    customBuilding.Flags.RemoveAll(f => f.Name.Equals(ModifyFlag.Name, StringComparison.OrdinalIgnoreCase));
+                }
             }
             if (IsWaterSource && who.CurrentTool is not null && who.CurrentTool is WateringCan wateringCan)
             {

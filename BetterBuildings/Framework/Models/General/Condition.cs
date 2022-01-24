@@ -27,6 +27,7 @@ namespace BetterBuildings.Framework.Models.General
             InputItemCount,
             OutputItemNames,
             OutputItemCount,
+            HasFlag,
             IsPlayerOnWalkableTile
         }
 
@@ -51,6 +52,8 @@ namespace BetterBuildings.Framework.Models.General
                     return customBuilding.OutputStorage.Value.items.Any(i => IsValid(i.Name));
                 case Type.OutputItemCount:
                     return IsValid(customBuilding.OutputStorage.Value.items.Count(i => i is not null));
+                case Type.HasFlag:
+                    return customBuilding.Flags.Any(i => IsValid(i.Name));
             }
 
             return false;
@@ -80,6 +83,9 @@ namespace BetterBuildings.Framework.Models.General
             {
                 case Comparison.Contains:
                     passed = stringValue.Contains(comparisonValue, StringComparison.OrdinalIgnoreCase);
+                    break;
+                default:
+                    passed = stringValue.Equals(comparisonValue, StringComparison.OrdinalIgnoreCase);
                     break;
             }
             if (Inverse)

@@ -1,4 +1,5 @@
-﻿using BetterBuildings.Framework.Models.General.Tiles;
+﻿using BetterBuildings.Framework.Models.General;
+using BetterBuildings.Framework.Models.General.Tiles;
 using BetterBuildings.Framework.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -37,6 +38,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
         internal bool IsWorking { get; set; }
         internal int MinutesUntilProductionFinishes { get; set; }
         internal RecipeModel CurrentRecipe { get; set; }
+        internal List<Flag> Flags { get; set; } = new List<Flag>();
 
         private BoundaryCollective _walkableTileGroup;
         private BoundaryCollective _buildingTileGroup;
@@ -551,7 +553,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 foreach (var effect in GetActiveAnimation().Effects.Where(e => e.Model is not null && e.PassesAllConditions(this) && !e.HasFinished()))
                 {
                     var adjustedTile = effect.Tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
-                    b.Draw(effect.Model.Texture, Game1.GlobalToLocal(Game1.viewport, new Vector2((adjustedTile.X + effect.OffsetInPixels.Width) * 64, (adjustedTile.Y + effect.OffsetInPixels.Height) * 64)), effect.GetSourceRectangle(), effect.ActualColor, 0f, Vector2.Zero, 4f, SpriteEffects.None, 10000f);
+                    b.Draw(effect.Model.Texture, Game1.GlobalToLocal(Game1.viewport, new Vector2((adjustedTile.X * 64) + effect.OffsetInPixels.Width, (adjustedTile.Y * 64) + effect.OffsetInPixels.Height)), effect.GetSourceRectangle(), effect.ActualColor, 0f, Vector2.Zero, 4f, SpriteEffects.None, 10000f);
                 }
 
                 // Start of debug draws
