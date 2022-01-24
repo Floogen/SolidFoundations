@@ -553,7 +553,7 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 foreach (var effect in GetActiveAnimation().Effects.Where(e => e.Model is not null && e.PassesAllConditions(this) && !e.HasFinished()))
                 {
                     var adjustedTile = effect.Tile.GetAdjustedLocation(base.tileX.Value, base.tileY.Value);
-                    b.Draw(effect.Model.Texture, Game1.GlobalToLocal(Game1.viewport, new Vector2((adjustedTile.X * 64) + effect.OffsetInPixels.Width, (adjustedTile.Y * 64) + effect.OffsetInPixels.Height)), effect.GetSourceRectangle(), effect.ActualColor, 0f, Vector2.Zero, 4f, SpriteEffects.None, 10000f);
+                    b.Draw(effect.Model.Texture, Game1.GlobalToLocal(Game1.viewport, new Vector2((adjustedTile.X * 64) + effect.OffsetInPixels.Width, (adjustedTile.Y * 64) + effect.OffsetInPixels.Height)), effect.GetSourceRectangle(), effect.ActualColor, 0f, Vector2.Zero, 4f, SpriteEffects.None, (float)((base.tileY.Value) * 64) / (effect.DrawOverPlayer ? 7900f : 9400f));
                 }
 
                 // Start of debug draws

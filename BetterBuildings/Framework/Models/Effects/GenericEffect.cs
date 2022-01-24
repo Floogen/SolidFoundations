@@ -22,6 +22,7 @@ namespace BetterBuildings.Framework.Models.Effects
         public Dimensions OffsetInPixels { get; set; } = new Dimensions();
         public List<TextureAnimation> AnimationOverride { get; set; }
         public List<Condition> Conditions { get; set; }
+        public bool DrawOverPlayer { get; set; }
         public bool StopAtFinish { get; set; }
         internal Color ActualColor { get; set; } = Microsoft.Xna.Framework.Color.White;
         public int[] Color { set { ActualColor = GetColor(value); } }
