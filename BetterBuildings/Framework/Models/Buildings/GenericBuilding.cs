@@ -294,6 +294,16 @@ namespace BetterBuildings.Framework.Models.ContentPack
                 FinishProduction();
             }
 
+            GameLocation gameLocation = Game1.getLocationFromName(LocationName);
+            for (int y = 0; y < base.tilesHigh.Value; y++)
+            {
+                for (int x = 0; x < this.tilesWide.Value; x++)
+                {
+                    Vector2 currentGlobalTilePosition = new Vector2(base.tileX.Value + x, base.tileY.Value + y);
+                    gameLocation.terrainFeatures.Remove(currentGlobalTilePosition);
+                }
+            }
+
             Flags.RemoveAll(f => f.Type is FlagType.Temporary);
         }
 
