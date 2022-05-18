@@ -222,6 +222,43 @@ namespace BetterBuildings.Framework.Models.ContentPack
             }
         }
 
+        private bool AttemptDoorwayTeleport(Vector2 tileLocation)
+        {
+            if (Model.Doorways is null)
+            {
+                return false;
+            }
+
+            foreach (var doorway in Model.Doorways.Where(d => d.Type is not DoorType.Tunnel))
+            {
+                if (doorway.Type is DoorType.Standard)
+                {
+                    BetterBuildings.monitor.Log("HERE", LogLevel.Debug);
+                    foreach (var tile in doorway.Tiles)
+                    {
+                        if (base.tileX.Value + tile.X == tileLocation.X && base.tileY.Value + tile.Y == tileLocation.Y)
+                        {
+                            // Warp player inside
+                            base.indoors.Value.isStructure.Value = true;
+                            Game1.player.currentLocation.playSoundAt("doorClose", Game1.player.getTileLocation());
+
+                            // Get warp destination tile
+                            var destinationTile = new TileLocation() { X = this.indoors.Value.warps[0].X, Y = this.indoors.Value.warps[0].Y - 1 };
+                            if (doorway.EntranceTile is not null)
+                            {
+                                destinationTile = doorway.EntranceTile;
+                            }
+
+                            Game1.warpFarmer(this.indoors.Value.uniqueName.Value, destinationTile.X, destinationTile.Y, Game1.player.FacingDirection, isStructure: true);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private bool AttemptTunnelDoorTeleport(TileLocation triggeredTile)
         {
             if (Model.Doorways is null || !Model.Doorways.Any(d => d.Type is DoorType.Tunnel))
@@ -442,21 +479,23 @@ namespace BetterBuildings.Framework.Models.ContentPack
 
         public override bool doAction(Vector2 tileLocation, Farmer who)
         {
-            if (Model.InteractiveTiles is null || Model.InteractiveTiles.Count <= 0)
-            {
-                return false;
-            }
+            // Check for doorways (standard / animal)
+            AttemptDoorwayTeleport(tileLocation);
 
-            foreach (var interactiveTile in Model.InteractiveTiles)
+            // Check for any interactive tiles
+            if (Model.InteractiveTiles is not null && Model.InteractiveTiles.Count > 0)
             {
-                foreach (var tile in interactiveTile.GetActualTiles())
+                foreach (var interactiveTile in Model.InteractiveTiles)
                 {
-                    if (base.tileX.Value + tile.X == tileLocation.X && base.tileY.Value + tile.Y == tileLocation.Y)
+                    foreach (var tile in interactiveTile.GetActualTiles())
                     {
-                        // Trigger the tile
-                        interactiveTile.Trigger(this, Game1.player);
+                        if (base.tileX.Value + tile.X == tileLocation.X && base.tileY.Value + tile.Y == tileLocation.Y)
+                        {
+                            // Trigger the tile
+                            interactiveTile.Trigger(this, Game1.player);
 
-                        return true;
+                            return true;
+                        }
                     }
                 }
             }

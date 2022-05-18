@@ -1,0 +1,49 @@
+{
+  "Name": "ExpandedBarn",
+  "DisplayName": "Expanded Barn",
+  "Description": "...",
+  "ShowShadow": false,
+  "TextureDimensions": {
+    "Height": 9,
+    "Width": 7
+  },
+  "PhysicalDimensions": {
+    "Height": 7,
+    "Width": 7
+  },
+  "Doorways": [
+    {
+      "Type": "Standard",
+      "ExitTile": {
+        "X": 2,
+        "Y": 8
+      },
+      "EntranceTile": {
+        "X": 2,
+        "Y": 3
+      },
+      "Tiles": [
+        {
+          "X": 1,
+          "Y": 6
+        },
+        {
+          "X": 1,
+          "Y": 7
+        }
+      ]
+    }
+  ],
+
+  "Blueprint": {
+    "Vendor": "Robin",
+    "DaysToConstruct": 0,
+    "RequiredMoney": 2500,
+    "RequiredItems": [
+      {
+        "Name": "Wood",
+        "Quantity": 25
+      }
+    ]
+  }
+}
