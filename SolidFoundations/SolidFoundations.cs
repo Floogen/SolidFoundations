@@ -6,6 +6,7 @@ using SolidFoundations.Framework.Patches.Buildings;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Locations;
 using System;
 using System.Drawing;
 using System.IO;
@@ -40,6 +41,7 @@ namespace SolidFoundations
 
                 // Apply building patches
                 new BluePrintPatch(monitor, helper).Apply(harmony);
+                new BuildingPatch(monitor, helper).Apply(harmony);
 
                 // Apply menu patches
                 new CarpenterMenuPatch(monitor, helper).Apply(harmony);
@@ -51,7 +53,7 @@ namespace SolidFoundations
             }
 
             // Add in the debug commands
-            helper.ConsoleCommands.Add("sf_reload", "Reloads all Solid Foundations content packs.\n\nUsage: sf_reload", delegate { this.LoadContentPacks(); });
+            helper.ConsoleCommands.Add("sf_reload", "Reloads all Solid Foundations content packs.\n\nUsage: sf_reload", delegate { this.LoadContentPacks(); this.RefreshAllCustomBuildings(); });
 
             // Hook into the required events
             modHelper.Events.Content.AssetRequested += OnAssetRequested;
@@ -105,7 +107,7 @@ namespace SolidFoundations
         private void LoadContentPacks(bool silent = false)
         {
             // Clear the existing cache of custom buildings
-            //buildingManager.Reset();
+            buildingManager.Reset();
 
             // Load owned content packs
             foreach (IContentPack contentPack in Helper.ContentPacks.GetOwned())
@@ -153,7 +155,7 @@ namespace SolidFoundations
                     var modelPath = Path.Combine(parentFolderName, folder.Name, "building.json");
 
                     // Parse the model and assign it the content pack's owner
-                    BuildingExtended buildingModel = contentPack.ReadJsonFile<BuildingExtended>(modelPath);
+                    ExtendedBuildingModel buildingModel = contentPack.ReadJsonFile<ExtendedBuildingModel>(modelPath);
 
                     // Verify the required Name property is set
                     if (String.IsNullOrEmpty(buildingModel.Name))
@@ -168,7 +170,7 @@ namespace SolidFoundations
                     buildingModel.ID = String.Concat(buildingModel.Owner, "_", buildingModel.Name);
 
                     // Verify that a building with the name doesn't exist in this pack
-                    if (buildingManager.GetSpecificBuildingModel<BuildingExtended>(buildingModel.ID) != null)
+                    if (buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(buildingModel.ID) != null)
                     {
                         Monitor.Log($"Unable to add building from {contentPack.Manifest.Name}: This pack already contains a building with the name of {buildingModel.Name}", LogLevel.Warn);
                         continue;
@@ -214,6 +216,27 @@ namespace SolidFoundations
             catch (Exception ex)
             {
                 Monitor.Log($"Error loading buildings from content pack {contentPack.Manifest.Name}: {ex}", LogLevel.Error);
+            }
+        }
+
+        private void RefreshAllCustomBuildings(bool resetTexture = true)
+        {
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
+            {
+                foreach (GenericBuilding building in buildableLocation.buildings.Where(b => b is GenericBuilding))
+                {
+                    var model = buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(building.Id);
+                    if (model is not null)
+                    {
+                        building.RefreshModel(model);
+                    }
+
+                    if (resetTexture)
+                    {
+                        Helper.GameContent.InvalidateCache(model.Texture);
+                        building.resetTexture();
+                    }
+                }
             }
         }
     }

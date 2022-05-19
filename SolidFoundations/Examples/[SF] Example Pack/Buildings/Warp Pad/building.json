@@ -1,4 +1,12 @@
 {
   "Name": "Warp Pad",
-  "Description": "A warp pad. Teleports you to a random location."
+  "Description": "A warp pad. Teleports you to a random location.",
+  "DrawShadow": false,
+  "Size": {
+    "X": 5,
+    "Y": 5
+  },
+  "SortTileOffset": 3.0,
+  "CollisionMap": "XXXXX\nXOOOX\nXOOOX\nXOXXX",
+  "FadeWhenBehind": true
 }

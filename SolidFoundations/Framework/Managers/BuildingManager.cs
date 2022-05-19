@@ -13,7 +13,7 @@ namespace SolidFoundations.Framework.Managers
         private IMonitor _monitor;
         private IModHelper _helper;
 
-        private List<BuildingExtended> _buildings;
+        private List<ExtendedBuildingModel> _buildings;
         private Dictionary<string, string> _assetPathToMap;
         private Dictionary<string, string> _assetPathToTexture;
 
@@ -22,7 +22,7 @@ namespace SolidFoundations.Framework.Managers
             _monitor = monitor;
             _helper = helper;
 
-            _buildings = new List<BuildingExtended>();
+            _buildings = new List<ExtendedBuildingModel>();
             _assetPathToMap = new Dictionary<string, string>();
             _assetPathToTexture = new Dictionary<string, string>();
         }
@@ -34,9 +34,9 @@ namespace SolidFoundations.Framework.Managers
             _assetPathToTexture.Clear();
         }
 
-        public void AddBuilding(BuildingExtended model)
+        public void AddBuilding(ExtendedBuildingModel model)
         {
-            if (_buildings.FirstOrDefault(t => t.ID.Equals(model.ID, StringComparison.OrdinalIgnoreCase)) is BuildingExtended buildingExtended && buildingExtended is not null)
+            if (_buildings.FirstOrDefault(t => t.ID.Equals(model.ID, StringComparison.OrdinalIgnoreCase)) is ExtendedBuildingModel buildingExtended && buildingExtended is not null)
             {
                 var replacementIndex = _buildings.IndexOf(buildingExtended);
                 _buildings[replacementIndex] = model;
@@ -87,12 +87,12 @@ namespace SolidFoundations.Framework.Managers
             return null;
         }
 
-        public List<BuildingExtended> GetAllBuildingModels()
+        public List<ExtendedBuildingModel> GetAllBuildingModels()
         {
             return _buildings;
         }
 
-        public T GetSpecificBuildingModel<T>(string buildingId) where T : BuildingExtended
+        public T GetSpecificBuildingModel<T>(string buildingId) where T : ExtendedBuildingModel
         {
             return (T)_buildings.FirstOrDefault(t => String.Equals(t.ID, buildingId, StringComparison.OrdinalIgnoreCase) && t is T);
         }

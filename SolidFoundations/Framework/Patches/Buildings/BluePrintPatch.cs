@@ -20,7 +20,7 @@ using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Patches.Buildings
 {
-    // TODO: When updated to SDV v1.6, delete __instance patch
+    // TODO: When updated to SDV v1.6, delete this patch
     internal class BluePrintPatch : PatchTemplate
     {
         private readonly Type _object = typeof(BluePrint);
@@ -37,7 +37,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         private static bool BluePrintPrefix(BluePrint __instance, string name)
         {
-            if (SolidFoundations.buildingManager.GetSpecificBuildingModel<BuildingExtended>(name) is BuildingExtended buildingData && buildingData is not null)
+            if (SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(name) is ExtendedBuildingModel buildingData && buildingData is not null)
             {
                 __instance.name = name;
                 __instance.displayName = TextParser.ParseText(buildingData.Name);
@@ -67,9 +67,9 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 }
 
                 __instance.daysToConstruct = buildingData.BuildDays;
+                __instance.additionalPlacementTiles = new List<Point>();
                 if (buildingData.AdditionalPlacementTiles != null)
                 {
-                    __instance.additionalPlacementTiles.Clear();
                     foreach (BuildingPlacementTile additionalPlacementTile in buildingData.AdditionalPlacementTiles)
                     {
                         __instance.additionalPlacementTiles.Add(additionalPlacementTile.Tile);
