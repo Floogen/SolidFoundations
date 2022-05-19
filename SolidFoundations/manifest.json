@@ -1,0 +1,20 @@
+﻿{
+  "Name": "Solid Foundations",
+  "Author": "PeacefulEnd",
+  "Version": "REPLACE_ME_WITH_VERSION",
+  "Description": "Custom buildings framework for Stardew Valley.",
+  "UniqueID": "PeacefulEnd.SolidFoundations",
+  "EntryDll": "SolidFoundations.dll",
+  "MinimumApiVersion": "3.14.4",
+  "UpdateKeys": [ "Nexus:????" ],
+  "Dependencies": [
+    {
+      "UniqueID": "Pathoschild.ContentPatcher",
+      "IsRequired": false
+    },
+    {
+      "UniqueID": "PeacefulEnd.AlternativeTextures",
+      "IsRequired": false
+    }
+  ]
+}
