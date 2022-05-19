@@ -108,7 +108,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return false;
             }
 
-            var customBuilding = new GenericBuilding(buildingModel, blueprint, tileLocation) { Location = farm };
+            var customBuilding = new GenericBuilding(buildingModel, blueprint, tileLocation) { LocationName = farm.NameOrUniqueName };
             customBuilding.owner.Value = Game1.player.UniqueMultiplayerID;
 
             string finalCheckResult = customBuilding.isThereAnythingtoPreventConstruction(farm, tileLocation);

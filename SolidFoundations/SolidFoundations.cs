@@ -1,16 +1,22 @@
 ﻿using HarmonyLib;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Managers;
+using SolidFoundations.Framework.Models.Buildings;
 using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Patches.Buildings;
+using SolidFoundations.Framework.Utilities;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace SolidFoundations
 {
@@ -65,7 +71,43 @@ namespace SolidFoundations
 
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
-            // TODO: Implement this
+            if (!Game1.IsMasterGame)
+            {
+                return;
+            }
+
+            // Create the SolidFoundations folder near the save file, if one doesn't exist
+            var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations");
+            if (!Directory.Exists(externalSaveFolderPath))
+            {
+                Directory.CreateDirectory(externalSaveFolderPath);
+            }
+
+            // Process each buildable location and archive the relevant data
+            var allExistingCustomBuildings = new List<GenericBuilding>();
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
+            {
+                var archivedBuildingsData = new List<ArchivedBuildingData>();
+                foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
+                {
+                    // Prepare the custom building objects for this location to be stored externally
+                    allExistingCustomBuildings.Add(customBuilding);
+                    archivedBuildingsData.Add(new ArchivedBuildingData() { Id = customBuilding.Id, TileX = customBuilding.tileX.Value, TileY = customBuilding.tileY.Value });
+
+                    // Remove the building from the location to avoid serialization issues
+                    buildableLocation.buildings.Remove(customBuilding);
+                }
+
+                // Archive the custom building data for this location
+                buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(archivedBuildingsData);
+            }
+
+            // Save the custom building objects externally, at the player's save file location
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+            using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
+            {
+                xmlSerializer.Serialize(writer, allExistingCustomBuildings);
+            }
         }
 
         private void OnTimeChanged(object sender, TimeChangedEventArgs e)
@@ -75,7 +117,53 @@ namespace SolidFoundations
 
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
-            // TODO: Implement this
+            var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
+            if (!Game1.IsMasterGame || !File.Exists(customBuildingsExternalSavePath))
+            {
+                return;
+            }
+
+            // Get the externally saved custom building objects
+            var externallySavedCustomBuildings = new List<GenericBuilding>();
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+            using (StreamReader textReader = new StreamReader(customBuildingsExternalSavePath))
+            {
+                externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(textReader);
+            }
+
+            // Process each buildable location and restore any installed custom buildings
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation && l.modData.ContainsKey(ModDataKeys.LOCATION_CUSTOM_BUILDINGS)))
+            {
+                // Get the archived custom building data for this location
+                var archivedBuildingsData = JsonSerializer.Deserialize<List<ArchivedBuildingData>>(buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS]);
+
+                // Go through each ArchivedBuildingData to confirm that a) the Id exists via BuildingManager and b) there is a match in locationNamesToCustomBuildings to its Id and TileLocation
+                foreach (var archivedData in archivedBuildingsData)
+                {
+                    if (!buildingManager.DoesBuildingModelExist(archivedData.Id) || !externallySavedCustomBuildings.Any(b => b.LocationName == buildableLocation.NameOrUniqueName))
+                    {
+                        continue;
+                    }
+
+                    GenericBuilding customBuilding = externallySavedCustomBuildings.FirstOrDefault(b => b.Id == archivedData.Id && b.tileX.Value == archivedData.TileX && b.tileY.Value == archivedData.TileY);
+                    if (customBuilding is null)
+                    {
+                        continue;
+                    }
+
+                    // Update the building's model
+                    customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(customBuilding.Id));
+
+                    // Load the building
+                    customBuilding.load();
+
+                    // Restore the archived custom building
+                    buildableLocation.buildings.Add(customBuilding);
+
+                    // Trigger the missed DayUpdate
+                    customBuilding.dayUpdate(Game1.dayOfMonth);
+                }
+            }
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)

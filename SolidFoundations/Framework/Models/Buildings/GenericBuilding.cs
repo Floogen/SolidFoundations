@@ -20,9 +20,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
 {
     public class GenericBuilding : Building
     {
+        [XmlIgnore]
         public ExtendedBuildingModel Model { get; set; }
         public string Id { get; set; }
-        public GameLocation Location { get; set; }
+        public string LocationName { get; set; }
 
         // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.buildingChests
         public NetList<Chest, NetRef<Chest>> buildingChests = new NetList<Chest, NetRef<Chest>>();

@@ -4,9 +4,9 @@
   "DrawShadow": false,
   "Size": {
     "X": 5,
-    "Y": 5
+    "Y": 4
   },
-  "SortTileOffset": 3.0,
-  "CollisionMap": "XXXXX\nXOOOX\nXOOOX\nXOXXX",
-  "FadeWhenBehind": true
+  "SortTileOffset": 3,
+  "CollisionMap": "OXXXO\nXOOOX\nXOOOX\nXOXXX",
+  "FadeWhenBehind": false
 }
