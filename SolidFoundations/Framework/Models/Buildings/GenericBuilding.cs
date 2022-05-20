@@ -2,11 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using SolidFoundations.Framework.Models.Backport;
+using SolidFoundations.Framework.Utilities.Backport;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Locations;
 using StardewValley.Menus;
+using StardewValley.Network;
 using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
@@ -25,10 +27,42 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public string Id { get; set; }
         public string LocationName { get; set; }
 
+        // Start of backported properties
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.buildingLocation
+        [XmlIgnore]
+        public NetLocationRef buildingLocation = new NetLocationRef();
         // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.buildingChests
         public NetList<Chest, NetRef<Chest>> buildingChests = new NetList<Chest, NetRef<Chest>>();
         // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.animalDoorOpenAmount
         public readonly NetFloat animalDoorOpenAmount = new NetFloat();
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._buildingMetadata
+        [XmlIgnore]
+        protected Dictionary<string, string> _buildingMetadata = new Dictionary<string, string>();
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._lastHouseUpgradeLevel
+        protected int _lastHouseUpgradeLevel = -1;
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._chimneyPosition
+        protected Vector2 _chimneyPosition = Vector2.Zero;
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._hasChimney
+        protected bool? _hasChimney;
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.chimneyTimer
+        protected int chimneyTimer = 500;
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.skinID
+        public NetString skinID = new NetString();
+
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.nonInstancedIndoors
+        public readonly NetLocationRef nonInstancedIndoors = new NetLocationRef();
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.IndoorOrInstancedIndoor
+        public GameLocation IndoorOrInstancedIndoor
+        {
+            get
+            {
+                if (this.indoors.Value != null)
+                {
+                    return this.indoors.Value;
+                }
+                return this.nonInstancedIndoors.Value;
+            }
+        }
 
         private Texture2D _lavaTexture;
 
@@ -75,6 +109,109 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             _lavaTexture = SolidFoundations.modHelper.GameContent.Load<Texture2D>("Maps/Mines/volcano_dungeon");
         }
+
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
+        public virtual void ToggleAnimalDoor(Farmer who)
+        {
+            if (!this.animalDoorOpen)
+            {
+                if (this.Model.AnimalDoorOpenSound != null)
+                {
+                    who.currentLocation.playSound(this.Model.AnimalDoorOpenSound);
+                }
+            }
+            else if (this.Model.AnimalDoorCloseSound != null)
+            {
+                who.currentLocation.playSound(this.Model.AnimalDoorCloseSound);
+            }
+            this.animalDoorOpen.Value = !this.animalDoorOpen;
+        }
+
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
+        public virtual bool OnUseHumanDoor(Farmer who)
+        {
+            return true;
+        }
+
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.doAction
+        public override bool doAction(Vector2 tileLocation, Farmer who)
+        {
+            SolidFoundations.monitor.Log("123", LogLevel.Debug);
+            if (who.isRidingHorse())
+            {
+                return false;
+            }
+            if (who.IsLocalPlayer && tileLocation.X >= (float)(int)this.tileX && tileLocation.X < (float)((int)this.tileX + (int)this.tilesWide) && tileLocation.Y >= (float)(int)this.tileY && tileLocation.Y < (float)((int)this.tileY + (int)this.tilesHigh) && (int)this.daysOfConstructionLeft > 0)
+            {
+                Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\Buildings:UnderConstruction"));
+            }
+            else
+            {
+                if (who.IsLocalPlayer && tileLocation.X == (float)(this.humanDoor.X + (int)this.tileX) && tileLocation.Y == (float)(this.humanDoor.Y + (int)this.tileY) && this.IndoorOrInstancedIndoor != null)
+                {
+                    if (who.mount != null)
+                    {
+                        Game1.showRedMessage(Game1.content.LoadString("Strings\\Buildings:DismountBeforeEntering"));
+                        return false;
+                    }
+                    if (who.team.demolishLock.IsLocked())
+                    {
+                        Game1.showRedMessage(Game1.content.LoadString("Strings\\Buildings:CantEnter"));
+                        return false;
+                    }
+                    if (this.OnUseHumanDoor(who))
+                    {
+                        who.currentLocation.playSoundAt("doorClose", tileLocation);
+                        bool isStructure = false;
+                        if (this.indoors.Value != null)
+                        {
+                            isStructure = true;
+                        }
+                        Game1.warpFarmer(this.IndoorOrInstancedIndoor.NameOrUniqueName, this.IndoorOrInstancedIndoor.warps[0].X, this.IndoorOrInstancedIndoor.warps[0].Y - 1, Game1.player.FacingDirection, isStructure);
+                    }
+                    return true;
+                }
+                if (this.Model != null)
+                {
+                    Microsoft.Xna.Framework.Rectangle rectForAnimalDoor = this.getRectForAnimalDoor();
+                    rectForAnimalDoor.Width /= 64;
+                    rectForAnimalDoor.Height /= 64;
+                    rectForAnimalDoor.X /= 64;
+                    rectForAnimalDoor.Y /= 64;
+                    if ((int)this.daysOfConstructionLeft <= 0 && rectForAnimalDoor != Microsoft.Xna.Framework.Rectangle.Empty && rectForAnimalDoor.Contains(Utility.Vector2ToPoint(tileLocation)) && Game1.didPlayerJustRightClick(ignoreNonMouseHeldInput: true))
+                    {
+                        this.ToggleAnimalDoor(who);
+                        return true;
+                    }
+                    this.GetAdditionalTilePropertyRadius();
+                    if (who.IsLocalPlayer && this.IsInTilePropertyRadius(tileLocation) && !this.isTilePassable(tileLocation))
+                    {
+                        string actionAtTile = this.Model.GetActionAtTile((int)tileLocation.X - this.tileX.Value, (int)tileLocation.Y - this.tileY.Value);
+                        if (actionAtTile != null)
+                        {
+                            actionAtTile = TextParser.ParseText(actionAtTile);
+                            if (who.currentLocation.performAction(actionAtTile, who, new xTile.Dimensions.Location((int)tileLocation.X, (int)tileLocation.Y)))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return base.doAction(tileLocation, who); ;
+        }
+
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.doesTileHaveProperty
+        public override bool doesTileHaveProperty(int tile_x, int tile_y, string property_name, string layer_name, ref string property_value)
+        {
+            if (this.Model != null)
+            {
+                return this.Model.HasPropertyAtTile(tile_x - this.tileX.Value, tile_y - this.tileY.Value, property_name, layer_name, ref property_value);
+            }
+            return false;
+        }
+
 
         // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.ApplySourceRectOffsets
         public virtual Rectangle ApplySourceRectOffsets(Rectangle source)
@@ -264,7 +401,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return true;
         }
 
-
         // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.draw
         public override void draw(SpriteBatch b)
         {
@@ -417,5 +553,173 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.GetMetadata
+        public string GetMetadata(string key)
+        {
+            if (this._buildingMetadata == null)
+            {
+                this._buildingMetadata = new Dictionary<string, string>();
+                if (this.Model != null)
+                {
+                    foreach (KeyValuePair<string, string> metadatum in this.Model.Metadata)
+                    {
+                        this._buildingMetadata[metadatum.Key] = metadatum.Value;
+                    }
+                    if (this.Model.Skins != null && this.Model.Skins.Count > 0 && this.skinID.Value != null)
+                    {
+                        foreach (BuildingSkin skin in this.Model.Skins)
+                        {
+                            if (!(skin.ID == this.skinID.Value))
+                            {
+                                continue;
+                            }
+                            foreach (KeyValuePair<string, string> metadatum2 in skin.Metadata)
+                            {
+                                this._buildingMetadata[metadatum2.Key] = metadatum2.Value;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            if (this._buildingMetadata.TryGetValue(key, out key))
+            {
+                return key;
+            }
+            return null;
+        }
+
+        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.GameLocation.hasActiveFireplace
+        public bool HasActiveFireplaceBackport()
+        {
+            if (this.Model is null || this.IndoorOrInstancedIndoor is null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < this.IndoorOrInstancedIndoor.furniture.Count(); i++)
+            {
+                if ((int)this.IndoorOrInstancedIndoor.furniture[i].furniture_type.Value == 14 && (bool)this.IndoorOrInstancedIndoor.furniture[i].isOn.Value)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        // TODO: When updated to SDV v1.6, this class should be deleted
+        private void UpdateBackport(GameTime time)
+        {
+            this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
+            int num = this.tilesHigh.Get();
+            if (this.fadeWhenPlayerIsBehind.Value && Game1.player.GetBoundingBox().Intersects(new Microsoft.Xna.Framework.Rectangle(64 * (int)this.tileX, 64 * ((int)this.tileY + (-(this.getSourceRectForMenu().Height / 16) + num)), (int)this.tilesWide * 64, (this.getSourceRectForMenu().Height / 16 - num) * 64 + 32)))
+            {
+                this.alpha.Value = Math.Max(0.4f, this.alpha.Value - 0.09f);
+            }
+            if (this.isUnderConstruction())
+            {
+                return;
+            }
+            if (!this._hasChimney.HasValue)
+            {
+                string metadata = this.GetMetadata("ChimneyPosition");
+                if (metadata != null)
+                {
+                    this._hasChimney = true;
+                    string[] array = metadata.Split(' ');
+                    this._chimneyPosition.X = int.Parse(array[0]);
+                    this._chimneyPosition.Y = int.Parse(array[1]);
+                }
+                else
+                {
+                    this._hasChimney = false;
+                }
+            }
+            if (this.IndoorOrInstancedIndoor is FarmHouse)
+            {
+                int houseUpgradeLevel = (this.IndoorOrInstancedIndoor as FarmHouse).owner.HouseUpgradeLevel;
+                if (this._lastHouseUpgradeLevel != houseUpgradeLevel)
+                {
+                    this._lastHouseUpgradeLevel = houseUpgradeLevel;
+                    string text = null;
+                    for (int i = 1; i <= this._lastHouseUpgradeLevel; i++)
+                    {
+                        string metadata2 = this.GetMetadata("ChimneyPosition" + (i + 1));
+                        if (metadata2 != null)
+                        {
+                            text = metadata2;
+                        }
+                    }
+                    if (text != null)
+                    {
+                        this._hasChimney = true;
+                        string[] array2 = text.Split(' ');
+                        this._chimneyPosition.X = int.Parse(array2[0]);
+                        this._chimneyPosition.Y = int.Parse(array2[1]);
+                    }
+                }
+            }
+            if (!this._hasChimney.Value)
+            {
+                return;
+            }
+            this.chimneyTimer -= time.ElapsedGameTime.Milliseconds;
+            if (this.chimneyTimer > 0)
+            {
+                return;
+            }
+            if (this.HasActiveFireplaceBackport())
+            {
+                GameLocation value = this.buildingLocation.Value;
+                Vector2 vector = new Vector2((int)this.tileX * 64, (int)this.tileY * 64 + num * 64 - this.getSourceRect().Height * 4);
+                Vector2 vector2 = Vector2.Zero;
+                if (this.Model != null)
+                {
+                    vector2 = this.Model.DrawOffset * 4f;
+                }
+                TemporaryAnimatedSprite temporaryAnimatedSprite = new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Microsoft.Xna.Framework.Rectangle(372, 1956, 10, 10), new Vector2(vector.X + vector2.X, vector.Y + vector2.Y) + this._chimneyPosition * 4f + new Vector2(-8f, -12f), flipped: false, 0.002f, Color.Gray);
+                temporaryAnimatedSprite.alpha = 0.75f;
+                temporaryAnimatedSprite.motion = new Vector2(0f, -0.5f);
+                temporaryAnimatedSprite.acceleration = new Vector2(0.002f, 0f);
+                temporaryAnimatedSprite.interval = 99999f;
+                temporaryAnimatedSprite.layerDepth = 1f;
+                temporaryAnimatedSprite.scale = 2f;
+                temporaryAnimatedSprite.scaleChange = 0.02f;
+                temporaryAnimatedSprite.rotationChange = (float)Game1.random.Next(-5, 6) * (float)Math.PI / 256f;
+                value.temporarySprites.Add(temporaryAnimatedSprite);
+            }
+            this.chimneyTimer = 500;
+        }
+
+        public override void Update(GameTime time)
+        {
+            // TODO: When updated to SDV v1.6, this line should be replaced with base.Update(time)
+            UpdateBackport(time);
+
+            // Catch touch actions
+            if (this.Model != null)
+            {
+                Vector2 playerStandingPosition = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
+                if (buildingLocation.Value.lastTouchActionLocation.Equals(Vector2.Zero))
+                {
+                    string eventTile = this.Model.GetEventAtTile((int)playerStandingPosition.X - this.tileX.Value, (int)playerStandingPosition.Y - this.tileY.Value);
+                    buildingLocation.Value.lastTouchActionLocation = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
+                    if (eventTile != null)
+                    {
+                        eventTile = TextParser.ParseText(eventTile);
+                        eventTile = SolidFoundations.modHelper.Reflection.GetMethod(new Dialogue(eventTile, null), "checkForSpecialCharacters").Invoke<string>(eventTile);
+                        if (buildingLocation.Value.performAction(eventTile, Game1.player, new xTile.Dimensions.Location((int)buildingLocation.Value.lastTouchActionLocation.X, (int)buildingLocation.Value.lastTouchActionLocation.Y)) is false)
+                        {
+                            buildingLocation.Value.performTouchAction(eventTile, playerStandingPosition);
+                        }
+                    }
+                }
+                else if (!buildingLocation.Value.lastTouchActionLocation.Equals(playerStandingPosition))
+                {
+                    buildingLocation.Value.lastTouchActionLocation = Vector2.Zero;
+                }
+            }
+        }
     }
 }

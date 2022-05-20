@@ -8,5 +8,29 @@
   },
   "SortTileOffset": 3,
   "CollisionMap": "OXXXO\nXOOOX\nXOOOX\nXOXXX",
-  "FadeWhenBehind": false
+  "FadeWhenBehind": false,
+
+  "EventTiles": [
+    {
+      "Tile": {
+        "X": 1,
+        "Y": 1
+      },
+      "Action": "Dialogue Hello there, @"
+    },
+    {
+      "Tile": {
+        "X": 2,
+        "Y": 2
+      },
+      "Action": "Warp 2 2 Farmhouse"
+    },
+    {
+      "Tile": {
+        "X": 1,
+        "Y": 2
+      },
+      "Action": "Dialogue [LocalizedText Strings\\StringsFromCSFiles:ShopMenu.cs.11488] This is raw text"
+    }
+  ]
 }

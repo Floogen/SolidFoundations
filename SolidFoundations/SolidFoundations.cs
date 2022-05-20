@@ -157,6 +157,9 @@ namespace SolidFoundations
                     // Load the building
                     customBuilding.load();
 
+                    // Set the location
+                    customBuilding.buildingLocation.Value = buildableLocation;
+
                     // Restore the archived custom building
                     buildableLocation.buildings.Add(customBuilding);
 
