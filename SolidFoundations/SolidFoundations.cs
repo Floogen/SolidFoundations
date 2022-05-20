@@ -6,6 +6,7 @@ using SolidFoundations.Framework.Models.Buildings;
 using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Patches.Buildings;
 using SolidFoundations.Framework.Utilities;
+using SolidFoundations.Framework.Utilities.Backport;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -190,6 +191,9 @@ namespace SolidFoundations
         {
             // Load any owned content packs
             LoadContentPacks();
+
+            // Set up the backported GameStateQuery
+            GameStateQuery.SetupQueryTypes();
         }
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
