@@ -17,12 +17,13 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public bool HideBaseTexture { get; set; }
         public List<Sequence> Sequences { get; set; }
         public string Condition { get; set; }
+        public string[] MetadataFlags { get; set; }
 
         private int _cachedTime;
         private int _elapsedTime;
         private int _currentSequenceIndex;
 
-        public new Rectangle GetSourceRect(int time)
+        public Rectangle GetSourceRect(int time, GenericBuilding building)
         {
             if (Sequences is null || Sequences.Count <= _currentSequenceIndex)
             {
@@ -38,7 +39,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             if (_elapsedTime > sequence.Duration)
             {
                 _elapsedTime = 0;
-                _currentSequenceIndex = GetNextValidFrame(_currentSequenceIndex);
+                _currentSequenceIndex = GetNextValidFrame(building, _currentSequenceIndex);
             }
             _elapsedTime += time - _cachedTime;
             _cachedTime = time;
@@ -56,7 +57,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return sourceRect;
         }
 
-        public int GetNextValidFrame(int startingValue = 0)
+        public int GetNextValidFrame(GenericBuilding building, int startingValue = 0)
         {
             var currentIndex = startingValue;
             if (currentIndex + 1 < Sequences.Count)
@@ -69,9 +70,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
 
             var sequence = Sequences[currentIndex];
-            if (GameStateQuery.CheckConditions(sequence.Condition) is false)
+            if (building.ValidateConditions(sequence.Condition, sequence.MetadataFlags) is false)
             {
-                currentIndex = GetNextValidFrame(currentIndex);
+                currentIndex = GetNextValidFrame(building, currentIndex);
             }
             return currentIndex;
         }

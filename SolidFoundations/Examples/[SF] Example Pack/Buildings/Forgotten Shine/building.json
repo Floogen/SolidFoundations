@@ -1,0 +1,85 @@
+{
+  "Name": "Forgotten Shine",
+  "Description": "???",
+  "DrawShadow": false,
+  "FadeWhenBehind": false,
+
+  "SourceRect": "0 0 48 48",
+  "Size": {
+    "X": 3,
+    "Y": 2
+  },
+  "DrawLayers": [
+    {
+      "SourceRect": "48 32 16 16",
+      "DrawPosition": {
+        "X": 16,
+        "Y": 28
+      },
+      "DrawInBackground": false,
+      "SortTileOffset": 0,
+      "Sequences": [
+        {
+          "Frame": 0,
+          "Duration": 100
+        },
+        {
+          "Frame": 1,
+          "Duration": 100
+        },
+        {
+          "Frame": 2,
+          "Duration": 100
+        },
+        {
+          "Frame": 3,
+          "Duration": 100
+        }
+      ],
+      "Condition": "WEATHER Here rainy"
+    }
+  ],
+
+  "InteractiveTiles": [
+    {
+      "DialogueWithChoices": {
+        "Question": "What is your favorite color?",
+        "Responses": [
+          {
+            "Text": "Blue",
+            "Action": {
+              "ModifyFlag": {
+                "Name": "PassedTest",
+                "Type": "Permanent",
+                "Operation": "Add"
+              },
+              "Dialogue": {
+                "Text": "Right, off you go"
+              }
+            }
+          },
+          {
+            "Text": "Yellow?",
+            "Action": {
+              "ModifyFlag": {
+                "Name": "PassedTest",
+                "Operation": "Remove"
+              },
+              "Warp": {
+                "Map": "Mountain",
+                "DestinationTile": {
+                  "X": 99,
+                  "Y": 27
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Tile": {
+        "X": 1,
+        "Y": 1
+      }
+    }
+  ]
+}

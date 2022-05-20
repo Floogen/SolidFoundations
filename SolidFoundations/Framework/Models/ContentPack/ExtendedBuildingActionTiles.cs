@@ -9,11 +9,7 @@ using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {
-    public class Sequence
+    public class ExtendedBuildingActionTiles : BuildingActionTiles
     {
-        public int Frame { get; set; }
-        public int Duration { get; set; }
-        public string Condition { get; set; }
-        public string[] MetadataFlags { get; set; }
     }
 }

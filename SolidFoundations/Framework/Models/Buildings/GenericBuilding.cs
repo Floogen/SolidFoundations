@@ -110,6 +110,45 @@ namespace SolidFoundations.Framework.Models.ContentPack
             _lavaTexture = SolidFoundations.modHelper.GameContent.Load<Texture2D>("Maps/Mines/volcano_dungeon");
         }
 
+        public bool ValidateConditions(string condition, string[] metadataFlags = null)
+        {
+            if (GameStateQuery.CheckConditions(condition))
+            {
+                if (metadataFlags is not null)
+                {
+                    foreach (string flag in metadataFlags)
+                    {
+                        // Clear whitespace
+                        var cleanedFlag = flag.Replace(" ", String.Empty);
+                        bool flagShouldNotExist = String.IsNullOrEmpty(cleanedFlag) || cleanedFlag[0] != '!' ? false : true;
+                        if (flagShouldNotExist)
+                        {
+                            cleanedFlag = cleanedFlag[1..];
+                        }
+
+                        string flagKey = cleanedFlag.Contains(':') ? cleanedFlag.Split(':')[0] : String.Empty;
+                        string flagValue = cleanedFlag.Contains(':') && cleanedFlag.Split(':').Length > 1 ? cleanedFlag.Split(':')[1] : String.Empty;
+
+                        if (String.IsNullOrEmpty(flagKey) && this.GetMetadata(cleanedFlag) is null == flagShouldNotExist is false)
+                        {
+                            return false;
+                        }
+                        else if (this.GetMetadata(flagKey) is null)
+                        {
+                            return false;
+                        }
+                        else if (this.GetMetadata(flagKey).Equals(flagValue, StringComparison.OrdinalIgnoreCase) is false)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        }
+
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
         public virtual void ToggleAnimalDoor(Farmer who)
         {
@@ -133,7 +172,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return true;
         }
 
-        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.doAction
+        // Preserve this override (specifically the CustomAction) when updated to SDV v1.6, but call the base doAction method if ExtendedBuildingModel.
         public override bool doAction(Vector2 tileLocation, Farmer who)
         {
             if (who.isRidingHorse())
@@ -198,7 +237,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
             }
 
-            return base.doAction(tileLocation, who); ;
+            return base.doAction(tileLocation, who);
         }
 
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.doesTileHaveProperty
@@ -430,7 +469,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 vector2 = this.Model.DrawOffset * 4f;
             }
             Vector2 vector3 = new Vector2(0f, this.getSourceRect().Height);
-            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && GameStateQuery.CheckConditions(l.Condition)) is false)
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.MetadataFlags)) is false)
             {
                 b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
             }
@@ -461,7 +500,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => GameStateQuery.CheckConditions(d.Condition)))
+                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => ValidateConditions(d.Condition, d.MetadataFlags)))
                     {
                         if (drawLayer.DrawInBackground)
                         {
@@ -478,7 +517,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         num2 = num - drawLayer.SortTileOffset * 64f;
                         num2 += 1f;
                         num2 /= 10000f;
-                        Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds);
+                        Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
                         sourceRect = this.ApplySourceRectOffsets(sourceRect);
                         vector2 = Vector2.Zero;
                         if (drawLayer.AnimalDoorOffset != Point.Zero)
@@ -539,7 +578,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         continue;
                     }
                 }
-                Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds);
+                Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
                 sourceRect = this.ApplySourceRectOffsets(sourceRect);
                 Vector2 vector3 = Vector2.Zero;
                 if (drawLayer.AnimalDoorOffset != Point.Zero)

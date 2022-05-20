@@ -20,11 +20,35 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingDrawLayer> DrawLayers;
+        [ContentSerializer(Optional = true)]
+        public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
 
         [ContentSerializer(Optional = true)]
-        public List<BuildingActionTiles> EventTiles = new List<BuildingActionTiles>();
-
+        public List<ExtendedBuildingActionTiles> EventTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, string> _eventTiles;
+
+        public new string GetActionAtTile(int relative_x, int relative_y)
+        {
+            Point key = new Point(relative_x, relative_y);
+            if (_actionTiles == null)
+            {
+                _actionTiles = new Dictionary<Point, string>();
+                foreach (ExtendedBuildingActionTiles actionTile in ActionTiles)
+                {
+                    _actionTiles[actionTile.Tile] = actionTile.Action;
+                }
+            }
+            string value = null;
+            if (!_actionTiles.TryGetValue(key, out value))
+            {
+                if (relative_x < 0 || relative_x >= Size.X || relative_y < 0 || relative_y >= Size.Y)
+                {
+                    return null;
+                }
+                value = DefaultAction;
+            }
+            return value;
+        }
 
         public string GetEventAtTile(int relative_x, int relative_y)
         {
@@ -32,7 +56,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             if (_eventTiles == null)
             {
                 _eventTiles = new Dictionary<Point, string>();
-                foreach (BuildingActionTiles eventTile in EventTiles)
+                foreach (ExtendedBuildingActionTiles eventTile in EventTiles)
                 {
                     _eventTiles[eventTile.Tile] = eventTile.Action;
                 }
