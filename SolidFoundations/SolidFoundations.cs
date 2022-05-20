@@ -10,6 +10,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
+using StardewValley.TerrainFeatures;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -69,6 +70,8 @@ namespace SolidFoundations
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
         }
 
+
+        // TODO: When using SDV v1.6, delete this event hook
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
             if (!Game1.IsMasterGame)
@@ -115,6 +118,7 @@ namespace SolidFoundations
             // TODO: Implement this
         }
 
+        // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
@@ -165,6 +169,19 @@ namespace SolidFoundations
 
                     // Trigger the missed DayUpdate
                     customBuilding.dayUpdate(Game1.dayOfMonth);
+
+                    // Clear any grass
+                    for (int x = 0; x < customBuilding.tilesWide.Value; x++)
+                    {
+                        for (int y = 0; y < customBuilding.tilesHigh.Value; y++)
+                        {
+                            var targetTile = new Vector2(customBuilding.tileX.Value + x, customBuilding.tileY.Value + y);
+                            if (buildableLocation.terrainFeatures.ContainsKey(targetTile) && buildableLocation.terrainFeatures[targetTile] is Grass grass && grass is not null)
+                            {
+                                buildableLocation.terrainFeatures.Remove(targetTile);
+                            }
+                        }
+                    }
                 }
             }
         }
