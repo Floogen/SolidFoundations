@@ -19,6 +19,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         internal string PackName { get; set; }
 
         [ContentSerializer(Optional = true)]
+        public new List<ExtendedBuildingDrawLayer> DrawLayers;
+
+        [ContentSerializer(Optional = true)]
         public List<BuildingActionTiles> EventTiles = new List<BuildingActionTiles>();
 
         protected Dictionary<Point, string> _eventTiles;

@@ -23,6 +23,13 @@
         "X": 2,
         "Y": 2
       },
+      "Action": "MagicWarp Farmhouse 2 2"
+    },
+    {
+      "Tile": {
+        "X": 3,
+        "Y": 1
+      },
       "Action": "Warp 2 2 Farmhouse"
     },
     {

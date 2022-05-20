@@ -28,30 +28,30 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public string LocationName { get; set; }
 
         // Start of backported properties
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.buildingLocation
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.buildingLocation
         [XmlIgnore]
         public NetLocationRef buildingLocation = new NetLocationRef();
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.buildingChests
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.buildingChests
         public NetList<Chest, NetRef<Chest>> buildingChests = new NetList<Chest, NetRef<Chest>>();
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.animalDoorOpenAmount
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.animalDoorOpenAmount
         public readonly NetFloat animalDoorOpenAmount = new NetFloat();
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._buildingMetadata
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building._buildingMetadata
         [XmlIgnore]
         protected Dictionary<string, string> _buildingMetadata = new Dictionary<string, string>();
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._lastHouseUpgradeLevel
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building._lastHouseUpgradeLevel
         protected int _lastHouseUpgradeLevel = -1;
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._chimneyPosition
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building._chimneyPosition
         protected Vector2 _chimneyPosition = Vector2.Zero;
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building._hasChimney
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building._hasChimney
         protected bool? _hasChimney;
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.chimneyTimer
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.chimneyTimer
         protected int chimneyTimer = 500;
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.skinID
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.skinID
         public NetString skinID = new NetString();
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.nonInstancedIndoors
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.nonInstancedIndoors
         public readonly NetLocationRef nonInstancedIndoors = new NetLocationRef();
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.IndoorOrInstancedIndoor
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.IndoorOrInstancedIndoor
         public GameLocation IndoorOrInstancedIndoor
         {
             get
@@ -110,7 +110,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             _lavaTexture = SolidFoundations.modHelper.GameContent.Load<Texture2D>("Maps/Mines/volcano_dungeon");
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
         public virtual void ToggleAnimalDoor(Farmer who)
         {
             if (!this.animalDoorOpen)
@@ -127,16 +127,15 @@ namespace SolidFoundations.Framework.Models.ContentPack
             this.animalDoorOpen.Value = !this.animalDoorOpen;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
         public virtual bool OnUseHumanDoor(Farmer who)
         {
             return true;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.doAction
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.doAction
         public override bool doAction(Vector2 tileLocation, Farmer who)
         {
-            SolidFoundations.monitor.Log("123", LogLevel.Debug);
             if (who.isRidingHorse())
             {
                 return false;
@@ -202,7 +201,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return base.doAction(tileLocation, who); ;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.doesTileHaveProperty
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.doesTileHaveProperty
         public override bool doesTileHaveProperty(int tile_x, int tile_y, string property_name, string layer_name, ref string property_value)
         {
             if (this.Model != null)
@@ -213,7 +212,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
 
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.ApplySourceRectOffsets
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.ApplySourceRectOffsets
         public virtual Rectangle ApplySourceRectOffsets(Rectangle source)
         {
             if (this.Model.SeasonOffset != Point.Zero)
@@ -242,7 +241,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return source;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.getSourceRect
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.getSourceRect
         public override Rectangle getSourceRect()
         {
             Rectangle rectangle = this.Model.GetSourceRect();
@@ -254,7 +253,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return rectangle;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.intersects
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.intersects
         public override bool intersects(Rectangle boundingBox)
         {
             if (this.Model != null)
@@ -286,7 +285,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return new Rectangle((int)this.tileX.Value * 64, (int)this.tileY.Value * 64, (int)this.tilesWide.Value * 64, (int)this.tilesHigh.Value * 64).Intersects(boundingBox);
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.isTilePassable
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.isTilePassable
         public override bool isTilePassable(Vector2 tile)
         {
             bool flag = this.occupiesTile(tile);
@@ -302,7 +301,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
 
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.IsInTilePropertyRadius
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.IsInTilePropertyRadius
         public virtual bool IsInTilePropertyRadius(Vector2 tileLocation)
         {
             int additionalTilePropertyRadius = this.GetAdditionalTilePropertyRadius();
@@ -313,7 +312,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return false;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.getIndoors
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.getIndoors
         protected override GameLocation getIndoors(string nameOfIndoorsWithoutUnique)
         {
             GameLocation gameLocation = null;
@@ -360,7 +359,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return gameLocation;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.GetBuildingChest
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.GetBuildingChest
         public Chest GetBuildingChest(string name)
         {
             foreach (Chest buildingChest in this.buildingChests)
@@ -373,7 +372,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return null;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.GetBuildingChestData
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.GetBuildingChestData
         public BuildingChest GetBuildingChestData(string name)
         {
             if (this.Model == null)
@@ -391,7 +390,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return null;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.ShouldDrawShadow
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.ShouldDrawShadow
         public bool ShouldDrawShadow()
         {
             if (this.Model != null && !this.Model.DrawShadow)
@@ -401,7 +400,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return true;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.draw
+        // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.
         public override void draw(SpriteBatch b)
         {
             if (this.isMoving)
@@ -431,7 +430,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 vector2 = this.Model.DrawOffset * 4f;
             }
             Vector2 vector3 = new Vector2(0f, this.getSourceRect().Height);
-            b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture) is false)
+            {
+                b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
+            }
             if ((bool)this.magical.Value && this.buildingType.Value.Equals("Gold Clock"))
             {
                 b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2((int)this.tileX.Value * 64 + 92, (int)this.tileY.Value * 64 - 40)), Town.hourHandSource, Color.White * this.alpha.Value, (float)(Math.PI * 2.0 * (double)((float)(Game1.timeOfDay % 1200) / 1200f) + (double)((float)Game1.gameTimeInterval / 7000f / 23f)), new Vector2(2.5f, 8f), 3f, SpriteEffects.None, (float)(((int)this.tileY.Value + (int)this.tilesHigh.Value) * 64) / 10000f + 0.0001f);
@@ -459,7 +461,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (BuildingDrawLayer drawLayer in this.Model.DrawLayers)
+                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers)
                     {
                         if (drawLayer.DrawInBackground)
                         {
@@ -512,7 +514,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.draw
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.draw
         public override void drawBackground(SpriteBatch b)
         {
             if (this.isMoving || (int)this.daysOfConstructionLeft > 0 || (int)this.newConstructionTimer > 0 || this.Model == null || this.Model.DrawLayers == null)
@@ -522,7 +524,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             Vector2 vector = new Vector2((int)this.tileX * 64, (int)this.tileY * 64 + (int)this.tilesHigh * 64);
             Vector2 vector2 = new Vector2(0f, this.getSourceRect().Height);
-            foreach (BuildingDrawLayer drawLayer in this.Model.DrawLayers)
+            foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers)
             {
                 if (!drawLayer.DrawInBackground)
                 {
@@ -553,7 +555,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.Buildings.Building.GetMetadata
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.GetMetadata
         public string GetMetadata(string key)
         {
             if (this._buildingMetadata == null)
@@ -589,7 +591,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return null;
         }
 
-        // TODO: When updated to SDV v1.6, this class should be deleted in favor of using the native StardewValley.GameLocation.hasActiveFireplace
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.GameLocation.hasActiveFireplace
         public bool HasActiveFireplaceBackport()
         {
             if (this.Model is null || this.IndoorOrInstancedIndoor is null)
@@ -608,7 +610,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
 
 
-        // TODO: When updated to SDV v1.6, this class should be deleted
+        // TODO: When updated to SDV v1.6, this method should be deleted
         private void UpdateBackport(GameTime time)
         {
             this.alpha.Value = Math.Min(1f, this.alpha.Value + 0.05f);
