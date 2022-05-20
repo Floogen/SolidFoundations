@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.Backport;
+using SolidFoundations.Framework.Utilities.Backport;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +16,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         public bool HideBaseTexture { get; set; }
         public List<Sequence> Sequences { get; set; }
+        public string Condition { get; set; }
 
         private int _cachedTime;
-
         private int _elapsedTime;
-
         private int _currentSequenceIndex;
 
         public new Rectangle GetSourceRect(int time)
@@ -38,7 +38,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             if (_elapsedTime > sequence.Duration)
             {
                 _elapsedTime = 0;
-                _currentSequenceIndex = _currentSequenceIndex + 1 >= Sequences.Count ? 0 : _currentSequenceIndex + 1;
+                _currentSequenceIndex = GetNextValidFrame(_currentSequenceIndex);
             }
             _elapsedTime += time - _cachedTime;
             _cachedTime = time;
@@ -54,6 +54,26 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 sourceRect.Y += sourceRect.Height * (sequence.Frame / this.FramesPerRow);
             }
             return sourceRect;
+        }
+
+        public int GetNextValidFrame(int startingValue = 0)
+        {
+            var currentIndex = startingValue;
+            if (currentIndex + 1 < Sequences.Count)
+            {
+                currentIndex = currentIndex + 1;
+            }
+            else
+            {
+                currentIndex = 0;
+            }
+
+            var sequence = Sequences[currentIndex];
+            if (GameStateQuery.CheckConditions(sequence.Condition) is false)
+            {
+                currentIndex = GetNextValidFrame(currentIndex);
+            }
+            return currentIndex;
         }
     }
 }

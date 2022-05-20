@@ -430,7 +430,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 vector2 = this.Model.DrawOffset * 4f;
             }
             Vector2 vector3 = new Vector2(0f, this.getSourceRect().Height);
-            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture) is false)
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && GameStateQuery.CheckConditions(l.Condition)) is false)
             {
                 b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
             }
@@ -461,7 +461,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers)
+                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => GameStateQuery.CheckConditions(d.Condition)))
                     {
                         if (drawLayer.DrawInBackground)
                         {

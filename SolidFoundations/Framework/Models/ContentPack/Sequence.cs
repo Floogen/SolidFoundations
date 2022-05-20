@@ -13,6 +13,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         public int Frame { get; set; }
         public int Duration { get; set; }
-        public string Condition { get; set; } // TODO: Implement this with SDV v1.6, using the game's query system
+        public string Condition { get; set; }
     }
 }
