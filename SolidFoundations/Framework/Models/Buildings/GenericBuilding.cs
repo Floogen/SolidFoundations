@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using SolidFoundations.Framework.Models.Backport;
+using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
 using StardewModdingAPI;
 using StardewValley;
@@ -110,13 +111,13 @@ namespace SolidFoundations.Framework.Models.ContentPack
             _lavaTexture = SolidFoundations.modHelper.GameContent.Load<Texture2D>("Maps/Mines/volcano_dungeon");
         }
 
-        public bool ValidateConditions(string condition, string[] metadataFlags = null)
+        public bool ValidateConditions(string condition, string[] modDataFlags = null)
         {
             if (GameStateQuery.CheckConditions(condition))
             {
-                if (metadataFlags is not null)
+                if (modDataFlags is not null)
                 {
-                    foreach (string flag in metadataFlags)
+                    foreach (string flag in modDataFlags)
                     {
                         // Clear whitespace
                         var cleanedFlag = flag.Replace(" ", String.Empty);
@@ -125,24 +126,18 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         {
                             cleanedFlag = cleanedFlag[1..];
                         }
+                        cleanedFlag = String.Concat(ModDataKeys.FLAG_BASE, ".", cleanedFlag.ToLower());
 
-                        string flagKey = cleanedFlag.Contains(':') ? cleanedFlag.Split(':')[0] : String.Empty;
-                        string flagValue = cleanedFlag.Contains(':') && cleanedFlag.Split(':').Length > 1 ? cleanedFlag.Split(':')[1] : String.Empty;
+                        //string flagKey = cleanedFlag.Contains(':') ? cleanedFlag.Split(':')[0] : String.Empty;
+                        //string flagValue = cleanedFlag.Contains(':') && cleanedFlag.Split(':').Length > 1 ? cleanedFlag.Split(':')[1] : String.Empty;
 
-                        if (String.IsNullOrEmpty(flagKey) && this.GetMetadata(cleanedFlag) is null == flagShouldNotExist is false)
-                        {
-                            return false;
-                        }
-                        else if (this.GetMetadata(flagKey) is null)
-                        {
-                            return false;
-                        }
-                        else if (this.GetMetadata(flagKey).Equals(flagValue, StringComparison.OrdinalIgnoreCase) is false)
+                        if (this.modData.ContainsKey(cleanedFlag) is false == flagShouldNotExist is false)
                         {
                             return false;
                         }
                     }
                 }
+
                 return true;
             }
 
@@ -469,7 +464,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 vector2 = this.Model.DrawOffset * 4f;
             }
             Vector2 vector3 = new Vector2(0f, this.getSourceRect().Height);
-            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.MetadataFlags)) is false)
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.ModDataFlags)) is false)
             {
                 b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
             }
@@ -500,7 +495,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => ValidateConditions(d.Condition, d.MetadataFlags)))
+                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => ValidateConditions(d.Condition, d.ModDataFlags)))
                     {
                         if (drawLayer.DrawInBackground)
                         {

@@ -14,6 +14,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public int Frame { get; set; }
         public int Duration { get; set; }
         public string Condition { get; set; }
-        public string[] MetadataFlags { get; set; }
+        public string[] ModDataFlags { get; set; }
     }
 }

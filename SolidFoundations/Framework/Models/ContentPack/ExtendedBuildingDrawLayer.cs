@@ -17,7 +17,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public bool HideBaseTexture { get; set; }
         public List<Sequence> Sequences { get; set; }
         public string Condition { get; set; }
-        public string[] MetadataFlags { get; set; }
+        public string[] ModDataFlags { get; set; }
 
         private int _cachedTime;
         private int _elapsedTime;
@@ -70,7 +70,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
 
             var sequence = Sequences[currentIndex];
-            if (building.ValidateConditions(sequence.Condition, sequence.MetadataFlags) is false)
+            if (building.ValidateConditions(sequence.Condition, sequence.ModDataFlags) is false)
             {
                 currentIndex = GetNextValidFrame(building, currentIndex);
             }
