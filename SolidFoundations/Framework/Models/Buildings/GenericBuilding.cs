@@ -219,13 +219,22 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     this.GetAdditionalTilePropertyRadius();
                     if (who.IsLocalPlayer && this.IsInTilePropertyRadius(tileLocation) && !this.isTilePassable(tileLocation))
                     {
-                        string actionAtTile = this.Model.GetActionAtTile((int)tileLocation.X - this.tileX.Value, (int)tileLocation.Y - this.tileY.Value);
-                        if (actionAtTile != null)
+                        Point actualTile = new Point((int)tileLocation.X - this.tileX.Value, (int)tileLocation.Y - this.tileY.Value);
+                        var specialActionAtTile = this.Model.GetSpecialActionAtTile(actualTile.X, actualTile.Y);
+                        if (specialActionAtTile is not null)
                         {
-                            actionAtTile = TextParser.ParseText(actionAtTile);
-                            if (who.currentLocation.performAction(actionAtTile, who, new xTile.Dimensions.Location((int)tileLocation.X, (int)tileLocation.Y)))
+                            specialActionAtTile.Trigger(who, this);
+                        }
+                        else
+                        {
+                            string actionAtTile = this.Model.GetActionAtTile(actualTile.X, actualTile.Y);
+                            if (actionAtTile != null)
                             {
-                                return true;
+                                actionAtTile = TextParser.ParseText(actionAtTile);
+                                if (who.currentLocation.performAction(actionAtTile, who, new xTile.Dimensions.Location((int)tileLocation.X, (int)tileLocation.Y)))
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }

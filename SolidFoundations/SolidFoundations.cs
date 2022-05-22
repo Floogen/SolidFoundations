@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
 using SolidFoundations.Framework.Models.ContentPack;
+using SolidFoundations.Framework.Models.ContentPack.Actions;
 using SolidFoundations.Framework.Patches.Buildings;
 using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
@@ -72,7 +73,7 @@ namespace SolidFoundations
         }
 
 
-        // TODO: When using SDV v1.6, delete this event hook
+        // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
             if (!Game1.IsMasterGame)
@@ -94,6 +95,15 @@ namespace SolidFoundations
                 var archivedBuildingsData = new List<ArchivedBuildingData>();
                 foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
                 {
+                    // Remove any FlagType.Temporary stored in the buildings modData
+                    foreach (var key in customBuilding.modData.Keys.Where(k => k.Contains(ModDataKeys.FLAG_BASE)).ToList())
+                    {
+                        if (customBuilding.modData[key] == SpecialAction.FlagType.Temporary.ToString())
+                        {
+                            customBuilding.modData.Remove(key);
+                        }
+                    }
+
                     // Prepare the custom building objects for this location to be stored externally
                     allExistingCustomBuildings.Add(customBuilding);
                     archivedBuildingsData.Add(new ArchivedBuildingData() { Id = customBuilding.Id, TileX = customBuilding.tileX.Value, TileY = customBuilding.tileY.Value });

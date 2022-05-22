@@ -12,5 +12,8 @@ namespace SolidFoundations.Framework.Utilities
         internal const string GENERIC_BLUEPRINT = "SolidFoundations.GenericBlueprint";
         internal const string GENERIC_BUILDING = "SolidFoundations.GenericBuilding";
         internal const string LOCATION_CUSTOM_BUILDINGS = "SolidFoundations.Location.CustomBuildings";
+
+        // Flags
+        internal const string FLAG_BASE = "SolidFoundations.Flag";
     }
 }

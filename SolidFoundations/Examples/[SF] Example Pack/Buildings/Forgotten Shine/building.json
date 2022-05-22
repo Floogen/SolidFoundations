@@ -36,50 +36,45 @@
           "Duration": 100
         }
       ],
-      "Condition": "WEATHER Here rainy"
+      "ModDataFlags": [
+        "PassedTest"
+      ]
     }
   ],
-
-  "InteractiveTiles": [
-    {
-      "DialogueWithChoices": {
-        "Question": "What is your favorite color?",
-        "Responses": [
-          {
-            "Text": "Blue",
-            "Action": {
-              "ModifyFlag": {
-                "Name": "PassedTest",
-                "Type": "Permanent",
-                "Operation": "Add"
-              },
-              "Dialogue": {
-                "Text": "Right, off you go"
-              }
+  "DefaultSpecialAction": {
+    "DialogueWithChoices": {
+      "Question": "What is your favorite color, @?",
+      "Responses": [
+        {
+          "Text": "Blue",
+          "SpecialAction": {
+            "ModifyFlag": {
+              "Name": "PassedTest",
+              "Type": "Permanent",
+              "Operation": "Add"
+            },
+            "Dialogue": {
+              "Text": "Right, off you go"
             }
-          },
-          {
-            "Text": "Yellow?",
-            "Action": {
-              "ModifyFlag": {
-                "Name": "PassedTest",
-                "Operation": "Remove"
-              },
-              "Warp": {
-                "Map": "Mountain",
-                "DestinationTile": {
-                  "X": 99,
-                  "Y": 27
-                }
+          }
+        },
+        {
+          "Text": "Yellow?",
+          "SpecialAction": {
+            "ModifyFlag": {
+              "Name": "PassedTest",
+              "Operation": "Remove"
+            },
+            "Warp": {
+              "Map": "Mountain",
+              "DestinationTile": {
+                "X": 99,
+                "Y": 27
               }
             }
           }
-        ]
-      },
-      "Tile": {
-        "X": 1,
-        "Y": 1
-      }
+        }
+      ]
     }
-  ]
+  }
 }

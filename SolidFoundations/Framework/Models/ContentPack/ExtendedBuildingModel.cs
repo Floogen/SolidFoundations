@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.Backport;
+using SolidFoundations.Framework.Models.ContentPack.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         // TODO: When using SDV v1.6, likely flag this as obsolete in favor of StardewValley.GameData.BuildingData.BuildCondition?
         public bool IsLocked { get; set; }
+        public SpecialAction DefaultSpecialAction { get; set; }
 
         internal string Owner { get; set; }
         internal string PackName { get; set; }
@@ -22,10 +24,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public new List<ExtendedBuildingDrawLayer> DrawLayers;
         [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
+        protected Dictionary<Point, SpecialAction> _specialActionTiles;
 
         [ContentSerializer(Optional = true)]
         public List<ExtendedBuildingActionTiles> EventTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, string> _eventTiles;
+        protected Dictionary<Point, SpecialAction> _specialEventTiles;
 
         public new string GetActionAtTile(int relative_x, int relative_y)
         {
@@ -38,6 +42,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     _actionTiles[actionTile.Tile] = actionTile.Action;
                 }
             }
+
             string value = null;
             if (!_actionTiles.TryGetValue(key, out value))
             {
@@ -46,6 +51,30 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     return null;
                 }
                 value = DefaultAction;
+            }
+            return value;
+        }
+
+        public SpecialAction GetSpecialActionAtTile(int relative_x, int relative_y)
+        {
+            Point key = new Point(relative_x, relative_y);
+            if (_specialActionTiles == null)
+            {
+                _specialActionTiles = new Dictionary<Point, SpecialAction>();
+                foreach (ExtendedBuildingActionTiles actionTile in ActionTiles)
+                {
+                    _specialActionTiles[actionTile.Tile] = actionTile.SpecialAction;
+                }
+            }
+
+            SpecialAction value = null;
+            if (!_specialActionTiles.TryGetValue(key, out value))
+            {
+                if (relative_x < 0 || relative_x >= Size.X || relative_y < 0 || relative_y >= Size.Y)
+                {
+                    return null;
+                }
+                value = DefaultSpecialAction;
             }
             return value;
         }
@@ -70,6 +99,30 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     return null;
                 }
                 value = DefaultAction;
+            }
+            return value;
+        }
+
+        public SpecialAction GetSpecialEventAtTile(int relative_x, int relative_y)
+        {
+            Point key = new Point(relative_x, relative_y);
+            if (_specialEventTiles == null)
+            {
+                _specialEventTiles = new Dictionary<Point, SpecialAction>();
+                foreach (ExtendedBuildingActionTiles eventTile in EventTiles)
+                {
+                    _specialEventTiles[eventTile.Tile] = eventTile.SpecialAction;
+                }
+            }
+
+            SpecialAction value = null;
+            if (!_specialEventTiles.TryGetValue(key, out value))
+            {
+                if (relative_x < 0 || relative_x >= Size.X || relative_y < 0 || relative_y >= Size.Y)
+                {
+                    return null;
+                }
+                value = DefaultSpecialAction;
             }
             return value;
         }
