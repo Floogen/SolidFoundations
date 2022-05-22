@@ -1,0 +1,11 @@
+{
+  "Name": "Worn Down Building",
+  "Description": "...",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 7,
+    "Y": 3
+  },
+  "CollisionMap": "XOXXXXX\nXOXXXXX\nXOXXXXX"
+}
