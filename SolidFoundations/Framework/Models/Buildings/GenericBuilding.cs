@@ -623,12 +623,54 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 this.drawShadow(b, x, y);
             }
-            b.Draw(this.texture.Value, new Vector2(x, y), this.getSourceRect(), this.color, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, num2);
+
+            var adjustedScale = 4f;
+            var adjustedOffset = new Vector2(0f, 0f);
+            var buildingRectangle = this.getSourceRect();
+            if (this.Model != null)
+            {
+                if (buildingRectangle.Height + buildingRectangle.Width > 300)
+                {
+                    adjustedScale = 2f;
+                    adjustedOffset = new Vector2(-80, -80);
+                }
+                else if (buildingRectangle.Height + buildingRectangle.Width > 250)
+                {
+                    adjustedScale = 3f;
+                    adjustedOffset = new Vector2(-16, -24);
+                }
+
+                if (this.Model.DrawLayers != null)
+                {
+                    foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawInBackground is true && ValidateConditions(l.Condition, l.ModDataFlags)))
+                    {
+                        if (drawLayer.OnlyDrawIfChestHasContents == null)
+                        {
+                            num2 = num - drawLayer.SortTileOffset * 64f;
+                            num2 += 1f;
+                            if (drawLayer.DrawInBackground)
+                            {
+                                num2 = 0f;
+                            }
+                            num2 /= 10000f;
+                            Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
+                            sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                            Texture2D texture2D = this.texture.Value;
+                            if (drawLayer.Texture != null)
+                            {
+                                texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                            }
+                            b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
+                        }
+                    }
+                }
+            }
+            b.Draw(this.texture.Value, new Vector2(x, y), buildingRectangle, this.color, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
             if (this.Model == null || this.Model.DrawLayers == null)
             {
                 return;
             }
-            foreach (BuildingDrawLayer drawLayer in this.Model.DrawLayers)
+            foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawInBackground is false && ValidateConditions(l.Condition, l.ModDataFlags)))
             {
                 if (drawLayer.OnlyDrawIfChestHasContents == null)
                 {
@@ -639,14 +681,14 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         num2 = 0f;
                     }
                     num2 /= 10000f;
-                    Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds);
+                    Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
                     sourceRect = this.ApplySourceRectOffsets(sourceRect);
                     Texture2D texture2D = this.texture.Value;
                     if (drawLayer.Texture != null)
                     {
                         texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
                     }
-                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * 4f, sourceRect, Color.White, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, num2);
+                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
                 }
             }
         }
@@ -661,7 +703,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             Vector2 vector = new Vector2((int)this.tileX * 64, (int)this.tileY * 64 + (int)this.tilesHigh * 64);
             Vector2 vector2 = new Vector2(0f, this.getSourceRect().Height);
-            foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers)
+            foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(l => ValidateConditions(l.Condition, l.ModDataFlags)))
             {
                 if (!drawLayer.DrawInBackground)
                 {

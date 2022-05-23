@@ -1,0 +1,69 @@
+{
+  "Name": "Forge",
+  "Description": "...",
+  "DrawShadow": false,
+
+  "SourceRect": "0 0 160 160",
+  "Size": {
+    "X": 10,
+    "Y": 10
+  },
+  "CollisionMap": "XXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX\nXXXXOOXXXX\nXXOOOOOOXX\nXXXOOOOXXX\nXXXXOOXXXX\nXXXXOOXXXX\nXXXXOOXXXX",
+  "DrawLayers": [
+    {
+      "SourceRect": "0 160 160 160",
+      "DrawPosition": {
+        "X": 0,
+        "Y": 0
+      },
+      "DrawInBackground": true,
+      "SortTileOffset": 0,
+      "FrameCount": 10,
+      "FramesPerRow": 1,
+      "FrameDuration": 150
+    },
+    {
+      "SourceRect": "160 0 32 16",
+      "DrawPosition": {
+        "X": 64,
+        "Y": 32
+      },
+      "DrawInBackground": false,
+      "SortTileOffset": 10,
+      "FrameCount": 4,
+      "FramesPerRow": 1,
+      "FrameDuration": 100
+    },
+    {
+      "SourceRect": "160 64 32 16",
+      "DrawPosition": {
+        "X": 64,
+        "Y": 48
+      },
+      "DrawInBackground": false,
+      "SortTileOffset": 10,
+      "FramesPerRow": 1,
+      "Sequences": [
+        {
+          "Frame": 0,
+          "Duration": 250
+        },
+        {
+          "Frame": 1,
+          "Duration": 500
+        },
+        {
+          "Frame": 0,
+          "Duration": 250
+        },
+        {
+          "Frame": 2,
+          "Duration": 250
+        }
+      ]
+    }
+  ],
+  "SortTileOffset": 10,
+
+
+}
