@@ -1,0 +1,39 @@
+{
+  "Name": "Striped Tent",
+  "Description": "A striped tent. Can be used to store things.",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 6,
+    "Y": 3
+  },
+  "CollisionMap": "XXXXXX\nXXOOXX\nXXOOXX",
+
+  "IndoorMap": "StripedTent",
+  "TunnelDoors": [
+    {
+      "X": 2,
+      "Y": 2
+    },
+    {
+      "X": 3,
+      "Y": 2
+    }
+  ],
+
+  "Blueprint": {
+    "Vendor": "Robin",
+    "DaysToConstruct": 0,
+    "RequiredMoney": 2500,
+    "RequiredItems": [
+      {
+        "Name": "Cloth",
+        "Quantity": 25
+      },
+      {
+        "Name": "Wood",
+        "Quantity": 25
+      }
+    ]
+  }
+}

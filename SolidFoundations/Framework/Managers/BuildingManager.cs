@@ -54,7 +54,7 @@ namespace SolidFoundations.Framework.Managers
                 return;
             }
 
-            _assetPathToMap[assetPath] = pathToMap;
+            _assetPathToMap[$"Maps/{assetPath}"] = pathToMap;
         }
 
         public void AddTextureAsset(string assetPath, string pathToTexture)

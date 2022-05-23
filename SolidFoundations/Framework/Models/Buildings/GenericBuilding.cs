@@ -75,6 +75,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public GenericBuilding(ExtendedBuildingModel model) : base(new BluePrint(model.ID), Vector2.Zero)
         {
             RefreshModel(model);
+
+            base.indoors.Value = this.getIndoors(this.Model.IndoorMap);
+            this.updateInteriorWarps();
         }
 
         public GenericBuilding(ExtendedBuildingModel model, BluePrint bluePrint) : base(bluePrint, Vector2.Zero)
@@ -82,6 +85,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
             RefreshModel(model);
 
             base.texture = new Lazy<Texture2D>(bluePrint.texture);
+
+            base.indoors.Value = this.getIndoors(this.Model.IndoorMap);
+            this.updateInteriorWarps();
         }
 
         public GenericBuilding(ExtendedBuildingModel model, BluePrint bluePrint, Vector2 tileLocation) : base(bluePrint, tileLocation)
@@ -89,6 +95,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
             RefreshModel(model);
 
             base.texture = new Lazy<Texture2D>(bluePrint.texture);
+
+            base.indoors.Value = this.getIndoors(this.Model.IndoorMap);
+            this.updateInteriorWarps();
         }
 
         public void RefreshModel()
@@ -109,6 +118,14 @@ namespace SolidFoundations.Framework.Models.ContentPack
             base.fadeWhenPlayerIsBehind.Value = model.FadeWhenBehind;
 
             _lavaTexture = SolidFoundations.modHelper.GameContent.Load<Texture2D>("Maps/Mines/volcano_dungeon");
+
+            if (String.IsNullOrEmpty(this.Model.IndoorMap) is false && base.indoors.Value is not null)
+            {
+                base.indoors.Value.mapPath.Value = "Maps\\" + this.Model.IndoorMap;
+                base.indoors.Value.loadMap(base.indoors.Value.mapPath.Value, true);
+                base.indoors.Value.updateWarps();
+                this.updateInteriorWarps(base.indoors.Value);
+            }
         }
 
         public bool ValidateConditions(string condition, string[] modDataFlags = null)
@@ -359,7 +376,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
         protected override GameLocation getIndoors(string nameOfIndoorsWithoutUnique)
         {
             GameLocation gameLocation = null;
-            if (this.Model != null && !string.IsNullOrEmpty(this.Model.IndoorMap))
+            if (this.indoors.Value is not null)
+            {
+                gameLocation = this.indoors.Value;
+            }
+            else if (this.Model != null && !string.IsNullOrEmpty(this.Model.IndoorMap))
             {
                 Type type = typeof(GameLocation);
                 try
@@ -373,6 +394,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     type = typeof(GameLocation);
                 }
+
                 try
                 {
                     gameLocation = (GameLocation)Activator.CreateInstance(type, "Maps\\" + this.Model.IndoorMap, this.buildingType.Value);
@@ -441,6 +463,31 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 return false;
             }
             return true;
+        }
+
+        // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.
+        public override void updateInteriorWarps(GameLocation interior = null)
+        {
+            base.updateInteriorWarps(interior);
+
+            if (interior is null)
+            {
+                interior = this.IndoorOrInstancedIndoor;
+            }
+
+            if (interior is not null && this.Model is not null && this.Model.TunnelDoors.Count > 0)
+            {
+                var firstTunnelDoor = this.Model.TunnelDoors.First();
+                foreach (Warp warp in interior.warps)
+                {
+                    if (this.buildingLocation.Value != null)
+                    {
+                        warp.TargetName = this.buildingLocation.Value.Name;
+                    }
+                    warp.TargetX = firstTunnelDoor.X + (int)this.tileX.Value;
+                    warp.TargetY = firstTunnelDoor.Y + (int)this.tileY.Value + 1;
+                }
+            }
         }
 
         // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.

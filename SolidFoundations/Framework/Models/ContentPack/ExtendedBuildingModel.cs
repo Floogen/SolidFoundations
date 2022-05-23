@@ -15,7 +15,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         // TODO: When using SDV v1.6, likely flag this as obsolete in favor of StardewValley.GameData.BuildingData.BuildCondition?
         public bool IsLocked { get; set; }
-        public SpecialAction DefaultSpecialAction { get; set; }
 
         internal string Owner { get; set; }
         internal string PackName { get; set; }

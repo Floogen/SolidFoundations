@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Xml.Serialization;
+using xTile;
 
 namespace SolidFoundations
 {
@@ -165,6 +166,11 @@ namespace SolidFoundations
                     {
                         continue;
                     }
+                    GameLocation interior = null;
+                    if (customBuilding.indoors.Value is not null)
+                    {
+                        interior = customBuilding.indoors.Value;
+                    }
 
                     // Update the building's model
                     customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(customBuilding.Id));
@@ -216,12 +222,12 @@ namespace SolidFoundations
                     e.LoadFrom(() => Helper.ModContent.Load<Texture2D>(texturePath), AssetLoadPriority.Exclusive);
                 }
             }
-            else if (e.DataType == typeof(string))
+            else if (e.DataType == typeof(Map))
             {
                 var asset = e.Name;
                 if (buildingManager.GetMapAsset(asset.Name) is var mapPath && mapPath is not null)
                 {
-                    e.LoadFrom(() => mapPath, AssetLoadPriority.Exclusive);
+                    e.LoadFrom(() => Helper.ModContent.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
                 }
             }
         }
@@ -236,9 +242,53 @@ namespace SolidFoundations
             {
                 Monitor.Log($"Loading data from pack: {contentPack.Manifest.Name} {contentPack.Manifest.Version} by {contentPack.Manifest.Author}", silent ? LogLevel.Trace : LogLevel.Debug);
 
+                // Load interiors
+                Monitor.Log($"Loading interiors from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
+                LoadInteriors(contentPack);
+
+
                 // Load the buildings
                 Monitor.Log($"Loading buildings from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
                 LoadBuildings(contentPack);
+            }
+        }
+
+        private void LoadInteriors(IContentPack contentPack)
+        {
+            try
+            {
+                var directoryPath = new DirectoryInfo(Path.Combine(contentPack.DirectoryPath, "Interiors"));
+                if (!directoryPath.Exists)
+                {
+                    Monitor.Log($"No Interiors folder found for the content pack {contentPack.Manifest.Name}", LogLevel.Trace);
+                    return;
+                }
+
+                var interiorFiles = directoryPath.GetFiles("*.tmx", SearchOption.AllDirectories);
+                if (interiorFiles.Count() == 0)
+                {
+                    Monitor.Log($"No TMX files found under Interiors for the content pack {contentPack.Manifest.Name}", LogLevel.Warn);
+                    return;
+                }
+
+                foreach (var interiorFile in interiorFiles)
+                {
+                    // Cache the interior map
+                    if (interiorFile.Exists)
+                    {
+                        var mapPath = contentPack.ModContent.GetInternalAssetName(interiorFile.FullName).Name;
+                        buildingManager.AddMapAsset(Path.GetFileNameWithoutExtension(interiorFile.Name), interiorFile.FullName);
+                    }
+                    else
+                    {
+                        Monitor.Log($"Unable to add interior for {interiorFile.FullName} from {contentPack.Manifest.Name}!", LogLevel.Warn);
+                        continue;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Monitor.Log($"Error loading interiors from content pack {contentPack.Manifest.Name}: {ex}", LogLevel.Error);
             }
         }
 
@@ -303,23 +353,6 @@ namespace SolidFoundations
                     {
                         Monitor.Log($"Unable to add building for {buildingModel.Name} from {contentPack.Manifest.Name}: No associated building.png given", LogLevel.Warn);
                         continue;
-                    }
-
-                    // Verify that we are given an interior.tmx if any InteractiveTiles
-                    var mapPath = Path.Combine(folder.FullName, "interior.tmx");
-                    if (String.IsNullOrEmpty(buildingModel.AnimalDoor) is false || (buildingModel.HumanDoor.X != -1 && buildingModel.HumanDoor.Y != -1))
-                    {
-                        // Cache the interior map
-                        if (File.Exists(mapPath))
-                        {
-                            buildingModel.IndoorMap = contentPack.ModContent.GetInternalAssetName(mapPath).Name;
-                            buildingManager.AddMapAsset(buildingModel.IndoorMap, mapPath);
-                        }
-                        else
-                        {
-                            Monitor.Log($"Unable to add building for {buildingModel.Name} from {contentPack.Manifest.Name}: The Doorways property was used but no interior.tmx was found", LogLevel.Warn);
-                            continue;
-                        }
                     }
 
                     // Load in the texture
