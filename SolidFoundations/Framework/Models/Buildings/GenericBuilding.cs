@@ -748,15 +748,37 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 Vector2 playerStandingPosition = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
                 if (buildingLocation.Value.lastTouchActionLocation.Equals(Vector2.Zero))
                 {
-                    string eventTile = this.Model.GetEventAtTile((int)playerStandingPosition.X - this.tileX.Value, (int)playerStandingPosition.Y - this.tileY.Value);
-                    buildingLocation.Value.lastTouchActionLocation = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
-                    if (eventTile != null)
+                    Point actualTile = new Point((int)playerStandingPosition.X - this.tileX.Value, (int)playerStandingPosition.Y - this.tileY.Value);
+                    if (this.Model.TunnelDoors.Any(d => d.X == actualTile.X && d.Y == actualTile.Y))
                     {
-                        eventTile = TextParser.ParseText(eventTile);
-                        eventTile = SolidFoundations.modHelper.Reflection.GetMethod(new Dialogue(eventTile, null), "checkForSpecialCharacters").Invoke<string>(eventTile);
-                        if (buildingLocation.Value.performAction(eventTile, Game1.player, new xTile.Dimensions.Location((int)buildingLocation.Value.lastTouchActionLocation.X, (int)buildingLocation.Value.lastTouchActionLocation.Y)) is false)
+                        buildingLocation.Value.lastTouchActionLocation = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
+                        bool isStructure = false;
+                        if (this.indoors.Value != null)
                         {
-                            buildingLocation.Value.performTouchAction(eventTile, playerStandingPosition);
+                            isStructure = true;
+                        }
+                        Game1.warpFarmer(this.IndoorOrInstancedIndoor.NameOrUniqueName, this.IndoorOrInstancedIndoor.warps[0].X, this.IndoorOrInstancedIndoor.warps[0].Y - 1, Game1.player.FacingDirection, isStructure);
+                    }
+
+                    var specialActionAtTile = this.Model.GetSpecialEventAtTile(actualTile.X, actualTile.Y);
+                    if (specialActionAtTile is not null)
+                    {
+                        buildingLocation.Value.lastTouchActionLocation = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
+                        specialActionAtTile.Trigger(Game1.player, this);
+                    }
+                    else
+                    {
+                        string eventTile = this.Model.GetEventAtTile((int)playerStandingPosition.X - this.tileX.Value, (int)playerStandingPosition.Y - this.tileY.Value);
+                        if (eventTile != null)
+                        {
+                            buildingLocation.Value.lastTouchActionLocation = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
+
+                            eventTile = TextParser.ParseText(eventTile);
+                            eventTile = SolidFoundations.modHelper.Reflection.GetMethod(new Dialogue(eventTile, null), "checkForSpecialCharacters").Invoke<string>(eventTile);
+                            if (buildingLocation.Value.performAction(eventTile, Game1.player, new xTile.Dimensions.Location((int)buildingLocation.Value.lastTouchActionLocation.X, (int)buildingLocation.Value.lastTouchActionLocation.Y)) is false)
+                            {
+                                buildingLocation.Value.performTouchAction(eventTile, playerStandingPosition);
+                            }
                         }
                     }
                 }
