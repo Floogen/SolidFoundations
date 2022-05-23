@@ -51,6 +51,9 @@ namespace SolidFoundations
             {
                 var harmony = new Harmony(this.ModManifest.UniqueID);
 
+                // Apply location patches
+                new GameLocationPatch(monitor, helper).Apply(harmony);
+
                 // Apply building patches
                 new BluePrintPatch(monitor, helper).Apply(harmony);
                 new BuildingPatch(monitor, helper).Apply(harmony);

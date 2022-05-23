@@ -49,6 +49,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
         protected int chimneyTimer = 500;
         // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.skinID
         public NetString skinID = new NetString();
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.hasLoaded
+        public bool hasLoaded;
 
         // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.nonInstancedIndoors
         public readonly NetLocationRef nonInstancedIndoors = new NetLocationRef();
@@ -64,8 +66,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 return this.nonInstancedIndoors.Value;
             }
         }
-
-        private Texture2D _lavaTexture;
 
         public GenericBuilding() : base()
         {
@@ -117,8 +117,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
             base.tilesHigh.Value = model.Size.Y;
             base.fadeWhenPlayerIsBehind.Value = model.FadeWhenBehind;
 
-            _lavaTexture = SolidFoundations.modHelper.GameContent.Load<Texture2D>("Maps/Mines/volcano_dungeon");
-
             if (String.IsNullOrEmpty(this.Model.IndoorMap) is false && base.indoors.Value is not null)
             {
                 base.indoors.Value.mapPath.Value = "Maps\\" + this.Model.IndoorMap;
@@ -126,6 +124,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 base.indoors.Value.updateWarps();
                 this.updateInteriorWarps(base.indoors.Value);
             }
+            this.LoadFromBuildingData(false);
         }
 
         public bool ValidateConditions(string condition, string[] modDataFlags = null)
@@ -424,6 +423,126 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return gameLocation;
         }
 
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.LoadFromBuildingData
+        public virtual void LoadFromBuildingData(bool for_upgrade = false)
+        {
+            if (this.Model == null)
+            {
+                return;
+            }
+            this.tilesWide.Value = this.Model.Size.X;
+            this.tilesHigh.Value = this.Model.Size.Y;
+            this.humanDoor.X = this.Model.HumanDoor.X;
+            this.humanDoor.Y = this.Model.HumanDoor.Y;
+            this.animalDoor.Value = this.Model.GetAnimalDoorRect().Location;
+            if (this.Model.MaxOccupants >= 0)
+            {
+                this.maxOccupants.Value = this.Model.MaxOccupants;
+            }
+            //this.hayCapacity.Value = this.Model.HayCapacity;
+            this.magical.Value = this.Model.Builder == "Wizard";
+            this.fadeWhenPlayerIsBehind.Value = this.Model.FadeWhenBehind;
+            foreach (KeyValuePair<string, string> modDatum in this.Model.ModData)
+            {
+                this.modData[modDatum.Key] = modDatum.Value;
+            }
+            if (this.indoors.Value != null)
+            {
+                this.indoors.Value.InvalidateCachedMultiplayerMap(SolidFoundations.multiplayer.cachedMultiplayerMaps);
+            }
+            if (!Game1.IsMasterGame)
+            {
+                return;
+            }
+            if (this.hasLoaded && this.nonInstancedIndoors.Value == null)
+            {
+                string indoorMap = this.Model.IndoorMap;
+                string text = typeof(GameLocation).ToString();
+                if (this.Model.IndoorMapType != null)
+                {
+                    text = this.Model.IndoorMapType;
+                }
+                if (indoorMap != null)
+                {
+                    if (this.indoors.Value == null)
+                    {
+                        this.indoors.Value = this.getIndoors(this.getBuildingMapFileName(this.Model.Name));
+                        this.InitializeIndoor(for_upgrade);
+                    }
+                    else if (this.indoors.Value.mapPath.Value == indoorMap)
+                    {
+                        if (for_upgrade)
+                        {
+                            this.InitializeIndoor(for_upgrade);
+                        }
+                    }
+                    else
+                    {
+                        if (this.indoors.Value.GetType().ToString() != text)
+                        {
+                            this.load();
+                        }
+                        else
+                        {
+                            this.indoors.Value.mapPath.Value = "Maps\\" + indoorMap;
+                            this.indoors.Value.updateMap();
+                        }
+                        this.updateInteriorWarps(this.indoors.Value);
+                        this.InitializeIndoor(for_upgrade);
+                    }
+                }
+            }
+
+            HashSet<string> hashSet = new HashSet<string>();
+            if (this.Model.Chests != null)
+            {
+                foreach (BuildingChest chest2 in this.Model.Chests)
+                {
+                    hashSet.Add(chest2.Name);
+                }
+            }
+            for (int num = this.buildingChests.Count - 1; num >= 0; num--)
+            {
+                if (!hashSet.Contains(this.buildingChests[num].Name))
+                {
+                    this.buildingChests.RemoveAt(num);
+                }
+            }
+            if (this.Model.Chests == null)
+            {
+                return;
+            }
+            foreach (BuildingChest chest3 in this.Model.Chests)
+            {
+                if (this.GetBuildingChest(chest3.Name) == null)
+                {
+                    Chest chest = new Chest(playerChest: true);
+                    chest.Name = chest3.Name;
+                    this.buildingChests.Add(chest);
+                }
+            }
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.GetBuildingChest
+        protected override string getBuildingMapFileName(string name)
+        {
+            if (this.Model != null)
+            {
+                return this.Model.IndoorMap;
+            }
+            return name switch
+            {
+                "Slime Hutch" => "SlimeHutch",
+                "Big Coop" => "Coop2",
+                "Deluxe Coop" => "Coop3",
+                "Big Barn" => "Barn2",
+                "Deluxe Barn" => "Barn3",
+                "Big Shed" => "Shed2",
+                _ => name,
+            };
+        }
+
+
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.GetBuildingChest
         public Chest GetBuildingChest(string name)
         {
@@ -465,6 +584,183 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return true;
         }
 
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.GetItemConversionForItem
+        public BuildingItemConversion GetItemConversionForItem(Item item, Chest chest)
+        {
+            if (this.Model == null)
+            {
+                return null;
+            }
+            if (item == null)
+            {
+                return null;
+            }
+            if (chest == null)
+            {
+                return null;
+            }
+            foreach (BuildingItemConversion itemConversion in this.Model.ItemConversions)
+            {
+                if (!(itemConversion.SourceChest == chest.Name))
+                {
+                    continue;
+                }
+                bool flag = false;
+                foreach (string requiredTag in itemConversion.RequiredTags)
+                {
+                    if (!item.HasContextTag(requiredTag))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag)
+                {
+                    return itemConversion;
+                }
+            }
+            return null;
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.IsValidObjectForChest
+        public bool IsValidObjectForChest(Item item, Chest chest)
+        {
+            return this.GetItemConversionForItem(item, chest) != null;
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.PerformBuildingChestAction
+        public bool PerformBuildingChestAction(string name, Farmer who)
+        {
+            Chest chest = this.GetBuildingChest(name);
+            if (chest == null)
+            {
+                return false;
+            }
+
+            BuildingChest buildingChestData = this.GetBuildingChestData(name);
+            if (buildingChestData == null)
+            {
+                return false;
+            }
+            if (buildingChestData.Type == BuildingChest.ChestType.Chest)
+            {
+                Game1.activeClickableMenu = new ItemGrabMenu(chest.items, reverseGrab: false, showReceivingMenu: true, (Item item) => this.IsValidObjectForChest(item, chest), chest.grabItemFromInventory, null, chest.grabItemFromChest, snapToBottom: false, canBeExitedWithKey: true, playRightClickSound: true, allowRightClick: true, showOrganizeButton: true, 1, null, -1, this);
+                (Game1.activeClickableMenu as ItemGrabMenu).inventory.moveItemSound = buildingChestData.Sound;
+                return true;
+            }
+            if (buildingChestData.Type == BuildingChest.ChestType.Load)
+            {
+                if (who != null && who.ActiveObject != null)
+                {
+                    bool flag = false;
+                    if (this.IsValidObjectForChest(who.ActiveObject, chest))
+                    {
+                        flag = true;
+                    }
+                    if (!flag)
+                    {
+                        if (buildingChestData.InvalidItemMessage != null)
+                        {
+                            Game1.showRedMessage(TextParser.ParseText(buildingChestData.InvalidItemMessage));
+                        }
+                        return false;
+                    }
+                    BuildingItemConversion itemConversionForItem = this.GetItemConversionForItem(who.ActiveObject, chest);
+                    Utility.consolidateStacks(chest.items);
+                    chest.clearNulls();
+                    int numberOfItemThatCanBeAddedToThisInventoryList = Toolkit.GetNumberOfItemThatCanBeAddedToThisInventoryList(who.ActiveObject, chest.items, 36);
+                    if (who.ActiveObject.Stack > itemConversionForItem.RequiredCount && numberOfItemThatCanBeAddedToThisInventoryList < itemConversionForItem.RequiredCount)
+                    {
+                        Game1.showRedMessage(TextParser.ParseText(buildingChestData.ChestFullMessage));
+                        return false;
+                    }
+                    int num = Math.Min(numberOfItemThatCanBeAddedToThisInventoryList, who.ActiveObject.Stack) / itemConversionForItem.RequiredCount * itemConversionForItem.RequiredCount;
+                    if (num == 0)
+                    {
+                        if (buildingChestData.InvalidItemMessage != null)
+                        {
+                            Game1.showRedMessage(TextParser.ParseText(buildingChestData.InvalidCountMessage));
+                        }
+                        return false;
+                    }
+                    Item one = who.ActiveObject.getOne();
+                    Object @object = (Object)Toolkit.ConsumeStack(who.ActiveObject, num);
+                    who.ActiveObject = null;
+                    if (@object != null)
+                    {
+                        who.ActiveObject = @object;
+                    }
+                    one.Stack = num;
+                    Utility.addItemToThisInventoryList(one, chest.items, 36);
+                    if (buildingChestData.Sound != null)
+                    {
+                        Game1.playSound(buildingChestData.Sound);
+                    }
+                }
+                return true;
+            }
+            if (buildingChestData.Type == BuildingChest.ChestType.Collect)
+            {
+                Utility.CollectSingleItemOrShowChestMenu(chest);
+                return true;
+            }
+            return false;
+        }
+
+        public override void load()
+        {
+            base.load();
+            this.hasLoaded = true;
+        }
+
+        // Preserve this override when updated to SDV v1.6, but call the base draw method if InitializeIndoor.
+        public virtual void InitializeIndoor(bool for_upgrade)
+        {
+            if (this.Model == null || this.indoors.Value == null)
+            {
+                return;
+            }
+            if (this.IndoorOrInstancedIndoor is AnimalHouse && this.Model.MaxOccupants > 0)
+            {
+                (this.IndoorOrInstancedIndoor as AnimalHouse).animalLimit.Value = this.Model.MaxOccupants;
+            }
+            if (for_upgrade && this.Model.IndoorItemMoves != null)
+            {
+                foreach (IndoorItemMove indoorItemMove in this.Model.IndoorItemMoves)
+                {
+                    for (int i = 0; i < indoorItemMove.Size.X; i++)
+                    {
+                        for (int j = 0; j < indoorItemMove.Size.Y; j++)
+                        {
+                            this.IndoorOrInstancedIndoor.moveObject(indoorItemMove.Source.X + i, indoorItemMove.Source.Y + j, indoorItemMove.Destination.X + i, indoorItemMove.Destination.Y + j);
+                        }
+                    }
+                }
+            }
+            if (this.Model.IndoorItems == null)
+            {
+                return;
+            }
+            foreach (IndoorItemAdd indoorItem in this.Model.IndoorItems)
+            {
+                Point tile = indoorItem.Tile;
+                if (this.IndoorOrInstancedIndoor.objects.ContainsKey(Utility.PointToVector2(tile)) || int.TryParse(indoorItem.ItemID, out int id) is false)
+                {
+                    continue;
+                }
+                Item item = new Object(id, 1);
+                if (item is StardewValley.Object)
+                {
+                    if (indoorItem.Indestructible)
+                    {
+                        (item as StardewValley.Object).fragility.Value = 2;
+                    }
+                    (item as StardewValley.Object).tileLocation.Value = Utility.PointToVector2(tile);
+                    this.IndoorOrInstancedIndoor.objects.Add(new Vector2(tile.X, tile.Y), item as StardewValley.Object);
+                }
+            }
+        }
+
         // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.
         public override void updateInteriorWarps(GameLocation interior = null)
         {
@@ -486,6 +782,126 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     }
                     warp.TargetX = firstTunnelDoor.X + (int)this.tileX.Value;
                     warp.TargetY = firstTunnelDoor.Y + (int)this.tileY.Value + 1;
+                }
+            }
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.dayUpdate
+        public override void dayUpdate(int dayOfMonth)
+        {
+            base.dayUpdate(dayOfMonth);
+
+            if (this.Model is null || this.Model.ItemConversions is null)
+            {
+                return;
+            }
+            foreach (BuildingItemConversion itemConversion in this.Model.ItemConversions)
+            {
+                int num = 0;
+                int num2 = 0;
+                Chest buildingChest = this.GetBuildingChest(itemConversion.SourceChest);
+                Chest buildingChest2 = this.GetBuildingChest(itemConversion.DestinationChest);
+                if (buildingChest == null)
+                {
+                    continue;
+                }
+                foreach (Item item4 in buildingChest.items)
+                {
+                    if (item4 == null)
+                    {
+                        continue;
+                    }
+                    bool flag = false;
+                    foreach (string requiredTag in itemConversion.RequiredTags)
+                    {
+                        if (!item4.HasContextTag(requiredTag))
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                    {
+                        continue;
+                    }
+                    num2 += item4.Stack;
+                    if (num2 >= itemConversion.RequiredCount)
+                    {
+                        int num3 = num2 / itemConversion.RequiredCount;
+                        if (itemConversion.MaxDailyConversions >= 0)
+                        {
+                            num3 = Math.Min(num3, itemConversion.MaxDailyConversions - num);
+                        }
+                        num += num3;
+                        num2 -= num3 * itemConversion.RequiredCount;
+                    }
+                    if (itemConversion.MaxDailyConversions >= 0 && num >= itemConversion.MaxDailyConversions)
+                    {
+                        break;
+                    }
+                }
+                if (num == 0)
+                {
+                    continue;
+                }
+                int num4 = 0;
+                for (int i = 0; i < num; i++)
+                {
+                    bool flag2 = false;
+                    for (int j = 0; j < itemConversion.ProducedItems.Count; j++)
+                    {
+                        AdditionalChopDrops additionalChopDrops = itemConversion.ProducedItems[j];
+                        if (!GameStateQuery.CheckConditions(additionalChopDrops.Condition))
+                        {
+                            continue;
+                        }
+                        int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
+                        if (num5 != 0 && int.TryParse(additionalChopDrops.ItemID, out int id))
+                        {
+                            Item item = new Object(id, num5);
+                            Item item2 = buildingChest2.addItem(item);
+                            if (item2 == null || item2.Stack != num5)
+                            {
+                                flag2 = true;
+                            }
+                        }
+                    }
+                    if (flag2)
+                    {
+                        num4++;
+                    }
+                }
+                if (num4 <= 0)
+                {
+                    continue;
+                }
+                int num6 = num4 * itemConversion.RequiredCount;
+                for (int k = 0; k < buildingChest.items.Count; k++)
+                {
+                    Item item3 = buildingChest.items[k];
+                    if (item3 == null)
+                    {
+                        continue;
+                    }
+                    bool flag3 = false;
+                    foreach (string requiredTag2 in itemConversion.RequiredTags)
+                    {
+                        if (!item3.HasContextTag(requiredTag2))
+                        {
+                            flag3 = true;
+                            break;
+                        }
+                    }
+                    if (!flag3)
+                    {
+                        int num7 = Math.Min(num6, item3.Stack);
+                        buildingChest.items[k] = Toolkit.ConsumeStack(item3, num7);
+                        num6 -= num7;
+                        if (num6 <= 0)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
         }

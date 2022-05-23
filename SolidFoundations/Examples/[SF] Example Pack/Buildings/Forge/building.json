@@ -65,5 +65,62 @@
   ],
   "SortTileOffset": 10,
 
-
+  "ActionTiles": [
+    {
+      "Tile": {
+        "X": 4,
+        "Y": 3
+      },
+      "Action": "BuildingChest Input"
+    },
+    {
+      "Tile": {
+        "X": 5,
+        "Y": 3
+      },
+      "Action": "BuildingChest Output"
+    }
+  ],
+  "Chests": [
+    {
+      "Name": "Input",
+      "Type": "Load",
+      "Sound": "Ship",
+      "InvalidItemMessage": "[LocalizedText Strings\\\\Buildings:CantMill]",
+      "InvalidCountMessage": "[LocalizedText Strings\\\\StringsFromCSFiles:BlueprintsMenu.cs.10002]",
+      "ChestFullMessage": "[LocalizedText Strings\\\\Buildings:MillFull]",
+      "DisplayTile": "-1, -1",
+      "DisplayHeight": 0.0
+    },
+    {
+      "Name": "Output",
+      "Type": "Collect",
+      "Sound": null,
+      "InvalidItemMessage": null,
+      "InvalidCountMessage": null,
+      "ChestFullMessage": null,
+      "DisplayTile": "5, 2",
+      "DisplayHeight": 1.5
+    }
+  ],
+  "ItemConversions": [
+    {
+      "RequiredTags": [
+        "id_o_128"
+      ],
+      "RequiredCount": 1,
+      "MaxDailyConversions": -1,
+      "SourceChest": "Input",
+      "DestinationChest": "Output",
+      "ProducedItems": [
+        {
+          "ItemID": "423",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 1.0,
+          "Condition": null
+        }
+      ]
+    }
+  ]
 }

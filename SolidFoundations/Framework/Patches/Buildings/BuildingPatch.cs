@@ -26,8 +26,6 @@ namespace SolidFoundations.Framework.Patches.Buildings
     {
         private readonly Type _object = typeof(Building);
 
-        private readonly Type _entity = typeof(Building);
-
         internal BuildingPatch(IMonitor modMonitor, IModHelper modHelper) : base(modMonitor, modHelper)
         {
 
@@ -35,7 +33,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         internal void Apply(Harmony harmony)
         {
-            harmony.Patch(AccessTools.Method(_entity, nameof(Building.resetTexture), null), prefix: new HarmonyMethod(GetType(), nameof(ResetTexturePrefix)));
+            harmony.Patch(AccessTools.Method(_object, nameof(Building.resetTexture), null), prefix: new HarmonyMethod(GetType(), nameof(ResetTexturePrefix)));
         }
 
         internal static bool ResetTexturePrefix(Building __instance)
