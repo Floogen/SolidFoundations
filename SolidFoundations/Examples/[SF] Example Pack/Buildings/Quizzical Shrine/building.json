@@ -1,0 +1,115 @@
+{
+  "Name": "Quizzical Shrine",
+  "Description": "???",
+  "DrawShadow": false,
+  "FadeWhenBehind": false,
+
+  "SourceRect": "0 0 48 48",
+  "Size": {
+    "X": 3,
+    "Y": 2
+  },
+  "DrawLayers": [
+    {
+      "SourceRect": "48 0 2 2",
+      "DrawPosition": {
+        "X": 13,
+        "Y": 7
+      },
+      "DrawInBackground": false,
+      "SortTileOffset": 0,
+      "ModDataFlags": [
+        "AttemptedTest"
+      ]
+    },
+    {
+      "SourceRect": "54 35 5 1",
+      "DrawPosition": {
+        "X": 22,
+        "Y": 35
+      },
+      "DrawInBackground": false,
+      "SortTileOffset": 0,
+      "ModDataFlags": [
+        "AttemptedTest"
+      ]
+    }
+  ],
+  "DefaultSpecialAction": {
+    "ConditionalActions": [
+      {
+        "DialogueWithChoices": {
+          "Question": "What is tomorrow's weather going to be like?",
+          "Responses": [
+            {
+              "Text": "Rainy",
+              "SpecialAction": {
+                "ModifyFlags": [
+                  {
+                    "Name": "AttemptedTest",
+                    "Type": "Temporary",
+                    "Operation": "Add"
+                  },
+                  {
+                    "Name": "PassedTest",
+                    "Type": "Temporary",
+                    "Operation": "Add"
+                  }
+                ],
+                "Dialogue": {
+                  "Text": "Well done!"
+                },
+                "ModifyInventory": {
+                  "ItemId": 268,
+                  "Quantity": 5,
+                  "Operation": "Add"
+                }
+              }
+            },
+            {
+              "Text": "Sunny",
+              "SpecialAction": {
+                "Dialogue": {
+                  "Text": "Hm, that isn't right. Try again tomorrow!"
+                },
+                "ModifyFlags": [
+                  {
+                    "Name": "AttemptedTest",
+                    "Type": "Temporary",
+                    "Operation": "Add"
+                  }
+                ]
+              }
+            },
+            {
+              "Text": "Stormy",
+              "SpecialAction": {
+                "Dialogue": {
+                  "Text": "Hm, that isn't right. Try again tomorrow!"
+                },
+                "ModifyFlags": [
+                  {
+                    "Name": "AttemptedTest",
+                    "Type": "Temporary",
+                    "Operation": "Add"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "ModDataFlags": [
+          "!AttemptedTest"
+        ]
+      },
+      {
+        "Dialogue": {
+          "Text": "You've already been quizzed for today. Try again tomorrow!"
+        },
+        "ModDataFlags": [
+          "AttemptedTest"
+        ]
+      }
+    ]
+  }
+}

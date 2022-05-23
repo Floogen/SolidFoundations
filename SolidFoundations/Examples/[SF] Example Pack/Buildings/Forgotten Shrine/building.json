@@ -1,5 +1,5 @@
 {
-  "Name": "Forgotten Shine",
+  "Name": "Forgotten Shrine",
   "Description": "???",
   "DrawShadow": false,
   "FadeWhenBehind": false,
@@ -48,11 +48,13 @@
         {
           "Text": "Blue",
           "SpecialAction": {
-            "ModifyFlag": {
-              "Name": "PassedTest",
-              "Type": "Permanent",
-              "Operation": "Add"
-            },
+            "ModifyFlags": [
+              {
+                "Name": "PassedTest",
+                "Type": "Permanent",
+                "Operation": "Add"
+              }
+            ],
             "Dialogue": {
               "Text": "Right, off you go"
             }
@@ -61,10 +63,12 @@
         {
           "Text": "Yellow?",
           "SpecialAction": {
-            "ModifyFlag": {
-              "Name": "PassedTest",
-              "Operation": "Remove"
-            },
+            "ModifyFlags": [
+              {
+                "Name": "PassedTest",
+                "Operation": "Remove"
+              }
+            ],
             "Warp": {
               "Map": "Mountain",
               "DestinationTile": {
