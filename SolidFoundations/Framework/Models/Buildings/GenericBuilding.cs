@@ -604,6 +604,53 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.drawInMenu
+        public override void drawInMenu(SpriteBatch b, int x, int y)
+        {
+            if (this.Model != null)
+            {
+                x += (int)(this.Model.DrawOffset.X * 4f);
+                y += (int)(this.Model.DrawOffset.Y * 4f);
+            }
+            float num = (int)this.tilesHigh.Value * 64;
+            float num2 = num;
+            if (this.Model != null)
+            {
+                num2 -= this.Model.SortTileOffset * 64f;
+            }
+            num2 /= 10000f;
+            if (this.ShouldDrawShadow())
+            {
+                this.drawShadow(b, x, y);
+            }
+            b.Draw(this.texture.Value, new Vector2(x, y), this.getSourceRect(), this.color, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, num2);
+            if (this.Model == null || this.Model.DrawLayers == null)
+            {
+                return;
+            }
+            foreach (BuildingDrawLayer drawLayer in this.Model.DrawLayers)
+            {
+                if (drawLayer.OnlyDrawIfChestHasContents == null)
+                {
+                    num2 = num - drawLayer.SortTileOffset * 64f;
+                    num2 += 1f;
+                    if (drawLayer.DrawInBackground)
+                    {
+                        num2 = 0f;
+                    }
+                    num2 /= 10000f;
+                    Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds);
+                    sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                    Texture2D texture2D = this.texture.Value;
+                    if (drawLayer.Texture != null)
+                    {
+                        texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                    }
+                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * 4f, sourceRect, Color.White, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, num2);
+                }
+            }
+        }
+
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.draw
         public override void drawBackground(SpriteBatch b)
         {
