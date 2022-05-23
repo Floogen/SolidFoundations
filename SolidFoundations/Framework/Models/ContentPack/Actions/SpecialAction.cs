@@ -1,7 +1,9 @@
 ﻿using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
 using StardewValley;
+using StardewValley.Locations;
 using StardewValley.Menus;
+using StardewValley.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +35,12 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             Remove
         }
 
+        public enum StoreType
+        {
+            Vanilla,
+            STF
+        }
+
         public string Condition { get; set; }
         public string[] ModDataFlags { get; set; }
 
@@ -41,6 +49,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public WarpAction Warp { get; set; }
         public QuestionResponseAction DialogueWithChoices { get; set; }
         public ModifyInventory ModifyInventory { get; set; }
+        public OpenShopAction OpenShop { get; set; }
         public List<ModifyModDataAction> ModifyFlags { get; set; }
         public List<SpecialAction> ConditionalActions { get; set; }
 
@@ -102,6 +111,19 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                         who.addItemToInventoryBool(itemToAdd);
                     }
                 }
+
+                // TODO: Implement removal
+            }
+            if (OpenShop is not null)
+            {
+                if (OpenShop.Type is StoreType.Vanilla)
+                {
+                    HandleVanillaShopMenu(OpenShop.Name, who);
+                }
+                else if (OpenShop.Type is StoreType.STF && SolidFoundations.apiManager.GetShopTileFrameworkApi() is not null)
+                {
+                    SolidFoundations.apiManager.GetShopTileFrameworkApi().OpenItemShop(OpenShop.Name);
+                }
             }
         }
 
@@ -129,6 +151,79 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             dialogueText = SolidFoundations.modHelper.Reflection.GetMethod(new Dialogue(dialogueText, null), "checkForSpecialCharacters").Invoke<string>(dialogueText);
 
             return dialogueText;
+        }
+
+        // Vanilla shop related
+        private void HandleVanillaShopMenu(string shopName, Farmer who)
+        {
+            switch (shopName.ToLower())
+            {
+                case "clint":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithStock(), 0, "Clint");
+                    return;
+                case "desertmerchant":
+                    Game1.activeClickableMenu = new ShopMenu(Desert.getDesertMerchantTradeStock(who), 0, "DesertTrade", onDesertTraderPurchase);
+                    return;
+                case "dwarf":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getDwarfShopStock(), 0, "Dwarf");
+                    return;
+                case "geodes":
+                    Game1.activeClickableMenu = new GeodeMenu();
+                    return;
+                case "gus":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getSaloonStock(), 0, "Gus", (item, farmer, amount) => onGenericPurchase(SynchronizedShopStock.SynchedShop.Saloon, item, farmer, amount));
+                    return;
+                case "harvey":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getHospitalStock());
+                    return;
+                case "itemrecovery":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getAdventureRecoveryStock(), 0, "Marlon_Recovery");
+                    return;
+                case "krobus":
+                    Game1.activeClickableMenu = new ShopMenu((Game1.getLocationFromName("Sewer") as Sewer).getShadowShopStock(), 0, "KrobusGone", null);
+                    return;
+                case "marlon":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getAdventureShopStock(), 0, "Marlon");
+                    return;
+                case "marnie":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getAnimalShopStock(), 0, "Marnie");
+                    return;
+                case "pierre":
+                    Game1.activeClickableMenu = new ShopMenu(new SeedShop().shopStock(), 0, "Pierre");
+                    return;
+                case "qi":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getQiShopStock(), 2);
+                    return;
+                case "sandy":
+                    Game1.activeClickableMenu = new ShopMenu(SolidFoundations.modHelper.Reflection.GetMethod(Game1.currentLocation, "sandyShopStock").Invoke<Dictionary<ISalable, int[]>>(), 0, "Sandy", (item, farmer, amount) => onGenericPurchase(SynchronizedShopStock.SynchedShop.Sandy, item, farmer, amount));
+                    return;
+                case "robin":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getCarpenterStock(), 0, "Robin");
+                    return;
+                case "travelingmerchant":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getTravelingMerchantStock((int)((long)Game1.uniqueIDForThisGame + Game1.stats.DaysPlayed)), 0, "Traveler", Utility.onTravelingMerchantShopPurchase);
+                    return;
+                case "toolupgrades":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithUpgradeStock(who), 0, "ClintUpgrade");
+                    return;
+                case "willy":
+                    Game1.activeClickableMenu = new ShopMenu(Utility.getFishShopStock(who), 0, "Willy");
+                    return;
+            }
+        }
+        private bool onDesertTraderPurchase(ISalable item, Farmer who, int amount)
+        {
+            if (item.Name == "Magic Rock Candy")
+            {
+                Desert.boughtMagicRockCandy = true;
+            }
+            return false;
+        }
+
+        private bool onGenericPurchase(SynchronizedShopStock.SynchedShop synchedShop, ISalable item, Farmer who, int amount)
+        {
+            who.team.synchronizedShopStock.OnItemPurchased(synchedShop, item, amount);
+            return false;
         }
     }
 }

@@ -32,6 +32,7 @@ namespace SolidFoundations
         internal static Multiplayer multiplayer;
 
         // Managers
+        internal static ApiManager apiManager;
         internal static BuildingManager buildingManager;
 
         public override void Entry(IModHelper helper)
@@ -42,6 +43,7 @@ namespace SolidFoundations
             multiplayer = helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
 
             // Set up the managers
+            apiManager = new ApiManager(monitor);
             buildingManager = new BuildingManager(monitor, helper);
 
             // Load our Harmony patches
@@ -205,6 +207,16 @@ namespace SolidFoundations
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
+            // Hook into the APIs we utilize
+            if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
+            {
+                //apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "Building", new BuildingToken());
+            }
+            if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
+            {
+                // Do nothing
+            }
+
             // Load any owned content packs
             LoadContentPacks();
 

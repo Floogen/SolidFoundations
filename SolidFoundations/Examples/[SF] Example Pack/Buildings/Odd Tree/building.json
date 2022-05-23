@@ -1,0 +1,25 @@
+{
+  "Name": "Odd Tree",
+  "Description": "...",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 7,
+    "Y": 3
+  },
+  "CollisionMap": "OOOOOOO\nOOXXXOO\nOOXXXOO",
+  "ActionTiles": [
+    {
+      "SpecialAction": {
+        "OpenShop": {
+          "Name": "Dwarf",
+          "Type": "Vanilla"
+        }
+      },
+      "Tile": {
+        "X": 3,
+        "Y": 2
+      }
+    }
+  ]
+}
