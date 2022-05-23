@@ -102,7 +102,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     return null;
                 }
-                value = DefaultAction;
             }
             return value;
         }
