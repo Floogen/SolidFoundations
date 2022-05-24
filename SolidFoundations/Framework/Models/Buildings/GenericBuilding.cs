@@ -160,6 +160,149 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return false;
         }
 
+        public void ProcessItemConversions(int minutesElapsed, bool isDayStart = false)
+        {
+            if (this.Model is null || this.Model.ItemConversions is null)
+            {
+                return;
+            }
+
+            foreach (ExtendedBuildingItemConversion itemConversion in this.Model.ItemConversions)
+            {
+                if (itemConversion.MinutesPerConversion > 0)
+                {
+                    if (itemConversion.MinutesRemaining - minutesElapsed > 0 && isDayStart is false)
+                    {
+                        itemConversion.MinutesRemaining -= minutesElapsed;
+                        continue;
+                    }
+                    else if (itemConversion.RefreshMaxDailyConversions)
+                    {
+                        if (itemConversion.CachedMaxDailyConversions is null)
+                        {
+                            itemConversion.CachedMaxDailyConversions = itemConversion.MaxDailyConversions;
+                        }
+                        else
+                        {
+                            itemConversion.MaxDailyConversions = (int)itemConversion.CachedMaxDailyConversions;
+                        }
+                    }
+                    itemConversion.MinutesRemaining = itemConversion.MinutesPerConversion;
+                }
+                else if (isDayStart is false)
+                {
+                    continue;
+                }
+
+                int num = 0;
+                int num2 = 0;
+                Chest buildingChest = this.GetBuildingChest(itemConversion.SourceChest);
+                Chest buildingChest2 = this.GetBuildingChest(itemConversion.DestinationChest);
+                if (buildingChest == null)
+                {
+                    continue;
+                }
+                foreach (Item item4 in buildingChest.items)
+                {
+                    if (item4 == null)
+                    {
+                        continue;
+                    }
+                    bool flag = false;
+                    foreach (string requiredTag in itemConversion.RequiredTags)
+                    {
+                        if (!item4.HasContextTag(requiredTag))
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                    {
+                        continue;
+                    }
+                    num2 += item4.Stack;
+                    if (num2 >= itemConversion.RequiredCount)
+                    {
+                        int num3 = num2 / itemConversion.RequiredCount;
+                        if (itemConversion.MaxDailyConversions >= 0)
+                        {
+                            num3 = Math.Min(num3, itemConversion.MaxDailyConversions - num);
+                        }
+                        num += num3;
+                        num2 -= num3 * itemConversion.RequiredCount;
+                    }
+                    if (itemConversion.MaxDailyConversions >= 0 && num >= itemConversion.MaxDailyConversions)
+                    {
+                        break;
+                    }
+                }
+                if (num == 0)
+                {
+                    continue;
+                }
+                int num4 = 0;
+                for (int i = 0; i < num; i++)
+                {
+                    bool flag2 = false;
+                    for (int j = 0; j < itemConversion.ProducedItems.Count; j++)
+                    {
+                        AdditionalChopDrops additionalChopDrops = itemConversion.ProducedItems[j];
+                        if (!GameStateQuery.CheckConditions(additionalChopDrops.Condition))
+                        {
+                            continue;
+                        }
+                        int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
+                        if (num5 != 0 && int.TryParse(additionalChopDrops.ItemID, out int id))
+                        {
+                            Item item = new Object(id, num5);
+                            Item item2 = buildingChest2.addItem(item);
+                            if (item2 == null || item2.Stack != num5)
+                            {
+                                flag2 = true;
+                            }
+                        }
+                    }
+                    if (flag2)
+                    {
+                        num4++;
+                    }
+                }
+                if (num4 <= 0)
+                {
+                    continue;
+                }
+                int num6 = num4 * itemConversion.RequiredCount;
+                for (int k = 0; k < buildingChest.items.Count; k++)
+                {
+                    Item item3 = buildingChest.items[k];
+                    if (item3 == null)
+                    {
+                        continue;
+                    }
+                    bool flag3 = false;
+                    foreach (string requiredTag2 in itemConversion.RequiredTags)
+                    {
+                        if (!item3.HasContextTag(requiredTag2))
+                        {
+                            flag3 = true;
+                            break;
+                        }
+                    }
+                    if (!flag3)
+                    {
+                        int num7 = Math.Min(num6, item3.Stack);
+                        buildingChest.items[k] = Toolkit.ConsumeStack(item3, num7);
+                        num6 -= num7;
+                        if (num6 <= 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.OnUseHumanDoor
         public virtual void ToggleAnimalDoor(Farmer who)
         {
@@ -761,7 +904,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
-        // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.
+        // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel
         public override void updateInteriorWarps(GameLocation interior = null)
         {
             base.updateInteriorWarps(interior);
@@ -786,124 +929,20 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
-        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.dayUpdate
+        // Preserve this override when updated to SDV v1.6, but call the base dayUpdate method if ExtendedBuildingModel
         public override void dayUpdate(int dayOfMonth)
         {
             base.dayUpdate(dayOfMonth);
 
-            if (this.Model is null || this.Model.ItemConversions is null)
-            {
-                return;
-            }
-            foreach (BuildingItemConversion itemConversion in this.Model.ItemConversions)
-            {
-                int num = 0;
-                int num2 = 0;
-                Chest buildingChest = this.GetBuildingChest(itemConversion.SourceChest);
-                Chest buildingChest2 = this.GetBuildingChest(itemConversion.DestinationChest);
-                if (buildingChest == null)
-                {
-                    continue;
-                }
-                foreach (Item item4 in buildingChest.items)
-                {
-                    if (item4 == null)
-                    {
-                        continue;
-                    }
-                    bool flag = false;
-                    foreach (string requiredTag in itemConversion.RequiredTags)
-                    {
-                        if (!item4.HasContextTag(requiredTag))
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (flag)
-                    {
-                        continue;
-                    }
-                    num2 += item4.Stack;
-                    if (num2 >= itemConversion.RequiredCount)
-                    {
-                        int num3 = num2 / itemConversion.RequiredCount;
-                        if (itemConversion.MaxDailyConversions >= 0)
-                        {
-                            num3 = Math.Min(num3, itemConversion.MaxDailyConversions - num);
-                        }
-                        num += num3;
-                        num2 -= num3 * itemConversion.RequiredCount;
-                    }
-                    if (itemConversion.MaxDailyConversions >= 0 && num >= itemConversion.MaxDailyConversions)
-                    {
-                        break;
-                    }
-                }
-                if (num == 0)
-                {
-                    continue;
-                }
-                int num4 = 0;
-                for (int i = 0; i < num; i++)
-                {
-                    bool flag2 = false;
-                    for (int j = 0; j < itemConversion.ProducedItems.Count; j++)
-                    {
-                        AdditionalChopDrops additionalChopDrops = itemConversion.ProducedItems[j];
-                        if (!GameStateQuery.CheckConditions(additionalChopDrops.Condition))
-                        {
-                            continue;
-                        }
-                        int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
-                        if (num5 != 0 && int.TryParse(additionalChopDrops.ItemID, out int id))
-                        {
-                            Item item = new Object(id, num5);
-                            Item item2 = buildingChest2.addItem(item);
-                            if (item2 == null || item2.Stack != num5)
-                            {
-                                flag2 = true;
-                            }
-                        }
-                    }
-                    if (flag2)
-                    {
-                        num4++;
-                    }
-                }
-                if (num4 <= 0)
-                {
-                    continue;
-                }
-                int num6 = num4 * itemConversion.RequiredCount;
-                for (int k = 0; k < buildingChest.items.Count; k++)
-                {
-                    Item item3 = buildingChest.items[k];
-                    if (item3 == null)
-                    {
-                        continue;
-                    }
-                    bool flag3 = false;
-                    foreach (string requiredTag2 in itemConversion.RequiredTags)
-                    {
-                        if (!item3.HasContextTag(requiredTag2))
-                        {
-                            flag3 = true;
-                            break;
-                        }
-                    }
-                    if (!flag3)
-                    {
-                        int num7 = Math.Min(num6, item3.Stack);
-                        buildingChest.items[k] = Toolkit.ConsumeStack(item3, num7);
-                        num6 -= num7;
-                        if (num6 <= 0)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
+            this.ProcessItemConversions(0, true);
+        }
+
+        public override void performTenMinuteAction(int timeElapsed)
+        {
+            base.performTenMinuteAction(timeElapsed);
+
+            // Update building item conversions
+            this.ProcessItemConversions(timeElapsed, false);
         }
 
         // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.
@@ -962,7 +1001,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                         // TODO: Display item texture here
                         //ParsedItemData itemDataForItemID = Utility.GetItemDataForItemID(buildingChest2.items[0].QualifiedItemID);
-                        //b.Draw(itemDataForItemID.texture, Game1.GlobalToLocal(Game1.viewport, new Vector2(num4 + 32f + 4f, num5 + 32f + num3)), itemDataForItemID.GetSourceRect(0), Color.White * 0.75f, 0f, new Vector2(8f, 8f), 4f, SpriteEffects.None, (num2 + 1f) / 10000f);
+                        b.Draw(Game1.objectSpriteSheet, Game1.GlobalToLocal(Game1.viewport, new Vector2(num4 + 32f + 4f, num5 + 32f + num3)), Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, buildingChest2.items[0].ParentSheetIndex, 16, 16), Color.White * 0.75f, 0f, new Vector2(8f, 8f), 4f, SpriteEffects.None, (num2 + 1f) / 10000f);
                     }
                 }
                 if (this.Model.DrawLayers != null)

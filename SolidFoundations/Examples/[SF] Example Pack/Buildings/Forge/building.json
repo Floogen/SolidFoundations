@@ -60,7 +60,8 @@
           "Frame": 2,
           "Duration": 250
         }
-      ]
+      ],
+      "OnlyDrawIfChestHasContents":  "Input"
     }
   ],
   "SortTileOffset": 10,
@@ -86,9 +87,9 @@
       "Name": "Input",
       "Type": "Load",
       "Sound": "Ship",
-      "InvalidItemMessage": "[LocalizedText Strings\\\\Buildings:CantMill]",
-      "InvalidCountMessage": "[LocalizedText Strings\\\\StringsFromCSFiles:BlueprintsMenu.cs.10002]",
-      "ChestFullMessage": "[LocalizedText Strings\\\\Buildings:MillFull]",
+      "InvalidItemMessage": "The forge can't process this.",
+      "InvalidCountMessage": "You don't have the minimum required amount for this to be processed.",
+      "ChestFullMessage": "The forge is full.",
       "DisplayTile": "-1, -1",
       "DisplayHeight": 0.0
     },
@@ -99,24 +100,26 @@
       "InvalidItemMessage": null,
       "InvalidCountMessage": null,
       "ChestFullMessage": null,
-      "DisplayTile": "5, 2",
+      "DisplayTile": "4.4, 3.5",
       "DisplayHeight": 1.5
     }
   ],
   "ItemConversions": [
     {
       "RequiredTags": [
-        "id_o_128"
+        "id_o_380"
       ],
       "RequiredCount": 1,
-      "MaxDailyConversions": -1,
+      "MaxDailyConversions": 10,
+      "MinutesPerConversion": 20,
+      "RefreshMaxDailyConversions": true,
       "SourceChest": "Input",
       "DestinationChest": "Output",
       "ProducedItems": [
         {
-          "ItemID": "423",
+          "ItemID": "335",
           "MinCount": 1,
-          "MaxCount": 1,
+          "MaxCount": 5,
           "Chance": 1.0,
           "Condition": null
         }

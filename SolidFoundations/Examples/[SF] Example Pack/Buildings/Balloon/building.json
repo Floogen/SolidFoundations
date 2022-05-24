@@ -9,7 +9,7 @@
     "X": 6,
     "Y": 2
   },
-  "CollisionMap": "OXXXXO\nOXXXXO",
+  "CollisionMap": "OOXXOO\nOXXXXO",
   "DrawLayers": [
     {
       "SourceRect": "0 0 96 176",
