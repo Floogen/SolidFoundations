@@ -15,6 +15,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         [ContentSerializer(Optional = true)]
         public int MinutesPerConversion = -1;
         internal int MinutesRemaining;
+
         [ContentSerializer(Optional = true)]
         public bool RefreshMaxDailyConversions;
         internal int? CachedMaxDailyConversions;

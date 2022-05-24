@@ -15,7 +15,7 @@ using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Patches.Buildings
 {
-    // TODO: When updated to SDV v1.6, delete __instance patch
+    // TODO: When updated to SDV v1.6, delete this patch
     internal class CarpenterMenuPatch : PatchTemplate
     {
         private readonly Type _object = typeof(CarpenterMenu);

@@ -1,0 +1,28 @@
+{
+  "Name": "Expanded Barn",
+  "Description": "...",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 7,
+    "Y": 7
+  },
+
+  "IndoorMap": "Barn3",
+  "IndoorMapType": "StardewValley.AnimalHouse",
+  "HumanDoor": {
+    "X": 1,
+    "Y": 7
+  },
+  "MaxOccupants": 20,
+  "ValidOccupantTypes": [ "Barn", "Coop" ],
+
+  "BuildCost": 2000,
+  "BuildMaterials": [
+    {
+      "ItemID": 388,
+      "Amount": 25
+    }
+  ],
+  "BuildDays": 1
+}

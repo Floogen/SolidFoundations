@@ -36,6 +36,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
         internal void Apply(Harmony harmony)
         {
             harmony.Patch(AccessTools.Method(_object, nameof(GameLocation.performAction), new[] { typeof(string), typeof(Farmer), typeof(Location) }), postfix: new HarmonyMethod(GetType(), nameof(PerformActionPostfix)));
+            harmony.Patch(AccessTools.Method(typeof(BuildableGameLocation), nameof(BuildableGameLocation.isBuildingConstructed), new[] { typeof(string) }), postfix: new HarmonyMethod(GetType(), nameof(IsBuildingConstructedPostfix)));
         }
 
         internal static void PerformActionPostfix(GameLocation __instance, ref bool __result, string action, Farmer who, Location tileLocation)
@@ -73,6 +74,28 @@ namespace SolidFoundations.Framework.Patches.Buildings
                             }
                             break;
                         }
+                }
+            }
+        }
+
+        internal static void IsBuildingConstructedPostfix(BuildableGameLocation __instance, ref bool __result, string name)
+        {
+            if (__result is true)
+            {
+                return;
+            }
+
+            foreach (GenericBuilding building in __instance.buildings.Where(b => b is GenericBuilding))
+            {
+                if (building is null || building.Model is null || building.Model.ValidOccupantTypes is null)
+                {
+                    continue;
+                }
+
+                if (building.Model.ValidOccupantTypes.Contains(name, StringComparer.OrdinalIgnoreCase))
+                {
+                    __result = true;
+                    return;
                 }
             }
         }

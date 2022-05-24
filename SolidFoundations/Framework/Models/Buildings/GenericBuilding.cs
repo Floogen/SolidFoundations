@@ -11,6 +11,7 @@ using StardewValley.Locations;
 using StardewValley.Menus;
 using StardewValley.Network;
 using StardewValley.Objects;
+using StardewValley.TerrainFeatures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,7 +122,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 base.indoors.Value.mapPath.Value = "Maps\\" + this.Model.IndoorMap;
                 base.indoors.Value.loadMap(base.indoors.Value.mapPath.Value, true);
-                base.indoors.Value.updateWarps();
                 this.updateInteriorWarps(base.indoors.Value);
             }
             this.LoadFromBuildingData(false);
@@ -518,7 +518,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         protected override GameLocation getIndoors(string nameOfIndoorsWithoutUnique)
         {
             GameLocation gameLocation = null;
-            if (this.indoors.Value is not null)
+            if (this.indoors.Value is not null && this.Model.IndoorMapType == this.indoors.Value.GetType().ToString())
             {
                 gameLocation = this.indoors.Value;
             }
@@ -529,7 +529,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     if (this.Model.IndoorMapType != null)
                     {
-                        type = Type.GetType(this.Model.IndoorMapType);
+                        type = Type.GetType($"{this.Model.IndoorMapType},Stardew Valley");
                     }
                 }
                 catch (Exception)
@@ -629,6 +629,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         {
                             this.indoors.Value.mapPath.Value = "Maps\\" + indoorMap;
                             this.indoors.Value.updateMap();
+                            base.indoors.Value.updateWarps();
+                            this.updateInteriorWarps(base.indoors.Value);
                         }
                         this.updateInteriorWarps(this.indoors.Value);
                         this.InitializeIndoor(for_upgrade);
@@ -852,8 +854,145 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         public override void load()
         {
-            base.load();
-            this.hasLoaded = true;
+            if (!Game1.IsMasterGame)
+            {
+                return;
+            }
+            if (!this.hasLoaded)
+            {
+                this.hasLoaded = true;
+                if (this.Model != null)
+                {
+                    if (this.Model.NonInstancedIndoorLocation == null && this.nonInstancedIndoors.Value != null)
+                    {
+                        this.nonInstancedIndoors.Value = null;
+                        //this.nonInstancedIndoors.Value.parentLocation.Value = null;
+                    }
+                    else if (this.Model.NonInstancedIndoorLocation != null)
+                    {
+                        GameLocation locationFromName = Game1.getLocationFromName(this.Model.NonInstancedIndoorLocation);
+                        bool flag = false;
+                        foreach (BuildableGameLocation location in Game1.locations)
+                        {
+                            foreach (GenericBuilding building in location.buildings)
+                            {
+                                if (building.Model != null && building.nonInstancedIndoors.Value == locationFromName)
+                                {
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!flag)
+                        {
+                            this.nonInstancedIndoors.Value = locationFromName;
+                        }
+                    }
+                }
+                this.LoadFromBuildingData();
+            }
+            if (this.nonInstancedIndoors.Value != null)
+            {
+                //this.UpdateIndoorParent();
+            }
+            else
+            {
+                GameLocation gameLocation = this.getIndoors(this.getBuildingMapFileName(this.Model.Name));
+                if (gameLocation != null && this.indoors.Value != null)
+                {
+                    gameLocation.characters.Set(this.indoors.Value.characters);
+                    gameLocation.netObjects.MoveFrom(this.indoors.Value.netObjects);
+                    gameLocation.terrainFeatures.MoveFrom(this.indoors.Value.terrainFeatures);
+                    gameLocation.IsFarm = true;
+                    gameLocation.IsOutdoors = false;
+                    gameLocation.isStructure.Value = true;
+                    gameLocation.miniJukeboxCount.Set(this.indoors.Value.miniJukeboxCount.Value);
+                    gameLocation.miniJukeboxTrack.Set(this.indoors.Value.miniJukeboxTrack.Value);
+                    gameLocation.uniqueName.Value = this.indoors.Value.uniqueName;
+                    if (gameLocation.uniqueName.Value == null)
+                    {
+                        gameLocation.uniqueName.Value = this.nameOfIndoorsWithoutUnique + ((int)this.tileX * 2000 + (int)this.tileY);
+                    }
+                    gameLocation.numberOfSpawnedObjectsOnMap = this.indoors.Value.numberOfSpawnedObjectsOnMap;
+                    if (this.indoors.Value is AnimalHouse indoorAnimalHouse && gameLocation is AnimalHouse animalHouse)
+                    {
+                        animalHouse.animals.MoveFrom(indoorAnimalHouse.animals);
+                        ((AnimalHouse)gameLocation).animalsThatLiveHere.Set(((AnimalHouse)this.indoors.Value).animalsThatLiveHere);
+
+                        foreach (KeyValuePair<long, FarmAnimal> pair in animalHouse.animals.Pairs)
+                        {
+                            pair.Value.reload(this);
+                        }
+                    }
+                    if (this.indoors.Value != null)
+                    {
+                        gameLocation.furniture.Set(this.indoors.Value.furniture);
+                        foreach (Furniture item in gameLocation.furniture)
+                        {
+                            item.updateDrawPosition();
+                        }
+                    }
+                    if (this.indoors.Value is Cabin && gameLocation is Cabin)
+                    {
+                        Cabin obj = gameLocation as Cabin;
+                        obj.fridge.Value = (this.indoors.Value as Cabin).fridge.Value;
+                        obj.farmhand.Set((this.indoors.Value as Cabin).farmhand);
+                    }
+                    if (this.indoors.Value != null)
+                    {
+                        //base.indoors.Value.mapPath.Value = "Maps\\" + this.Model.IndoorMap;
+                        //base.indoors.Value.loadMap(base.indoors.Value.mapPath.Value, true);
+                        gameLocation.TransferDataFromSavedLocation(this.indoors.Value);
+                    }
+                    this.indoors.Value = gameLocation;
+                    gameLocation = null;
+                }
+                this.updateInteriorWarps();
+                if (this.indoors.Value != null)
+                {
+                    for (int num = this.indoors.Value.characters.Count - 1; num >= 0; num--)
+                    {
+                        SaveGame.initializeCharacter(this.indoors.Value.characters[num], this.indoors.Value);
+                    }
+                    foreach (TerrainFeature value in this.indoors.Value.terrainFeatures.Values)
+                    {
+                        value.loadSprite();
+                    }
+                    foreach (KeyValuePair<Vector2, Object> pair2 in this.indoors.Value.objects.Pairs)
+                    {
+                        pair2.Value.initializeLightSource(pair2.Key);
+                        pair2.Value.reloadSprite();
+                    }
+                }
+                if (this.Model == null && this.IndoorOrInstancedIndoor is AnimalHouse)
+                {
+                    AnimalHouse animalHouse = this.IndoorOrInstancedIndoor as AnimalHouse;
+                    string text = this.buildingType.Value.Split(' ')[0];
+                    if (!(text == "Big"))
+                    {
+                        if (text == "Deluxe")
+                        {
+                            animalHouse.animalLimit.Value = 12;
+                        }
+                        else
+                        {
+                            animalHouse.animalLimit.Value = 4;
+                        }
+                    }
+                    else
+                    {
+                        animalHouse.animalLimit.Value = 8;
+                    }
+                }
+            }
+            BluePrint bluePrint = new BluePrint(this.buildingType.Value);
+            if (bluePrint != null)
+            {
+                this.humanDoor.X = bluePrint.humanDoor.X;
+                this.humanDoor.Y = bluePrint.humanDoor.Y;
+                this.additionalPlacementTiles.Clear();
+                this.additionalPlacementTiles.AddRange(bluePrint.additionalPlacementTiles);
+            }
         }
 
         // Preserve this override when updated to SDV v1.6, but call the base draw method if InitializeIndoor.
