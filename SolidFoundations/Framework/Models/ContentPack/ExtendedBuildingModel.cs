@@ -23,6 +23,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public new List<ExtendedBuildingDrawLayer> DrawLayers;
 
         [ContentSerializer(Optional = true)]
+        public new List<ExtendedBuildingItemConversion> ItemConversions;
+
+        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, SpecialAction> _specialActionTiles;
         [ContentSerializer(Optional = true)]
@@ -34,6 +37,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialAction { get; set; }
+        public SpecialAction DefaultSpecialEventAction { get; set; }
 
         public new string GetActionAtTile(int relative_x, int relative_y)
         {
@@ -125,7 +129,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     return null;
                 }
-                value = DefaultSpecialAction;
+                value = DefaultSpecialEventAction;
             }
             return value;
         }
