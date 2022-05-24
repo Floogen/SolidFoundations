@@ -395,16 +395,24 @@ namespace SolidFoundations
             {
                 foreach (GenericBuilding building in buildableLocation.buildings.Where(b => b is GenericBuilding))
                 {
-                    var model = buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(building.Id);
-                    if (model is not null)
+                    try
                     {
-                        building.RefreshModel(model);
-                    }
+                        var model = buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(building.Id);
+                        if (model is not null)
+                        {
+                            building.RefreshModel(model);
+                        }
 
-                    if (resetTexture)
+                        if (resetTexture)
+                        {
+                            Helper.GameContent.InvalidateCache(model.Texture);
+                            building.resetTexture();
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        Helper.GameContent.InvalidateCache(model.Texture);
-                        building.resetTexture();
+                        Monitor.Log($"Failed to refresh {building.nameOfIndoorsWithoutUnique} from {buildableLocation.NameOrUniqueName}!", LogLevel.Warn);
+                        Monitor.Log($"Failed to refresh {building.nameOfIndoorsWithoutUnique} from {buildableLocation.NameOrUniqueName}: {ex}", LogLevel.Trace);
                     }
                 }
             }
