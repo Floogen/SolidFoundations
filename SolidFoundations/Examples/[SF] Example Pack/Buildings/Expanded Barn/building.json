@@ -7,6 +7,68 @@
     "X": 7,
     "Y": 7
   },
+  "DrawLayers": [
+    {
+      "Texture": "Buildings\\Deluxe Barn",
+      "SourceRect": "0 112 32 16",
+      "DrawPosition": "64, 128",
+      "DrawInBackground": false,
+      "SortTileOffset": 0.02,
+      "OnlyDrawIfChestHasContents": null,
+      "FrameDuration": 90,
+      "FrameCount": 1,
+      "FramesPerRow": -1,
+      "AnimalDoorOffset": {
+        "X": 0,
+        "Y": -19
+      }
+    },
+    {
+      "Texture": "Buildings\\Deluxe Barn",
+      "SourceRect": "0 112 32 12",
+      "DrawPosition": "64, 116",
+      "DrawInBackground": false,
+      "SortTileOffset": 0.02,
+      "OnlyDrawIfChestHasContents": null,
+      "FrameDuration": 90,
+      "FrameCount": 1,
+      "FramesPerRow": -1,
+      "AnimalDoorOffset": {
+        "X": 0,
+        "Y": -19
+      }
+    },
+    {
+      "Texture": "Buildings\\Deluxe Barn",
+      "SourceRect": "32 112 32 16",
+      "DrawPosition": "64, 112",
+      "DrawInBackground": false,
+      "SortTileOffset": 1.0,
+      "OnlyDrawIfChestHasContents": null,
+      "FrameDuration": 90,
+      "FrameCount": 1,
+      "FramesPerRow": -1,
+      "AnimalDoorOffset": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "Texture": "Buildings\\Deluxe Barn",
+      "SourceRect": "64 112 32 16",
+      "DrawPosition": "64, 128",
+      "DrawInBackground": false,
+      "SortTileOffset": 1.0,
+      "OnlyDrawIfChestHasContents": null,
+      "FrameDuration": 90,
+      "FrameCount": 1,
+      "FramesPerRow": -1,
+      "AnimalDoorOffset": {
+        "X": 0,
+        "Y": 0
+      }
+    }
+  ],
 
   "IndoorMap": "Barn3",
   "IndoorMapType": "StardewValley.AnimalHouse",
@@ -14,6 +76,13 @@
     "X": 1,
     "Y": 7
   },
+
+  "AnimalDoor": "4 7 2 1",
+  "AnimalDoorOpenDuration": 0.4,
+  "AnimalDoorOpenSound": "doorCreak",
+  "AnimalDoorCloseDuration": 0.6,
+  "AnimalDoorCloseSound": "doorCreakReverse",
+  "NonInstancedIndoorLocation": null,
   "MaxOccupants": 20,
   "ValidOccupantTypes": [ "Barn", "Coop" ],
 

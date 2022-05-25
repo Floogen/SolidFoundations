@@ -21,19 +21,15 @@
     }
   ],
 
-  "Blueprint": {
-    "Vendor": "Robin",
-    "DaysToConstruct": 0,
-    "RequiredMoney": 2500,
-    "RequiredItems": [
-      {
-        "Name": "Cloth",
-        "Quantity": 25
-      },
-      {
-        "Name": "Wood",
-        "Quantity": 25
-      }
-    ]
-  }
+  "BuildCost": 2000,
+  "BuildMaterials": [
+    {
+      "ItemID": 428,
+      "Amount": 25
+    },
+    {
+      "ItemID": 388,
+      "Amount": 25
+    }
+  ]
 }

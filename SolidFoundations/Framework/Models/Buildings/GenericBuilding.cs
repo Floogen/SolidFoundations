@@ -455,6 +455,17 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return rectangle;
         }
 
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.getRectForAnimalDoor
+        public override Rectangle getRectForAnimalDoor()
+        {
+            if (this.Model != null)
+            {
+                Rectangle animalDoorRect = this.Model.GetAnimalDoorRect();
+                return new Rectangle((animalDoorRect.X + (int)this.tileX) * 64, (animalDoorRect.Y + (int)this.tileY) * 64, animalDoorRect.Width * 64, animalDoorRect.Height * 64);
+            }
+            return new Rectangle((this.animalDoor.X + (int)this.tileX) * 64, ((int)this.tileY + this.animalDoor.Y) * 64, 64, 64);
+        }
+
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.intersects
         public override bool intersects(Rectangle boundingBox)
         {
@@ -1465,6 +1476,47 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 value.temporarySprites.Add(temporaryAnimatedSprite);
             }
             this.chimneyTimer = 500;
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.updateWhenFarmNotCurrentLocation
+        public override void updateWhenFarmNotCurrentLocation(GameTime time)
+        {
+            base.updateWhenFarmNotCurrentLocation(time);
+
+            if (!Game1.IsMasterGame || this.Model == null)
+            {
+                return;
+            }
+            if (this.animalDoorOpen.Value)
+            {
+                if (this.animalDoorOpenAmount.Value < 1f)
+                {
+                    if (this.Model.AnimalDoorOpenDuration > 0f)
+                    {
+                        this.animalDoorOpenAmount.Value = Utility.MoveTowards(this.animalDoorOpenAmount.Value, 1f, (float)time.ElapsedGameTime.TotalSeconds / this.Model.AnimalDoorOpenDuration);
+                    }
+                    else
+                    {
+                        this.animalDoorOpenAmount.Value = 1f;
+                    }
+                }
+            }
+            else if (this.animalDoorOpenAmount.Value > 0f)
+            {
+                if (this.Model.AnimalDoorCloseDuration > 0f)
+                {
+                    this.animalDoorOpenAmount.Value = Utility.MoveTowards(this.animalDoorOpenAmount.Value, 0f, (float)time.ElapsedGameTime.TotalSeconds / this.Model.AnimalDoorCloseDuration);
+                }
+                else
+                {
+                    this.animalDoorOpenAmount.Value = 0f;
+                }
+            }
+
+            if (this.indoors.Value is not null && this.indoors.Value is AnimalHouse animalHouse)
+            {
+                animalHouse.updateWhenNotCurrentLocation(this, time);
+            }
         }
 
         public override void Update(GameTime time)
