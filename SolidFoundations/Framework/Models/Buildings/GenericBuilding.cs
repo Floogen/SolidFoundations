@@ -52,6 +52,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public NetString skinID = new NetString();
         // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.hasLoaded
         public bool hasLoaded;
+        // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.upgradeName
+        public readonly NetString upgradeName = new NetString();
 
         // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.nonInstancedIndoors
         public readonly NetLocationRef nonInstancedIndoors = new NetLocationRef();
@@ -640,7 +642,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
                             this.indoors.Value.mapPath.Value = "Maps\\" + indoorMap;
                             this.indoors.Value.updateMap();
                             base.indoors.Value.updateWarps();
-                            this.updateInteriorWarps(base.indoors.Value);
                         }
                         this.updateInteriorWarps(this.indoors.Value);
                         this.InitializeIndoor(for_upgrade);
@@ -1105,24 +1106,31 @@ namespace SolidFoundations.Framework.Models.ContentPack
         // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel
         public override void updateInteriorWarps(GameLocation interior = null)
         {
-            base.updateInteriorWarps(interior);
-
             if (interior is null)
             {
                 interior = this.IndoorOrInstancedIndoor;
             }
 
-            if (interior is not null && this.Model is not null && this.Model.TunnelDoors.Count > 0)
+            if (interior is not null && this.Model is not null)
             {
-                var firstTunnelDoor = this.Model.TunnelDoors.First();
-                foreach (Warp warp in interior.warps)
+                if (this.Model.TunnelDoors.Count > 0)
                 {
-                    if (this.buildingLocation.Value != null)
+                    var firstTunnelDoor = this.Model.TunnelDoors.First();
+                    foreach (Warp warp in interior.warps)
                     {
-                        warp.TargetName = this.buildingLocation.Value.Name;
+                        warp.TargetName = this.buildingLocation.Value is null ? Game1.getFarm().Name : this.buildingLocation.Value.Name;
+                        warp.TargetX = firstTunnelDoor.X + (int)this.tileX.Value;
+                        warp.TargetY = firstTunnelDoor.Y + (int)this.tileY.Value + 1;
                     }
-                    warp.TargetX = firstTunnelDoor.X + (int)this.tileX.Value;
-                    warp.TargetY = firstTunnelDoor.Y + (int)this.tileY.Value + 1;
+                }
+                else
+                {
+                    foreach (Warp warp in interior.warps)
+                    {
+                        warp.TargetName = this.buildingLocation.Value is null ? Game1.getFarm().Name : this.buildingLocation.Value.Name;
+                        warp.TargetX = Model.HumanDoor.X + (int)this.tileX.Value;
+                        warp.TargetY = Model.HumanDoor.Y + (int)this.tileY.Value + 1;
+                    }
                 }
             }
         }
@@ -1130,6 +1138,37 @@ namespace SolidFoundations.Framework.Models.ContentPack
         // Preserve this override when updated to SDV v1.6, but call the base dayUpdate method if ExtendedBuildingModel
         public override void dayUpdate(int dayOfMonth)
         {
+            if ((int)this.daysUntilUpgrade.Value - 1 <= 0 && !Utility.isFestivalDay(dayOfMonth, Game1.currentSeason))
+            {
+                this.daysUntilUpgrade.Value--;
+                if ((int)this.daysUntilUpgrade.Value <= 0)
+                {
+                    Game1.getFarm().buildings.Remove(this);
+                    string upgradeName = this.upgradeName.Value;
+
+                    if (SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(upgradeName) is ExtendedBuildingModel model && model is not null)
+                    {
+                        Game1.player.checkForQuestComplete(null, -1, -1, null, upgradeName, 8);
+                        RefreshModel(SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(upgradeName));
+
+                        BluePrint bluePrint = new BluePrint(upgradeName);
+                        if (bluePrint is not null)
+                        {
+                            this.buildingType.Value = bluePrint.name;
+                            if (this.indoors.Value is AnimalHouse)
+                            {
+                                ((AnimalHouse)(GameLocation)this.indoors).resetPositionsOfAllAnimals();
+                                ((AnimalHouse)(GameLocation)this.indoors).loadLights();
+                            }
+                            this.upgrade();
+                            this.resetTexture();
+                            this.updateInteriorWarps();
+                        }
+                    }
+
+                    Game1.getFarm().buildings.Add(this);
+                }
+            }
             base.dayUpdate(dayOfMonth);
 
             this.ProcessItemConversions(0, true);

@@ -29,6 +29,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
         {
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.setNewActiveBlueprint), null), prefix: new HarmonyMethod(GetType(), nameof(SetNewActiveBlueprintPrefix)));
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.tryToBuild), null), prefix: new HarmonyMethod(GetType(), nameof(TryToBuildPrefix)));
+            harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.receiveLeftClick), new[] { typeof(int), typeof(int), typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(ReceiveLeftClickPostfix)));
             harmony.Patch(AccessTools.Constructor(typeof(CarpenterMenu), new[] { typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(CarpenterMenuPostfix)));
         }
 
@@ -77,6 +78,18 @@ namespace SolidFoundations.Framework.Patches.Buildings
             return false;
         }
 
+        private static void ReceiveLeftClickPostfix(CarpenterMenu __instance, bool ___onFarm, bool ___upgrading, int x, int y, bool playSound = true)
+        {
+            if (___onFarm && ___upgrading)
+            {
+                GenericBuilding buildingAt = Game1.getFarm().getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64)) as GenericBuilding;
+                if (buildingAt != null && __instance.CurrentBlueprint.name != null && buildingAt.buildingType.Equals(__instance.CurrentBlueprint.nameOfBuildingToUpgrade))
+                {
+                    buildingAt.upgradeName.Value = __instance.CurrentBlueprint.name;
+                };
+            }
+        }
+
         private static void CarpenterMenuPostfix(CarpenterMenu __instance, ref List<BluePrint> ___blueprints, bool magicalConstruction = false)
         {
             string builder = "Carpenter";
@@ -89,7 +102,16 @@ namespace SolidFoundations.Framework.Patches.Buildings
             {
                 if (String.IsNullOrEmpty(building.Builder) || building.Builder.Equals(builder, StringComparison.OrdinalIgnoreCase))
                 {
-                    ___blueprints.Add(new BluePrint(building.ID));
+                    bool flag = false;
+                    if (building.BuildingToUpgrade != null && Game1.getFarm().getNumberBuildingsConstructed(building.BuildingToUpgrade) == 0)
+                    {
+                        flag = true;
+                    }
+
+                    if (!flag)
+                    {
+                        ___blueprints.Add(new BluePrint(building.ID));
+                    }
                 }
             }
         }

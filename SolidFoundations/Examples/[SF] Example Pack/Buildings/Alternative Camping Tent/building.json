@@ -1,0 +1,31 @@
+{
+  "Name": "Alternative Camping Tent",
+  "Description": "Another camping tent.",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 5,
+    "Y": 3
+  },
+  "CollisionMap": "OOOOO\nOXXXO\nXXXXX",
+
+  "IndoorMap": "CustomTent",
+  "HumanDoor": {
+    "X": 2,
+    "Y": 2
+  },
+
+  "BuildCost": 1000,
+  "BuildMaterials": [
+    {
+      "ItemID": 428,
+      "Amount": 25
+    },
+    {
+      "ItemID": 388,
+      "Amount": 25
+    }
+  ],
+  "BuildDays": 1,
+  "BuildingToUpgrade": "Camping Tent"
+}

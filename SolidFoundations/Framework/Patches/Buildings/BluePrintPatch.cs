@@ -52,6 +52,10 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 __instance.animalDoor = buildingData.GetAnimalDoorRect().Location;
                 __instance.moneyRequired = buildingData.BuildCost;
                 __instance.nameOfBuildingToUpgrade = buildingData.BuildingToUpgrade;
+                if (SolidFoundations.buildingManager.GetAllBuildingModels().FirstOrDefault(b => b.Name == buildingData.BuildingToUpgrade) is ExtendedBuildingModel upgradeBuildingData && upgradeBuildingData is not null)
+                {
+                    __instance.nameOfBuildingToUpgrade = upgradeBuildingData.ID;
+                }
 
                 __instance.itemsRequired = new Dictionary<int, int>();
                 if (buildingData.BuildMaterials != null)

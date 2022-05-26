@@ -1,0 +1,31 @@
+{
+  "Name": "Camping Tent",
+  "Description": "A camping tent.",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 3,
+    "Y": 4
+  },
+  "CollisionMap": "XXX\nXXX\nXXX\nXOX",
+
+  "IndoorMap": "CustomTent",
+  "TunnelDoors": [
+    {
+      "X": 1,
+      "Y": 3
+    }
+  ],
+
+  "BuildCost": 1000,
+  "BuildMaterials": [
+    {
+      "ItemID": 428,
+      "Amount": 25
+    },
+    {
+      "ItemID": 388,
+      "Amount": 25
+    }
+  ]
+}
