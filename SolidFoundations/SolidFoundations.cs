@@ -79,7 +79,6 @@ namespace SolidFoundations
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
         }
 
-
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {

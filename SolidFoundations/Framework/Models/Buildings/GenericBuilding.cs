@@ -253,9 +253,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
                             continue;
                         }
                         int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
-                        if (num5 != 0 && int.TryParse(additionalChopDrops.ItemID, out int id))
+                        if (num5 != 0 && Toolkit.CreateItemByID(additionalChopDrops.ItemID, num5, 0) is Item item && item is not null)
                         {
-                            Item item = new Object(id, num5);
                             Item item2 = buildingChest2.addItem(item);
                             if (item2 == null || item2.Stack != num5)
                             {
@@ -1037,19 +1036,23 @@ namespace SolidFoundations.Framework.Models.ContentPack
             foreach (IndoorItemAdd indoorItem in this.Model.IndoorItems)
             {
                 Point tile = indoorItem.Tile;
-                if (this.IndoorOrInstancedIndoor.objects.ContainsKey(Utility.PointToVector2(tile)) || int.TryParse(indoorItem.ItemID, out int id) is false)
+                if (this.IndoorOrInstancedIndoor.objects.ContainsKey(Utility.PointToVector2(tile)))
                 {
                     continue;
                 }
-                Item item = new Object(id, 1);
-                if (item is StardewValley.Object)
+
+                var item = Toolkit.CreateItemByID(indoorItem.ItemID, 1, 0);
+                if (item is not null && item is StardewValley.Object obj)
                 {
                     if (indoorItem.Indestructible)
                     {
-                        (item as StardewValley.Object).fragility.Value = 2;
+                        obj.Fragility = 2;
                     }
-                    (item as StardewValley.Object).tileLocation.Value = Utility.PointToVector2(tile);
-                    this.IndoorOrInstancedIndoor.objects.Add(new Vector2(tile.X, tile.Y), item as StardewValley.Object);
+
+                    }
+
+                    obj.TileLocation = Utility.PointToVector2(tile);
+                    this.IndoorOrInstancedIndoor.objects.Add(new Vector2(tile.X, tile.Y), obj);
                 }
             }
         }

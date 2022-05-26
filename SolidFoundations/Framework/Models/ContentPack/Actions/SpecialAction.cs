@@ -103,12 +103,11 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (ModifyInventory is not null)
             {
-                if (ModifyInventory.Operation == OperationName.Add && Int32.TryParse(ModifyInventory.ItemId, out int id))
+                if (ModifyInventory.Operation == OperationName.Add && Toolkit.CreateItemByID(ModifyInventory.ItemId, ModifyInventory.Quantity, 0) is Item item && item is not null)
                 {
-                    Item itemToAdd = new StardewValley.Object(id, ModifyInventory.Quantity);
-                    if (itemToAdd is not null && who.couldInventoryAcceptThisItem(itemToAdd))
+                    if (who.couldInventoryAcceptThisItem(item))
                     {
-                        who.addItemToInventoryBool(itemToAdd);
+                        who.addItemToInventoryBool(item);
                     }
                 }
 
