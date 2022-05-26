@@ -61,6 +61,9 @@ namespace SolidFoundations
                 // Apply menu patches
                 new CarpenterMenuPatch(monitor, helper).Apply(harmony);
                 new PurchaseAnimalsMenuPatch(monitor, helper).Apply(harmony);
+
+                // Apply etc. patches
+                new QuestionEventPatch(monitor, helper).Apply(harmony);
             }
             catch (Exception e)
             {
