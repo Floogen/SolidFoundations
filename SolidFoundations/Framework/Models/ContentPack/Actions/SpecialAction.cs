@@ -103,7 +103,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (ModifyInventory is not null)
             {
-                if (ModifyInventory.Operation == OperationName.Add && Toolkit.CreateItemByID(ModifyInventory.ItemId, ModifyInventory.Quantity, 0) is Item item && item is not null)
+                if (ModifyInventory.Operation == OperationName.Add && Toolkit.CreateItemByID(ModifyInventory.ItemId, ModifyInventory.Quantity, ModifyInventory.Quality) is Item item && item is not null)
                 {
                     if (who.couldInventoryAcceptThisItem(item))
                     {

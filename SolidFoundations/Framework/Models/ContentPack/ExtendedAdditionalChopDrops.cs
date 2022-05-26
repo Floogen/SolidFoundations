@@ -10,17 +10,9 @@ using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {
-    public class ExtendedBuildingItemConversion : BuildingItemConversion
+    public class ExtendedAdditionalChopDrops : AdditionalChopDrops
     {
         [ContentSerializer(Optional = true)]
-        public int MinutesPerConversion = -1;
-        internal int MinutesRemaining;
-
-        [ContentSerializer(Optional = true)]
-        public bool RefreshMaxDailyConversions;
-        internal int? CachedMaxDailyConversions;
-
-
-        public new List<ExtendedAdditionalChopDrops> ProducedItems;
+        public int Quality;
     }
 }

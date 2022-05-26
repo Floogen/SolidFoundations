@@ -64,6 +64,7 @@
                 "ModifyInventory": {
                   "ItemId": 268,
                   "Quantity": 5,
+                  "Quality": 2,
                   "Operation": "Add"
                 }
               }

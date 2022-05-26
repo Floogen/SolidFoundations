@@ -249,13 +249,13 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     bool flag2 = false;
                     for (int j = 0; j < itemConversion.ProducedItems.Count; j++)
                     {
-                        AdditionalChopDrops additionalChopDrops = itemConversion.ProducedItems[j];
+                        ExtendedAdditionalChopDrops additionalChopDrops = itemConversion.ProducedItems[j];
                         if (!GameStateQuery.CheckConditions(additionalChopDrops.Condition))
                         {
                             continue;
                         }
                         int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
-                        if (num5 != 0 && Toolkit.CreateItemByID(additionalChopDrops.ItemID, num5, 0) is Item item && item is not null)
+                        if (num5 != 0 && Toolkit.CreateItemByID(additionalChopDrops.ItemID, num5, additionalChopDrops.Quality) is Item item && item is not null)
                         {
                             Item item2 = buildingChest2.addItem(item);
                             if (item2 == null || item2.Stack != num5)
