@@ -1113,24 +1113,22 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             if (interior is not null && this.Model is not null)
             {
+                var targetName = this.buildingLocation.Value is null ? Game1.getFarm().Name : this.buildingLocation.Value.Name;
+                var baseX = Model.HumanDoor.X;
+                var baseY = Model.HumanDoor.Y;
+
                 if (this.Model.TunnelDoors.Count > 0)
                 {
                     var firstTunnelDoor = this.Model.TunnelDoors.First();
-                    foreach (Warp warp in interior.warps)
-                    {
-                        warp.TargetName = this.buildingLocation.Value is null ? Game1.getFarm().Name : this.buildingLocation.Value.Name;
-                        warp.TargetX = firstTunnelDoor.X + (int)this.tileX.Value;
-                        warp.TargetY = firstTunnelDoor.Y + (int)this.tileY.Value + 1;
-                    }
+                    baseX = firstTunnelDoor.X;
+                    baseY = firstTunnelDoor.Y;
                 }
-                else
+
+                foreach (Warp warp in interior.warps)
                 {
-                    foreach (Warp warp in interior.warps)
-                    {
-                        warp.TargetName = this.buildingLocation.Value is null ? Game1.getFarm().Name : this.buildingLocation.Value.Name;
-                        warp.TargetX = Model.HumanDoor.X + (int)this.tileX.Value;
-                        warp.TargetY = Model.HumanDoor.Y + (int)this.tileY.Value + 1;
-                    }
+                    warp.TargetName = targetName;
+                    warp.TargetX = baseX + (int)this.tileX.Value;
+                    warp.TargetY = baseY + (int)this.tileY.Value + 1;
                 }
             }
         }
