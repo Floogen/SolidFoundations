@@ -862,6 +862,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return false;
         }
 
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.load
         public override void load()
         {
             if (!Game1.IsMasterGame)
@@ -1007,7 +1008,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
-        // Preserve this override when updated to SDV v1.6, but call the base draw method if InitializeIndoor.
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.InitializeIndoor
         public virtual void InitializeIndoor(bool for_upgrade)
         {
             if (this.Model == null || this.indoors.Value == null)
@@ -1069,6 +1070,34 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         obj.TileLocation = Utility.PointToVector2(tile);
                         this.IndoorOrInstancedIndoor.objects.Add(vectorizedTile, obj);
                     }
+                }
+            }
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.InitializeIndoor
+        public override void performActionOnConstruction(GameLocation location)
+        {
+            base.performActionOnConstruction(location);
+
+            if (this.Model != null && this.Model.AddMailOnBuild != null)
+            {
+                foreach (string item in this.Model.AddMailOnBuild)
+                {
+                    Game1.addMail(item, noLetter: false, sendToEveryone: true);
+                }
+            }
+        }
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.upgrade
+        public override void upgrade()
+        {
+            base.upgrade();
+
+            if (this.Model != null && this.Model.AddMailOnBuild != null)
+            {
+                foreach (string item in this.Model.AddMailOnBuild)
+                {
+                    Game1.addMail(item, noLetter: false, sendToEveryone: true);
                 }
             }
         }
