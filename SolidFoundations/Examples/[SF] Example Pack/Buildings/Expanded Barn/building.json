@@ -86,6 +86,17 @@
   "MaxOccupants": 20,
   "ValidOccupantTypes": [ "Barn", "Coop" ],
 
+  "IndoorItems": [
+    {
+      "ItemID": "(BC)99",
+      "Tile": {
+        "X": 6,
+        "Y": 3
+      },
+      "Indestructible": true
+    }
+  ],
+
   "BuildCost": 2000,
   "BuildMaterials": [
     {

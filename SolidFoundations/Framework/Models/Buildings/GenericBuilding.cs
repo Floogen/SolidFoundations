@@ -995,6 +995,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     }
                 }
             }
+            this.InitializeIndoor(false);
+
             BluePrint bluePrint = new BluePrint(this.buildingType.Value);
             if (bluePrint != null)
             {
@@ -1036,7 +1038,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
             foreach (IndoorItemAdd indoorItem in this.Model.IndoorItems)
             {
                 Point tile = indoorItem.Tile;
-                if (this.IndoorOrInstancedIndoor.objects.ContainsKey(Utility.PointToVector2(tile)))
+                Vector2 vectorizedTile = Utility.PointToVector2(tile);
+                if (this.IndoorOrInstancedIndoor.objects.ContainsKey(Utility.PointToVector2(tile)) || this.IndoorOrInstancedIndoor.furniture.Any(f => f.TileLocation.X == vectorizedTile.X && f.TileLocation.Y == vectorizedTile.Y))
                 {
                     continue;
                 }
@@ -1049,10 +1052,23 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         obj.Fragility = 2;
                     }
 
+                    // Furniture doesn't seem to work
+                    if (obj is Furniture)
+                    {
+                        var furniture = Furniture.GetFurnitureInstance(obj.ParentSheetIndex, vectorizedTile);
+                        furniture.Fragility = obj.Fragility;
+                        this.IndoorOrInstancedIndoor.furniture.Add(furniture);
+                        foreach (var furn in this.IndoorOrInstancedIndoor.furniture)
+                        {
+                            SolidFoundations.monitor.Log($"[{furn.TileLocation}] {furn.boundingBox}", LogLevel.Debug);
+                        }
+                        continue;
                     }
-
-                    obj.TileLocation = Utility.PointToVector2(tile);
-                    this.IndoorOrInstancedIndoor.objects.Add(new Vector2(tile.X, tile.Y), obj);
+                    else
+                    {
+                        obj.TileLocation = Utility.PointToVector2(tile);
+                        this.IndoorOrInstancedIndoor.objects.Add(vectorizedTile, obj);
+                    }
                 }
             }
         }
