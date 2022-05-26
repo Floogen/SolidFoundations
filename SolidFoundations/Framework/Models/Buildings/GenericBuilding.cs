@@ -1054,17 +1054,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         obj.Fragility = 2;
                     }
 
-                    // Furniture doesn't seem to work
                     if (obj is Furniture)
                     {
                         var furniture = Furniture.GetFurnitureInstance(obj.ParentSheetIndex, vectorizedTile);
                         furniture.Fragility = obj.Fragility;
                         this.IndoorOrInstancedIndoor.furniture.Add(furniture);
-                        foreach (var furn in this.IndoorOrInstancedIndoor.furniture)
-                        {
-                            SolidFoundations.monitor.Log($"[{furn.TileLocation}] {furn.boundingBox}", LogLevel.Debug);
-                        }
-                        continue;
                     }
                     else
                     {
@@ -1101,6 +1095,55 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     Game1.addMail(item, noLetter: false, sendToEveryone: true);
                 }
             }
+        }
+
+        public override void resetTexture()
+        {
+            this.texture = new Lazy<Texture2D>(delegate
+            {
+                if (this.paintedTexture != null)
+                {
+                    this.paintedTexture.Dispose();
+                    this.paintedTexture = null;
+                }
+                string text = this.textureName();
+                Texture2D texture2D;
+                try
+                {
+                    texture2D = Game1.content.Load<Texture2D>(text);
+                }
+                catch (Exception)
+                {
+                    return Game1.content.Load<Texture2D>("Buildings\\Shipping Bin");
+                }
+                this.paintedTexture = BuildingPainter.Apply(texture2D, text + "_PaintMask", this.netBuildingPaintColor.Value);
+                if (this.paintedTexture != null)
+                {
+                    texture2D = this.paintedTexture;
+                }
+                return texture2D;
+            });
+        }
+
+
+        public override string textureName()
+        {
+            if (this.Model != null)
+            {
+                if (this.Model.Skins != null && this.Model.Skins.Count > 0 && this.skinID.Value != null)
+                {
+                    foreach (BuildingSkin skin in this.Model.Skins)
+                    {
+                        if (skin.ID == this.skinID.Value)
+                        {
+                            return SolidFoundations.buildingManager.GetTextureAsset(skin.Texture);
+                        }
+                    }
+                }
+                return SolidFoundations.buildingManager.GetTextureAsset(this.Model.Texture);
+            }
+
+            return "Buildings\\" + (string)this.buildingType.Value;
         }
 
         // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel

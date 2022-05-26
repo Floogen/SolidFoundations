@@ -33,6 +33,7 @@ namespace SolidFoundations
 
         // Managers
         internal static ApiManager apiManager;
+        internal static AssetManager assetManager;
         internal static BuildingManager buildingManager;
 
         public override void Entry(IModHelper helper)
@@ -44,6 +45,7 @@ namespace SolidFoundations
 
             // Set up the managers
             apiManager = new ApiManager(monitor);
+            assetManager = new AssetManager(monitor, helper);
             buildingManager = new BuildingManager(monitor, helper);
 
             // Load our Harmony patches
@@ -78,7 +80,6 @@ namespace SolidFoundations
             modHelper.Events.Content.AssetRequested += OnAssetRequested;
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
             modHelper.Events.GameLoop.DayStarted += OnDayStarted;
-            modHelper.Events.GameLoop.TimeChanged += OnTimeChanged;
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
         }
 
@@ -131,11 +132,6 @@ namespace SolidFoundations
             {
                 xmlSerializer.Serialize(writer, allExistingCustomBuildings);
             }
-        }
-
-        private void OnTimeChanged(object sender, TimeChangedEventArgs e)
-        {
-            // TODO: Implement this
         }
 
         // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
@@ -264,7 +260,6 @@ namespace SolidFoundations
                 Monitor.Log($"Loading interiors from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
                 LoadInteriors(contentPack);
 
-
                 // Load the buildings
                 Monitor.Log($"Loading buildings from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
                 LoadBuildings(contentPack);
@@ -321,7 +316,7 @@ namespace SolidFoundations
                     return;
                 }
 
-                var buildingsFolder = directoryPath.GetDirectories("*", SearchOption.AllDirectories);
+                var buildingsFolder = directoryPath.GetDirectories("*", SearchOption.TopDirectoryOnly);
                 if (buildingsFolder.Count() == 0)
                 {
                     Monitor.Log($"No sub-folders found under Buildings for the content pack {contentPack.Manifest.Name}", LogLevel.Warn);
@@ -371,6 +366,23 @@ namespace SolidFoundations
                     {
                         Monitor.Log($"Unable to add building for {buildingModel.Name} from {contentPack.Manifest.Name}: No associated building.png given", LogLevel.Warn);
                         continue;
+                    }
+
+                    // Load in any skins, if given
+                    if (Directory.Exists(Path.Combine(folder.FullName, "Skins")))
+                    {
+                        List<string> skinPaths = Directory.GetFiles(Path.Combine(folder.FullName, "Skins"), "skin_*.png").OrderBy(s => s).ToList();
+                        foreach (var skin in buildingModel.Skins)
+                        {
+                            var skinPath = Path.Combine(folder.FullName, "Skins", String.Concat(skin.Texture, ".png"));
+                            if (skinPaths.Contains(skinPath) is false)
+                            {
+                                continue;
+                            }
+
+                            skin.Texture = contentPack.ModContent.GetInternalAssetName(skinPath).Name;
+                            buildingManager.AddTextureAsset(skin.Texture, skinPath);
+                        }
                     }
 
                     // Load in the texture

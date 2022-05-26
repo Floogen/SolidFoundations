@@ -2,6 +2,26 @@
   "Name": "Camping Tent",
   "Description": "A camping tent.",
   "DrawShadow": false,
+  "Skins": [
+    {
+      "ID": "Stardrop",
+      "Name": "Stardrop Camping Tent",
+      "Description": "First skin.",
+      "Texture": "skin_1"
+    },
+    {
+      "ID": "Leather",
+      "Name": "Leather Camping Tent",
+      "Description": "...",
+      "Texture": "skin_2"
+    },
+    {
+      "ID": "Monster",
+      "Name": "Monster Leather Camping Tent",
+      "Description": "...",
+      "Texture": "skin_3"
+    }
+  ],
 
   "Size": {
     "X": 3,

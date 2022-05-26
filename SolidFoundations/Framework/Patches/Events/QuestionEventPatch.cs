@@ -44,7 +44,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             if (___whichQuestion == 2)
             {
                 FarmAnimal farmAnimal = null;
-                foreach (GenericBuilding building in Game1.getFarm().buildings)
+                foreach (GenericBuilding building in Game1.getFarm().buildings.Where(b => b is GenericBuilding))
                 {
                     if (building is null)
                     {
