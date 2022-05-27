@@ -1398,7 +1398,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     }
                 }
             }
-            b.Draw(this.texture.Value, new Vector2(x, y), buildingRectangle, this.color, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
+
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.ModDataFlags)) is false)
+            {
+                b.Draw(this.texture.Value, new Vector2(x, y), buildingRectangle, this.color, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
+            }
             if (this.Model == null || this.Model.DrawLayers == null)
             {
                 return;
