@@ -86,6 +86,74 @@ namespace SolidFoundations
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
+            SafelyCacheCustomBuildings();
+        }
+
+        // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
+        private void OnDayStarted(object sender, DayStartedEventArgs e)
+        {
+            LoadCachedCustomBuildings();
+        }
+
+        private void OnSaving(object sender, EventArgs e)
+        {
+            SafelyCacheCustomBuildings();
+        }
+
+        private void OnLoading(object sender, EventArgs e)
+        {
+            LoadCachedCustomBuildings();
+        }
+
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            // Hook into the APIs we utilize
+            if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
+            {
+                //apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "Building", new BuildingToken());
+            }
+            if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
+            {
+                // Do nothing
+            }
+            if (Helper.ModRegistry.IsLoaded("Omegasis.SaveAnywhere") && apiManager.HookIntoSaveAnywhere(Helper))
+            {
+                var saveAnywhereApi = apiManager.GetSaveAnywhereApi();
+
+                // Hook into save related events
+                saveAnywhereApi.BeforeSave += OnSaving;
+                saveAnywhereApi.AfterLoad += OnLoading;
+            }
+
+            // Load any owned content packs
+            LoadContentPacks();
+
+            // Set up the backported GameStateQuery
+            GameStateQuery.SetupQueryTypes();
+        }
+
+        private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
+        {
+            if (e.DataType == typeof(Texture2D))
+            {
+                var asset = e.Name;
+                if (buildingManager.GetTextureAsset(asset.Name) is var texturePath && texturePath is not null)
+                {
+                    e.LoadFrom(() => Helper.ModContent.Load<Texture2D>(texturePath), AssetLoadPriority.Exclusive);
+                }
+            }
+            else if (e.DataType == typeof(Map))
+            {
+                var asset = e.Name;
+                if (buildingManager.GetMapAsset(asset.Name) is var mapPath && mapPath is not null)
+                {
+                    e.LoadFrom(() => Helper.ModContent.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
+                }
+            }
+        }
+
+        private void SafelyCacheCustomBuildings()
+        {
             if (!Game1.IsMasterGame)
             {
                 return;
@@ -160,8 +228,7 @@ namespace SolidFoundations
             }
         }
 
-        // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
-        private void OnDayStarted(object sender, DayStartedEventArgs e)
+        private void LoadCachedCustomBuildings()
         {
             var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
             if (!Game1.IsMasterGame || !File.Exists(customBuildingsExternalSavePath))
@@ -237,45 +304,6 @@ namespace SolidFoundations
                         Monitor.Log($"Failed to load cached custom building {archivedData.Id} at [{archivedData.TileX}, {archivedData.TileY}], see log for details.", LogLevel.Warn);
                         Monitor.Log($"Failure to load the custom building: {ex}", LogLevel.Trace);
                     }
-                }
-            }
-        }
-
-        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
-        {
-            // Hook into the APIs we utilize
-            if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
-            {
-                //apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "Building", new BuildingToken());
-            }
-            if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
-            {
-                // Do nothing
-            }
-
-            // Load any owned content packs
-            LoadContentPacks();
-
-            // Set up the backported GameStateQuery
-            GameStateQuery.SetupQueryTypes();
-        }
-
-        private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
-        {
-            if (e.DataType == typeof(Texture2D))
-            {
-                var asset = e.Name;
-                if (buildingManager.GetTextureAsset(asset.Name) is var texturePath && texturePath is not null)
-                {
-                    e.LoadFrom(() => Helper.ModContent.Load<Texture2D>(texturePath), AssetLoadPriority.Exclusive);
-                }
-            }
-            else if (e.DataType == typeof(Map))
-            {
-                var asset = e.Name;
-                if (buildingManager.GetMapAsset(asset.Name) is var mapPath && mapPath is not null)
-                {
-                    e.LoadFrom(() => Helper.ModContent.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
                 }
             }
         }

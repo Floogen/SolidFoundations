@@ -15,6 +15,14 @@
     {
       "UniqueID": "PeacefulEnd.AlternativeTextures",
       "IsRequired": false
+    },
+    {
+      "UniqueID": "Omegasis.SaveAnywhere",
+      "IsRequired": false
+    },
+    {
+      "UniqueID": "Cherry.ExpandedPreconditionsUtility",
+      "IsRequired": false
     }
   ]
 }
