@@ -91,46 +91,72 @@ namespace SolidFoundations
                 return;
             }
 
-            // Create the SolidFoundations folder near the save file, if one doesn't exist
-            var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations");
-            if (!Directory.Exists(externalSaveFolderPath))
+            try
             {
-                Directory.CreateDirectory(externalSaveFolderPath);
-            }
-
-            // Process each buildable location and archive the relevant data
-            var allExistingCustomBuildings = new List<GenericBuilding>();
-            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation))
-            {
-                var archivedBuildingsData = new List<ArchivedBuildingData>();
-                foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
+                // Create the SolidFoundations folder near the save file, if one doesn't exist
+                var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations");
+                if (!Directory.Exists(externalSaveFolderPath))
                 {
-                    // Remove any FlagType.Temporary stored in the buildings modData
-                    foreach (var key in customBuilding.modData.Keys.Where(k => k.Contains(ModDataKeys.FLAG_BASE)).ToList())
-                    {
-                        if (customBuilding.modData[key] == SpecialAction.FlagType.Temporary.ToString())
-                        {
-                            customBuilding.modData.Remove(key);
-                        }
-                    }
-
-                    // Prepare the custom building objects for this location to be stored externally
-                    allExistingCustomBuildings.Add(customBuilding);
-                    archivedBuildingsData.Add(new ArchivedBuildingData() { Id = customBuilding.Id, TileX = customBuilding.tileX.Value, TileY = customBuilding.tileY.Value });
-
-                    // Remove the building from the location to avoid serialization issues
-                    buildableLocation.buildings.Remove(customBuilding);
+                    Directory.CreateDirectory(externalSaveFolderPath);
                 }
 
-                // Archive the custom building data for this location
-                buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(archivedBuildingsData);
-            }
+                // Process each buildable location and archive the relevant data
+                var allExistingCustomBuildings = new List<GenericBuilding>();
+                foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null))
+                {
+                    var archivedBuildingsData = new List<ArchivedBuildingData>();
+                    foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
+                    {
+                        // Remove any FlagType.Temporary stored in the buildings modData
+                        foreach (var key in customBuilding.modData.Keys.Where(k => k.Contains(ModDataKeys.FLAG_BASE)).ToList())
+                        {
+                            if (customBuilding.modData[key] == SpecialAction.FlagType.Temporary.ToString())
+                            {
+                                customBuilding.modData.Remove(key);
+                            }
+                        }
 
-            // Save the custom building objects externally, at the player's save file location
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
-            using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
+                        // Prepare the custom building objects for this location to be stored externally
+                        allExistingCustomBuildings.Add(customBuilding);
+                        archivedBuildingsData.Add(new ArchivedBuildingData() { Id = customBuilding.Id, TileX = customBuilding.tileX.Value, TileY = customBuilding.tileY.Value });
+
+                        // Remove the building from the location to avoid serialization issues
+                        buildableLocation.buildings.Remove(customBuilding);
+                    }
+
+                    // Archive the custom building data for this location
+                    buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(archivedBuildingsData);
+                }
+
+                // Save the custom building objects externally, at the player's save file location
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+                using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
+                {
+                    xmlSerializer.Serialize(writer, allExistingCustomBuildings);
+                }
+            }
+            catch (Exception ex)
             {
-                xmlSerializer.Serialize(writer, allExistingCustomBuildings);
+                Monitor.Log("Failed to cache the custom buildings: Any changes made in the last game day will be lost to allow saving!", LogLevel.Warn);
+                Monitor.Log($"Failure to cache the custom buildings: {ex}", LogLevel.Trace);
+
+                foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null))
+                {
+                    foreach (GenericBuilding customBuilding in buildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
+                    {
+                        try
+                        {
+                            // Remove the building from the location to avoid serialization issues
+                            buildableLocation.buildings.Remove(customBuilding);
+                        }
+                        catch (Exception subEx)
+                        {
+                            var buildingName = customBuilding is null || customBuilding.Model is null ? "Unknown" : customBuilding.Model.Name;
+                            Monitor.Log($"Failed to delete the custom building {buildingName}: Saving may fail!", LogLevel.Warn);
+                            Monitor.Log($"Failed to delete the custom building {buildingName}: {subEx}", LogLevel.Trace);
+                        }
+                    }
+                }
             }
         }
 
@@ -160,48 +186,56 @@ namespace SolidFoundations
                 // Go through each ArchivedBuildingData to confirm that a) the Id exists via BuildingManager and b) there is a match in locationNamesToCustomBuildings to its Id and TileLocation
                 foreach (var archivedData in archivedBuildingsData)
                 {
-                    if (!buildingManager.DoesBuildingModelExist(archivedData.Id) || !externallySavedCustomBuildings.Any(b => b.LocationName == buildableLocation.NameOrUniqueName))
+                    try
                     {
-                        continue;
-                    }
-
-                    GenericBuilding customBuilding = externallySavedCustomBuildings.FirstOrDefault(b => b.Id == archivedData.Id && b.tileX.Value == archivedData.TileX && b.tileY.Value == archivedData.TileY);
-                    if (customBuilding is null)
-                    {
-                        continue;
-                    }
-                    GameLocation interior = null;
-                    if (customBuilding.indoors.Value is not null)
-                    {
-                        interior = customBuilding.indoors.Value;
-                    }
-
-                    // Update the building's model
-                    customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(customBuilding.Id));
-
-                    // Load the building
-                    customBuilding.load();
-
-                    // Set the location
-                    customBuilding.buildingLocation.Value = buildableLocation;
-
-                    // Restore the archived custom building
-                    buildableLocation.buildings.Add(customBuilding);
-
-                    // Trigger the missed DayUpdate
-                    customBuilding.dayUpdate(Game1.dayOfMonth);
-
-                    // Clear any grass
-                    for (int x = 0; x < customBuilding.tilesWide.Value; x++)
-                    {
-                        for (int y = 0; y < customBuilding.tilesHigh.Value; y++)
+                        if (!buildingManager.DoesBuildingModelExist(archivedData.Id) || !externallySavedCustomBuildings.Any(b => b.LocationName == buildableLocation.NameOrUniqueName))
                         {
-                            var targetTile = new Vector2(customBuilding.tileX.Value + x, customBuilding.tileY.Value + y);
-                            if (buildableLocation.terrainFeatures.ContainsKey(targetTile) && buildableLocation.terrainFeatures[targetTile] is Grass grass && grass is not null)
+                            continue;
+                        }
+
+                        GenericBuilding customBuilding = externallySavedCustomBuildings.FirstOrDefault(b => b.Id == archivedData.Id && b.tileX.Value == archivedData.TileX && b.tileY.Value == archivedData.TileY);
+                        if (customBuilding is null)
+                        {
+                            continue;
+                        }
+                        GameLocation interior = null;
+                        if (customBuilding.indoors.Value is not null)
+                        {
+                            interior = customBuilding.indoors.Value;
+                        }
+
+                        // Update the building's model
+                        customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(customBuilding.Id));
+
+                        // Load the building
+                        customBuilding.load();
+
+                        // Set the location
+                        customBuilding.buildingLocation.Value = buildableLocation;
+
+                        // Restore the archived custom building
+                        buildableLocation.buildings.Add(customBuilding);
+
+                        // Trigger the missed DayUpdate
+                        customBuilding.dayUpdate(Game1.dayOfMonth);
+
+                        // Clear any grass
+                        for (int x = 0; x < customBuilding.tilesWide.Value; x++)
+                        {
+                            for (int y = 0; y < customBuilding.tilesHigh.Value; y++)
                             {
-                                buildableLocation.terrainFeatures.Remove(targetTile);
+                                var targetTile = new Vector2(customBuilding.tileX.Value + x, customBuilding.tileY.Value + y);
+                                if (buildableLocation.terrainFeatures.ContainsKey(targetTile) && buildableLocation.terrainFeatures[targetTile] is Grass grass && grass is not null)
+                                {
+                                    buildableLocation.terrainFeatures.Remove(targetTile);
+                                }
                             }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Monitor.Log($"Failed to load cached custom building {archivedData.Id} at [{archivedData.TileX}, {archivedData.TileY}], see log for details.", LogLevel.Warn);
+                        Monitor.Log($"Failure to load the custom building: {ex}", LogLevel.Trace);
                     }
                 }
             }
