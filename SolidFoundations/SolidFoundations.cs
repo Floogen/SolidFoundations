@@ -316,15 +316,22 @@ namespace SolidFoundations
             // Load owned content packs
             foreach (IContentPack contentPack in Helper.ContentPacks.GetOwned())
             {
-                Monitor.Log($"Loading data from pack: {contentPack.Manifest.Name} {contentPack.Manifest.Version} by {contentPack.Manifest.Author}", silent ? LogLevel.Trace : LogLevel.Debug);
+                try
+                {
+                    Monitor.Log($"Loading data from pack: {contentPack.Manifest.Name} {contentPack.Manifest.Version} by {contentPack.Manifest.Author}", silent ? LogLevel.Trace : LogLevel.Debug);
 
-                // Load interiors
-                Monitor.Log($"Loading interiors from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
-                LoadInteriors(contentPack);
+                    // Load interiors
+                    Monitor.Log($"Loading interiors from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
+                    LoadInteriors(contentPack);
 
-                // Load the buildings
-                Monitor.Log($"Loading buildings from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
-                LoadBuildings(contentPack);
+                    // Load the buildings
+                    Monitor.Log($"Loading buildings from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
+                    LoadBuildings(contentPack);
+                }
+                catch (Exception ex)
+                {
+                    Monitor.Log($"Failed to load the content pack {contentPack.Manifest.UniqueID}: {ex}", LogLevel.Warn);
+                }
             }
         }
 
