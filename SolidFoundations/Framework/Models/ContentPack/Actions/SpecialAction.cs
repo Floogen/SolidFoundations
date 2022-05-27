@@ -103,15 +103,18 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (ModifyInventory is not null)
             {
-                if (ModifyInventory.Operation == OperationName.Add && Toolkit.CreateItemByID(ModifyInventory.ItemId, ModifyInventory.Quantity, ModifyInventory.Quality) is Item item && item is not null)
+                var item = Toolkit.CreateItemByID(ModifyInventory.ItemId, ModifyInventory.Quantity, ModifyInventory.Quality);
+                if (ModifyInventory.Operation == OperationName.Add && item is not null)
                 {
                     if (who.couldInventoryAcceptThisItem(item))
                     {
                         who.addItemToInventoryBool(item);
                     }
                 }
-
-                // TODO: Implement removal
+                else if (ModifyInventory.Operation == OperationName.Remove && item is not null)
+                {
+                    InventoryManagement.ConsumeItemBasedOnQuantityAndQuality(who, item, ModifyInventory.Quantity, ModifyInventory.Quantity);
+                }
             }
             if (OpenShop is not null)
             {
