@@ -2,6 +2,9 @@
   "Name": "Camping Tent",
   "Description": "A camping tent.",
   "DrawShadow": false,
+  "UpgradeSignTile": "1, 3",
+  "UpgradeSignHeight": 24.0,
+
   "Skins": [
     {
       "ID": "Stardrop",

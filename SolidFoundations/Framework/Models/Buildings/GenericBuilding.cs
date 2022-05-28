@@ -1097,6 +1097,22 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.getUpgradeSignLocation
+        public override Vector2 getUpgradeSignLocation()
+        {
+            if (this.Model != null && this.Model.UpgradeSignTile.X >= 0f)
+            {
+                return new Vector2((float)(int)this.tileX + this.Model.UpgradeSignTile.X, (float)(int)this.tileY + this.Model.UpgradeSignTile.Y) * 64f + new Vector2(0f, -4f * this.Model.UpgradeSignHeight);
+            }
+            if (this.IndoorOrInstancedIndoor != null && this.IndoorOrInstancedIndoor is Shed)
+            {
+                return new Vector2((int)this.tileX + 5, (int)this.tileY + 1) * 64f + new Vector2(-12f, -16f);
+            }
+            return new Vector2((int)this.tileX * 64 + 32, (int)this.tileY * 64 - 32);
+        }
+
+
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.resetTexture
         public override void resetTexture()
         {
             this.texture = new Lazy<Texture2D>(delegate
@@ -1125,7 +1141,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             });
         }
 
-
+        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.textureName
         public override string textureName()
         {
             if (this.Model != null)
