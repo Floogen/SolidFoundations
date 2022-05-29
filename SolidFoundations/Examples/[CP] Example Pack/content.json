@@ -1,0 +1,28 @@
+﻿{
+  "Format": "1.26.0",
+  "DynamicTokens": [
+    {
+      "Name": "RandomY",
+      "Value": "TEST"
+    },
+    {
+      "Name": "RandomY",
+      "Value": "OTHER",
+      "When": {
+        "Query: {{Random: true, false |key={{Time}} }} = true": true
+      }
+    }
+  ],
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/BuildingsData",
+      "Fields": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_Striped Tent": {
+          "Description": "{{RandomY}}"
+        }
+      },
+      "Update": "OnTimeChange"
+    }
+  ]
+}

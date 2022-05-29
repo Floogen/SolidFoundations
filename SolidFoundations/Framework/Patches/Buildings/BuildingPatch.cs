@@ -43,7 +43,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return true;
             }
 
-            var buildingModel = SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(genericBuilding.Id);
+            var buildingModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(genericBuilding.Id);
             if (buildingModel is null || buildingModel.Texture is null)
             {
                 return false;

@@ -1,4 +1,5 @@
-﻿using SolidFoundations.Framework.Models.ContentPack;
+﻿using Newtonsoft.Json;
+using SolidFoundations.Framework.Models.ContentPack;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
@@ -13,38 +14,30 @@ namespace SolidFoundations.Framework.Managers
         private IMonitor _monitor;
         private IModHelper _helper;
 
-        private List<ExtendedBuildingModel> _buildings;
         private Dictionary<string, string> _assetPathToMap;
         private Dictionary<string, string> _assetPathToTexture;
+        private Dictionary<string, ExtendedBuildingModel> _idToModels;
 
         public BuildingManager(IMonitor monitor, IModHelper helper)
         {
             _monitor = monitor;
             _helper = helper;
 
-            _buildings = new List<ExtendedBuildingModel>();
             _assetPathToMap = new Dictionary<string, string>();
             _assetPathToTexture = new Dictionary<string, string>();
+            _idToModels = new Dictionary<string, ExtendedBuildingModel>();
         }
 
         public void Reset()
         {
-            _buildings.Clear();
             _assetPathToMap.Clear();
             _assetPathToTexture.Clear();
+            _idToModels.Clear();
         }
 
         public void AddBuilding(ExtendedBuildingModel model)
         {
-            if (_buildings.FirstOrDefault(t => t.ID.Equals(model.ID, StringComparison.OrdinalIgnoreCase)) is ExtendedBuildingModel buildingExtended && buildingExtended is not null)
-            {
-                var replacementIndex = _buildings.IndexOf(buildingExtended);
-                _buildings[replacementIndex] = model;
-            }
-            else
-            {
-                _buildings.Add(model);
-            }
+            _idToModels[model.ID] = model;
         }
 
         public void AddMapAsset(string assetPath, string pathToMap)
@@ -79,7 +72,7 @@ namespace SolidFoundations.Framework.Managers
 
         public string GetTextureAsset(string assetPath)
         {
-            if (_assetPathToTexture.ContainsKey(assetPath))
+            if (String.IsNullOrEmpty(assetPath) is false && _assetPathToTexture.ContainsKey(assetPath))
             {
                 return _assetPathToTexture[assetPath];
             }
@@ -89,17 +82,22 @@ namespace SolidFoundations.Framework.Managers
 
         public List<ExtendedBuildingModel> GetAllBuildingModels()
         {
-            return _buildings;
+            return _idToModels.Values.ToList();
         }
 
-        public T GetSpecificBuildingModel<T>(string buildingId) where T : ExtendedBuildingModel
+        public Dictionary<string, ExtendedBuildingModel> GetIdToModels()
         {
-            return (T)_buildings.FirstOrDefault(t => String.Equals(t.ID, buildingId, StringComparison.OrdinalIgnoreCase) && t is T);
+            return _idToModels;
+        }
+
+        public ExtendedBuildingModel GetSpecificBuildingModel(string buildingId)
+        {
+            return String.IsNullOrEmpty(buildingId) is false && _idToModels.ContainsKey(buildingId) ? _idToModels[buildingId] : null;
         }
 
         public bool DoesBuildingModelExist(string buildingId)
         {
-            return _buildings.Any(t => String.Equals(t.ID, buildingId, StringComparison.OrdinalIgnoreCase));
+            return String.IsNullOrEmpty(buildingId) is false && _idToModels.ContainsKey(buildingId);
         }
     }
 }

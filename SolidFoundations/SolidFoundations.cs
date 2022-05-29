@@ -77,10 +77,12 @@ namespace SolidFoundations
             helper.ConsoleCommands.Add("sf_reload", "Reloads all Solid Foundations content packs.\n\nUsage: sf_reload", delegate { this.LoadContentPacks(); this.RefreshAllCustomBuildings(); });
 
             // Hook into the required events
+            helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
             modHelper.Events.Content.AssetRequested += OnAssetRequested;
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
             modHelper.Events.GameLoop.DayStarted += OnDayStarted;
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
+
             modHelper.Events.World.BuildingListChanged += OnBuildingListChanged;
         }
 
@@ -90,7 +92,6 @@ namespace SolidFoundations
             {
                 RefreshCustomBuilding(e.Location, building, true);
             }
-
         }
 
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
@@ -118,10 +119,6 @@ namespace SolidFoundations
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             // Hook into the APIs we utilize
-            if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
-            {
-                //apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "Building", new BuildingToken());
-            }
             if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
             {
                 // Do nothing
@@ -144,7 +141,11 @@ namespace SolidFoundations
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.DataType == typeof(Texture2D))
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/BuildingsData"))
+            {
+                e.LoadFrom(() => buildingManager.GetIdToModels(), AssetLoadPriority.Exclusive);
+            }
+            else if (e.DataType == typeof(Texture2D))
             {
                 var asset = e.Name;
                 if (buildingManager.GetTextureAsset(asset.Name) is var texturePath && texturePath is not null)
@@ -160,6 +161,17 @@ namespace SolidFoundations
                     e.LoadFrom(() => Helper.ModContent.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
                 }
             }
+        }
+
+        private void OnAssetInvalidated(object sender, AssetsInvalidatedEventArgs e)
+        {
+            var asset = e.NamesWithoutLocale.FirstOrDefault(a => a.IsEquivalentTo("Data/BuildingsData"));
+            if (asset is null)
+            {
+                return;
+            }
+
+            _ = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
         }
 
         private void SafelyCacheCustomBuildings()
@@ -283,7 +295,7 @@ namespace SolidFoundations
                         }
 
                         // Update the building's model
-                        customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(customBuilding.Id));
+                        customBuilding.RefreshModel(buildingManager.GetSpecificBuildingModel(customBuilding.Id));
 
                         // Load the building
                         customBuilding.load();
@@ -319,6 +331,7 @@ namespace SolidFoundations
             }
         }
 
+        // TODO: When SDV v1.6 is released, revise this method to load the buildings into BuildingsData
         private void LoadContentPacks(bool silent = false)
         {
             // Clear the existing cache of custom buildings
@@ -344,6 +357,9 @@ namespace SolidFoundations
                     Monitor.Log($"Failed to load the content pack {contentPack.Manifest.UniqueID}: {ex}", LogLevel.Warn);
                 }
             }
+
+            // Load the buildings into the backported BuildingsData
+            _ = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>("Data/BuildingsData");
         }
 
         private void LoadInteriors(IContentPack contentPack)
@@ -435,7 +451,7 @@ namespace SolidFoundations
                     buildingModel.ID = String.Concat(buildingModel.Owner, "_", buildingModel.Name);
 
                     // Verify that a building with the name doesn't exist in this pack
-                    if (buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(buildingModel.ID) != null)
+                    if (buildingManager.GetSpecificBuildingModel(buildingModel.ID) != null)
                     {
                         Monitor.Log($"Unable to add building from {contentPack.Manifest.Name}: This pack already contains a building with the name of {buildingModel.Name}", LogLevel.Warn);
                         continue;
@@ -474,7 +490,7 @@ namespace SolidFoundations
                     buildingManager.AddBuilding(buildingModel);
 
                     // Log it
-                    Monitor.Log(buildingModel.ToString(), LogLevel.Trace);
+                    Monitor.Log($"Loaded the building {buildingModel.ID}", LogLevel.Trace);
                 }
 
             }
@@ -499,7 +515,7 @@ namespace SolidFoundations
         {
             try
             {
-                var model = buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(building.Id);
+                var model = buildingManager.GetSpecificBuildingModel(building.Id);
                 if (model is not null)
                 {
                     building.RefreshModel(model);

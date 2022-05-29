@@ -1206,10 +1206,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     Game1.getFarm().buildings.Remove(this);
                     string upgradeName = this.upgradeName.Value;
 
-                    if (SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(upgradeName) is ExtendedBuildingModel model && model is not null)
+                    if (SolidFoundations.buildingManager.GetSpecificBuildingModel(upgradeName) is ExtendedBuildingModel model && model is not null)
                     {
                         Game1.player.checkForQuestComplete(null, -1, -1, null, upgradeName, 8);
-                        RefreshModel(SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(upgradeName));
+                        RefreshModel(SolidFoundations.buildingManager.GetSpecificBuildingModel(upgradeName));
 
                         BluePrint bluePrint = new BluePrint(upgradeName);
                         if (bluePrint is not null)

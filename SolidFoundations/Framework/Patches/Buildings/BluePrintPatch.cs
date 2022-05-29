@@ -37,7 +37,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         private static bool BluePrintPrefix(BluePrint __instance, string name)
         {
-            if (SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(name) is ExtendedBuildingModel buildingData && buildingData is not null)
+            if (SolidFoundations.buildingManager.GetSpecificBuildingModel(name) is ExtendedBuildingModel buildingData && buildingData is not null)
             {
                 __instance.name = name;
                 __instance.displayName = TextParser.ParseText(buildingData.Name);

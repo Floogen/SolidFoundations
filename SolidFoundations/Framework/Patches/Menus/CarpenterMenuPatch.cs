@@ -85,7 +85,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         private static bool SetNewActiveBlueprintPrefix(CarpenterMenu __instance, int ___currentBlueprintIndex, List<BluePrint> ___blueprints, ref Building ___currentBuilding, ref int ___price, ref string ___buildingName, ref string ___buildingDescription, ref List<Item> ___ingredients)
         {
-            if (SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(___blueprints[___currentBlueprintIndex].name) is ExtendedBuildingModel model && model is not null)
+            if (SolidFoundations.buildingManager.GetSpecificBuildingModel(___blueprints[___currentBlueprintIndex].name) is ExtendedBuildingModel model && model is not null)
             {
                 Type buildingTypeFromName = GetBuildingTypeFromName(model.BuildingType);
                 ___currentBuilding = new GenericBuilding(model, ___blueprints[___currentBlueprintIndex]);
@@ -212,7 +212,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return false;
             }
 
-            var buildingModel = SolidFoundations.buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(blueprint.name);
+            var buildingModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(blueprint.name);
             if (buildingModel is null)
             {
                 return false;
