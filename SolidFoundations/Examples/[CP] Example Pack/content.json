@@ -18,7 +18,7 @@
       "Action": "EditData",
       "Target": "Data/BuildingsData",
       "Fields": {
-        "PeacefulEnd.SolidFoundations.ExamplePack_Striped Tent": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_Quizzical Shrine": {
           "Description": "{{RandomY}}"
         }
       },
