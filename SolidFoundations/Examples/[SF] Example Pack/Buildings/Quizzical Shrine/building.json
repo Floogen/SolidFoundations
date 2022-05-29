@@ -41,6 +41,7 @@
     "ConditionalActions": [
       {
         "DialogueWithChoices": {
+          "ShuffleResponseOrder": true,
           "Question": "What is tomorrow's weather going to be like?",
           "Responses": [
             {

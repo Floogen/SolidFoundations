@@ -10,5 +10,6 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
     {
         public string Question { get; set; }
         public List<ResponseAction> Responses { get; set; } = new List<ResponseAction>();
+        public bool ShuffleResponseOrder { get; set; }
     }
 }
