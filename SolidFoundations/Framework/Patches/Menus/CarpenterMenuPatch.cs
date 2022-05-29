@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Models.ContentPack;
+using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
 using StardewModdingAPI;
 using StardewValley;
@@ -245,6 +246,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             customBuilding.RefreshModel();
             customBuilding.performActionOnConstruction(farm);
             customBuilding.updateInteriorWarps();
+
             SolidFoundations.multiplayer.globalChatInfoMessage("BuildingBuild", Game1.player.Name, Utility.AOrAn(blueprint.displayName), blueprint.displayName, Game1.player.farmName);
 
             return true;

@@ -10,8 +10,11 @@ namespace SolidFoundations.Framework.Utilities
     {
         // Core keys
         internal const string GENERIC_BLUEPRINT = "SolidFoundations.GenericBlueprint";
-        internal const string GENERIC_BUILDING = "SolidFoundations.GenericBuilding";
+        internal const string GENERIC_BUILDING_ID = "SolidFoundations.GenericBuilding.Id";
         internal const string LOCATION_CUSTOM_BUILDINGS = "SolidFoundations.Location.CustomBuildings";
+
+        // Messages
+        internal const string MESSAGE_BUILDING_BUILT = "SolidFoundations.Messages.BuildingBuilt";
 
         // Flags
         internal const string FLAG_BASE = "SolidFoundations.Flag";

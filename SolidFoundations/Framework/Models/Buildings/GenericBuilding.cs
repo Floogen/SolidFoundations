@@ -26,7 +26,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         [XmlIgnore]
         public ExtendedBuildingModel Model { get; set; }
-        public string Id { get; set; }
+        public string Id { get { return base.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING_ID) ? base.modData[ModDataKeys.GENERIC_BUILDING_ID] : String.Empty; } set { base.modData[ModDataKeys.GENERIC_BUILDING_ID] = value; } }
         public string LocationName { get; set; }
 
         // Start of backported properties
@@ -447,13 +447,16 @@ namespace SolidFoundations.Framework.Models.ContentPack
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.getSourceRect
         public override Rectangle getSourceRect()
         {
-            Rectangle rectangle = this.Model.GetSourceRect();
-            if (rectangle == Rectangle.Empty)
+            if (this.Model is not null)
             {
-                return base.texture.Value.Bounds;
+                Rectangle rectangle = this.Model.GetSourceRect();
+                if (rectangle != Rectangle.Empty)
+                {
+                    return rectangle;
+                }
             }
 
-            return rectangle;
+            return base.texture.Value.Bounds;
         }
 
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.getRectForAnimalDoor
@@ -1673,7 +1676,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             UpdateBackport(time);
 
             // Catch touch actions
-            if (this.Model != null)
+            if (this.Model != null && buildingLocation.Value != null)
             {
                 Vector2 playerStandingPosition = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
                 if (buildingLocation.Value.lastTouchActionLocation.Equals(Vector2.Zero))

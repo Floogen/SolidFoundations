@@ -81,6 +81,16 @@ namespace SolidFoundations
             modHelper.Events.GameLoop.GameLaunched += OnGameLaunched;
             modHelper.Events.GameLoop.DayStarted += OnDayStarted;
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
+            modHelper.Events.World.BuildingListChanged += OnBuildingListChanged;
+        }
+
+        private void OnBuildingListChanged(object sender, BuildingListChangedEventArgs e)
+        {
+            foreach (GenericBuilding building in e.Added.Where(b => b is GenericBuilding))
+            {
+                RefreshCustomBuilding(e.Location, building, true);
+            }
+
         }
 
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
@@ -230,11 +240,12 @@ namespace SolidFoundations
 
         private void LoadCachedCustomBuildings()
         {
-            var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
-            if (!Game1.IsMasterGame || !File.Exists(customBuildingsExternalSavePath))
+            if (!Game1.IsMasterGame || String.IsNullOrEmpty(Constants.CurrentSavePath) || !File.Exists(Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json")))
             {
+                this.RefreshAllCustomBuildings();
                 return;
             }
+            var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
 
             // Get the externally saved custom building objects
             var externallySavedCustomBuildings = new List<GenericBuilding>();
@@ -479,26 +490,35 @@ namespace SolidFoundations
             {
                 foreach (GenericBuilding building in buildableLocation.buildings.Where(b => b is GenericBuilding))
                 {
-                    try
-                    {
-                        var model = buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(building.Id);
-                        if (model is not null)
-                        {
-                            building.RefreshModel(model);
-                        }
+                    RefreshCustomBuilding(buildableLocation, building, resetTexture);
+                }
+            }
+        }
 
-                        if (resetTexture)
-                        {
-                            Helper.GameContent.InvalidateCache(model.Texture);
-                            building.resetTexture();
-                        }
-                    }
-                    catch (Exception ex)
+        private void RefreshCustomBuilding(GameLocation location, GenericBuilding building, bool resetTexture = true)
+        {
+            try
+            {
+                var model = buildingManager.GetSpecificBuildingModel<ExtendedBuildingModel>(building.Id);
+                if (model is not null)
+                {
+                    building.RefreshModel(model);
+
+                    if (resetTexture)
                     {
-                        Monitor.Log($"Failed to refresh {building.nameOfIndoorsWithoutUnique} from {buildableLocation.NameOrUniqueName}!", LogLevel.Warn);
-                        Monitor.Log($"Failed to refresh {building.nameOfIndoorsWithoutUnique} from {buildableLocation.NameOrUniqueName}: {ex}", LogLevel.Trace);
+                        Helper.GameContent.InvalidateCache(model.Texture);
+                        building.resetTexture();
                     }
                 }
+                else
+                {
+                    throw new Exception("Model is null.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Monitor.Log($"Failed to refresh {building.Id} | {building.textureName()} from {location.NameOrUniqueName}!", LogLevel.Warn);
+                Monitor.Log($"Failed to refresh {building.Id} | {building.textureName()} from {location.NameOrUniqueName}: {ex}", LogLevel.Trace);
             }
         }
     }
