@@ -793,7 +793,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return this.GetItemConversionForItem(item, chest) != null;
         }
 
-        // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.PerformBuildingChestAction
+        // TODO: When updated to SDV v1.6, this method (StardewValley.Buildings.Building.PerformBuildingChestAction) should be patched to utilize fixes
+        // Current fixes:
+        // - Only take required amount from player's active stack, instead of all that can fit within chest
         public bool PerformBuildingChestAction(string name, Farmer who)
         {
             Chest chest = this.GetBuildingChest(name);
@@ -839,7 +841,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         Game1.showRedMessage(TextParser.ParseText(buildingChestData.ChestFullMessage));
                         return false;
                     }
-                    int num = Math.Min(numberOfItemThatCanBeAddedToThisInventoryList, who.ActiveObject.Stack) / itemConversionForItem.RequiredCount * itemConversionForItem.RequiredCount;
+                    int num = Math.Min(Math.Min(numberOfItemThatCanBeAddedToThisInventoryList, who.ActiveObject.Stack), itemConversionForItem.RequiredCount);
                     if (num == 0)
                     {
                         if (buildingChestData.InvalidItemMessage != null)
