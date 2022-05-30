@@ -72,7 +72,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 List<Response> responses = new List<Response>();
                 foreach (var response in DialogueWithChoices.Responses.Where(r => r.SpecialAction is not null).OrderBy(r => DialogueWithChoices.ShuffleResponseOrder ? Game1.random.Next() : DialogueWithChoices.Responses.IndexOf(r)))
                 {
-                    responses.Add(new Response(responses.Count.ToString(), HandleSpecialTextTokens(response.Text)));
+                    responses.Add(new Response(DialogueWithChoices.Responses.IndexOf(response).ToString(), HandleSpecialTextTokens(response.Text)));
                 }
 
                 who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, whichAnswer)));
