@@ -177,7 +177,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 builder = "Wizard";
             }
 
-            foreach (var building in SolidFoundations.buildingManager.GetAllBuildingModels().Where(b => b.IsLocked is false))
+            foreach (var building in SolidFoundations.buildingManager.GetAllBuildingModels().Where(b => GameStateQuery.CheckConditions(b.BuildCondition) is true))
             {
                 if (String.IsNullOrEmpty(building.Builder) || building.Builder.Equals(builder, StringComparison.OrdinalIgnoreCase))
                 {
