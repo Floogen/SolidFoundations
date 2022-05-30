@@ -42,10 +42,10 @@
       {
         "DialogueWithChoices": {
           "ShuffleResponseOrder": true,
-          "Question": "What is tomorrow's weather going to be like?",
+          "Question": "Which is correct?",
           "Responses": [
             {
-              "Text": "Rainy",
+              "Text": "This is correct!",
               "SpecialAction": {
                 "ModifyFlags": [
                   {
@@ -71,7 +71,7 @@
               }
             },
             {
-              "Text": "Sunny",
+              "Text": "This isn't correct!",
               "SpecialAction": {
                 "Dialogue": {
                   "Text": "Hm, that isn't right. Try again tomorrow!"
@@ -86,7 +86,7 @@
               }
             },
             {
-              "Text": "Stormy",
+              "Text": "This is also not correct...",
               "SpecialAction": {
                 "Dialogue": {
                   "Text": "Hm, that isn't right. Try again tomorrow!"
