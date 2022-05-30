@@ -95,23 +95,15 @@ namespace SolidFoundations
         }
 
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
+        [EventPriority(EventPriority.High + 1)]
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
             SafelyCacheCustomBuildings();
         }
 
         // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
+        [EventPriority(EventPriority.High + 1)]
         private void OnDayStarted(object sender, DayStartedEventArgs e)
-        {
-            LoadCachedCustomBuildings();
-        }
-
-        private void OnSaving(object sender, EventArgs e)
-        {
-            SafelyCacheCustomBuildings();
-        }
-
-        private void OnLoading(object sender, EventArgs e)
         {
             LoadCachedCustomBuildings();
         }
@@ -128,8 +120,8 @@ namespace SolidFoundations
                 var saveAnywhereApi = apiManager.GetSaveAnywhereApi();
 
                 // Hook into save related events
-                saveAnywhereApi.BeforeSave += OnSaving;
-                saveAnywhereApi.AfterLoad += OnLoading;
+                saveAnywhereApi.BeforeSave += delegate { SafelyCacheCustomBuildings(); };
+                saveAnywhereApi.AfterLoad += delegate { LoadCachedCustomBuildings(); };
             }
 
             // Load any owned content packs
