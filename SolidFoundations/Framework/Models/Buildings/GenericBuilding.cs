@@ -103,6 +103,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
             this.updateInteriorWarps();
         }
 
+        protected override void initNetFields()
+        {
+            base.initNetFields();
+            base.NetFields.AddFields(this.buildingLocation.NetFields, this.buildingChests, this.animalDoorOpenAmount, this.skinID, this.upgradeName, this.nonInstancedIndoors.NetFields);
+        }
+
         public void RefreshModel()
         {
             if (Model is not null)
