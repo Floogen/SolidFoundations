@@ -2,15 +2,40 @@
   "Format": "1.26.0",
   "DynamicTokens": [
     {
-      "Name": "RandomY",
-      "Value": "TEST"
+      "Name": "QuizRange",
+      "Value": "4"
     },
     {
-      "Name": "RandomY",
-      "Value": "OTHER",
-      "When": {
-        "Query: {{Random: true, false |key={{Time}} }} = true": true
-      }
+      "Name": "GiftRange",
+      "Value": "2"
+    },
+    {
+      "Name": "Question",
+      "Value": "{{i18n:Quiz.Question.{{Random:{{Range:1,{{QuizRange}}}} |key=quiz {{Time}}}}}}"
+    },
+    {
+      "Name": "WrongAnswer",
+      "Value": "{{i18n:Quiz.WrongAnswer.{{Random:{{Range:1,{{QuizRange}}}} |key=quiz {{Time}}}}}}"
+    },
+    {
+      "Name": "SecondaryWrongAnswer",
+      "Value": "{{i18n:Quiz.SecondaryWrongAnswer.{{Random:{{Range:1,{{QuizRange}}}} |key=quiz {{Time}}}}}}"
+    },
+    {
+      "Name": "RightAnswer",
+      "Value": "{{i18n:Quiz.RightAnswer.{{Random:{{Range:1,{{QuizRange}}}} |key=quiz {{Time}}}}}}"
+    },
+    {
+      "Name": "ItemGiftId",
+      "Value": "{{i18n:Quiz.GiftId.{{Random:{{Range:1,{{GiftRange}}}} |key=reward {{Time}}}}}}"
+    },
+    {
+      "Name": "ItemGiftQuantity",
+      "Value": "{{i18n:Quiz.GiftQuantity.{{Random:{{Range:1,{{GiftRange}}}} |key=reward {{Time}}}}}}"
+    },
+    {
+      "Name": "ItemGiftQuality",
+      "Value": "{{i18n:Quiz.GiftQuality.{{Random:{{Range:1,{{GiftRange}}}} |key=reward {{Time}}}}}}"
     }
   ],
   "Changes": [
@@ -19,7 +44,82 @@
       "Target": "Data/BuildingsData",
       "Fields": {
         "PeacefulEnd.SolidFoundations.ExamplePack_Quizzical Shrine": {
-          "Description": "{{RandomY}}"
+          "DefaultSpecialAction": {
+            "ConditionalActions": [
+              {
+                "DialogueWithChoices": {
+                  "ShuffleResponseOrder": true,
+                  "Question": "{{Question}}",
+                  "Responses": [
+                    {
+                      "Text": "{{RightAnswer}}",
+                      "SpecialAction": {
+                        "ModifyFlags": [
+                          {
+                            "Name": "AttemptedTest",
+                            "Type": "Temporary",
+                            "Operation": "Add"
+                          },
+                          {
+                            "Name": "PassedTest",
+                            "Type": "Temporary",
+                            "Operation": "Add"
+                          }
+                        ],
+                        "Dialogue": {
+                          "Text": "Well done!"
+                        },
+                        "ModifyInventory": {
+                          "ItemId": "{{ItemGiftId}}",
+                          "Quantity": "{{Random:{{Range:1,{{ItemGiftQuantity}}}}}}",
+                          "Quality": "{{Random:{{Range:0,{{ItemGiftQuality}}}}}}",
+                          "Operation": "Add"
+                        }
+                      }
+                    },
+                    {
+                      "Text": "{{WrongAnswer}}",
+                      "SpecialAction": {
+                        "Dialogue": {
+                          "Text": "Hm, that isn't right. Try again tomorrow!"
+                        },
+                        "ModifyFlags": [
+                          {
+                            "Name": "AttemptedTest",
+                            "Type": "Temporary",
+                            "Operation": "Add"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "Text": "{{SecondaryWrongAnswer}}",
+                      "SpecialAction": {
+                        "Dialogue": {
+                          "Text": "Hm, that isn't right. Try again tomorrow!"
+                        },
+                        "ModifyFlags": [
+                          {
+                            "Name": "AttemptedTest",
+                            "Type": "Temporary",
+                            "Operation": "Add"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "Dialogue": {
+                  "Text": "You've already been quizzed for today. Try again tomorrow!"
+                },
+                "ModDataFlags": [
+                  "AttemptedTest"
+                ]
+              }
+            ]
+          }
         }
       },
       "Update": "OnTimeChange"
