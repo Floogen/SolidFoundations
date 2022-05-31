@@ -43,7 +43,7 @@
       "Action": "EditData",
       "Target": "Data/BuildingsData",
       "Fields": {
-        "PeacefulEnd.SolidFoundations.ExamplePack_Quizzical Shrine": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_QuizzicalShrine": {
           "DefaultSpecialAction": {
             "ConditionalActions": [
               {

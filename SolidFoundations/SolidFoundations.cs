@@ -440,7 +440,7 @@ namespace SolidFoundations
                     // Set the PackName and Id
                     buildingModel.PackName = contentPack.Manifest.Name;
                     buildingModel.Owner = contentPack.Manifest.UniqueID;
-                    buildingModel.ID = String.Concat(buildingModel.Owner, "_", buildingModel.Name);
+                    buildingModel.ID = String.Concat(buildingModel.Owner, "_", buildingModel.Name.Replace(" ", String.Empty));
 
                     // Verify that a building with the name doesn't exist in this pack
                     if (buildingManager.GetSpecificBuildingModel(buildingModel.ID) != null)
