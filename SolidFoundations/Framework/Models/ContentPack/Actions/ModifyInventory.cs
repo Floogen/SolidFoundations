@@ -11,7 +11,9 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
     public class ModifyInventory
     {
         public string ItemId { get; set; }
-        public int Quantity { get; set; } = 1;
+        public int Quantity { get; set; }
+        public int MinCount { get; set; } = 1;
+        public int MaxCount { get; set; } = 1;
         public int Quality { get; set; }
         public OperationName Operation { get; set; } = OperationName.Add;
     }

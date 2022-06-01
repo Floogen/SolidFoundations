@@ -103,17 +103,30 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (ModifyInventory is not null)
             {
-                var item = Toolkit.CreateItemByID(ModifyInventory.ItemId, ModifyInventory.Quantity, ModifyInventory.Quality);
-                if (ModifyInventory.Operation == OperationName.Add && item is not null)
+                var quantity = ModifyInventory.Quantity;
+                if (quantity <= 0)
                 {
-                    if (who.couldInventoryAcceptThisItem(item))
+                    if (ModifyInventory.MaxCount < ModifyInventory.MinCount)
                     {
-                        who.addItemToInventoryBool(item);
+                        ModifyInventory.MaxCount = ModifyInventory.MinCount;
                     }
+
+                    quantity = new Random((int)((long)Game1.uniqueIDForThisGame + who.DailyLuck + Game1.stats.DaysPlayed * 500)).Next(ModifyInventory.MinCount, ModifyInventory.MaxCount + 1);
                 }
-                else if (ModifyInventory.Operation == OperationName.Remove && item is not null)
+
+                if (quantity > 0 && Toolkit.CreateItemByID(ModifyInventory.ItemId, quantity, ModifyInventory.Quality) is Item item && item is not null)
                 {
-                    InventoryManagement.ConsumeItemBasedOnQuantityAndQuality(who, item, ModifyInventory.Quantity, ModifyInventory.Quantity);
+                    if (ModifyInventory.Operation == OperationName.Add && item is not null)
+                    {
+                        if (who.couldInventoryAcceptThisItem(item))
+                        {
+                            who.addItemToInventoryBool(item);
+                        }
+                    }
+                    else if (ModifyInventory.Operation == OperationName.Remove && item is not null)
+                    {
+                        InventoryManagement.ConsumeItemBasedOnQuantityAndQuality(who, item, quantity, ModifyInventory.Quality);
+                    }
                 }
             }
             if (OpenShop is not null)
