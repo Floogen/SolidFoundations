@@ -123,6 +123,15 @@
         }
       },
       "Update": "OnTimeChange"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/BuildingsData",
+      "Fields": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_Balloon": {
+          "DefaultAction": "Dialogue This has been edited by Content Patcher. Neat!"
+        }
+      }
     }
   ]
 }
