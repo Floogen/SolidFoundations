@@ -160,55 +160,56 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         {
             switch (shopName.ToLower())
             {
-                case "clint":
+                case "clintshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithStock(), 0, "Clint");
                     return;
-                case "desertmerchant":
+                case "deserttrader":
                     Game1.activeClickableMenu = new ShopMenu(Desert.getDesertMerchantTradeStock(who), 0, "DesertTrade", onDesertTraderPurchase);
                     return;
-                case "dwarf":
+                case "dwarfshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getDwarfShopStock(), 0, "Dwarf");
                     return;
                 case "geodes":
                     Game1.activeClickableMenu = new GeodeMenu();
                     return;
-                case "gus":
+                case "gusshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getSaloonStock(), 0, "Gus", (item, farmer, amount) => onGenericPurchase(SynchronizedShopStock.SynchedShop.Saloon, item, farmer, amount));
                     return;
-                case "harvey":
+                case "harveyshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getHospitalStock());
                     return;
                 case "itemrecovery":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getAdventureRecoveryStock(), 0, "Marlon_Recovery");
                     return;
-                case "krobus":
+                case "krobusshop":
                     Game1.activeClickableMenu = new ShopMenu((Game1.getLocationFromName("Sewer") as Sewer).getShadowShopStock(), 0, "KrobusGone", null);
                     return;
-                case "marlon":
+                case "marlonshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getAdventureShopStock(), 0, "Marlon");
                     return;
-                case "marnie":
+                case "marnieshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getAnimalShopStock(), 0, "Marnie");
                     return;
-                case "pierre":
+                case "pierreshop":
                     Game1.activeClickableMenu = new ShopMenu(new SeedShop().shopStock(), 0, "Pierre");
                     return;
-                case "qi":
+                case "qishop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getQiShopStock(), 2);
                     return;
-                case "sandy":
+                case "sandyshop":
                     Game1.activeClickableMenu = new ShopMenu(SolidFoundations.modHelper.Reflection.GetMethod(Game1.currentLocation, "sandyShopStock").Invoke<Dictionary<ISalable, int[]>>(), 0, "Sandy", (item, farmer, amount) => onGenericPurchase(SynchronizedShopStock.SynchedShop.Sandy, item, farmer, amount));
                     return;
-                case "robin":
+                case "robinshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getCarpenterStock(), 0, "Robin");
                     return;
                 case "travelingmerchant":
+                case "travellingmerchant":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getTravelingMerchantStock((int)((long)Game1.uniqueIDForThisGame + Game1.stats.DaysPlayed)), 0, "Traveler", Utility.onTravelingMerchantShopPurchase);
                     return;
                 case "toolupgrades":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getBlacksmithUpgradeStock(who), 0, "ClintUpgrade");
                     return;
-                case "willy":
+                case "willyshop":
                     Game1.activeClickableMenu = new ShopMenu(Utility.getFishShopStock(who), 0, "Willy");
                     return;
             }
