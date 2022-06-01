@@ -38,6 +38,13 @@ namespace SolidFoundations
 
         public override void Entry(IModHelper helper)
         {
+            // Validate that the game version is compatible
+            if (IsGameVersionCompatible() is false)
+            {
+                Monitor.Log($"This version of Solid Foundations (v{ModManifest.Version}) is not compatible with Stardew Valley v{Game1.version}.\nSolid Foundations buildings will not be loaded.\nDownload the latest version of Solid Foundations to resolve this issue.", LogLevel.Error);
+                return;
+            }
+
             // Set up the monitor, helper and multiplayer
             monitor = Monitor;
             modHelper = helper;
@@ -84,6 +91,15 @@ namespace SolidFoundations
             modHelper.Events.GameLoop.DayEnding += OnDayEnding;
 
             modHelper.Events.World.BuildingListChanged += OnBuildingListChanged;
+        }
+
+        // TODO: Remove this once this framework has been updated for SDV v1.6
+        private bool IsGameVersionCompatible()
+        {
+            var incompatibleVersion = new Version("1.6.0");
+            var gameVersion = new Version(Game1.version);
+
+            return incompatibleVersion > gameVersion;
         }
 
         private void OnBuildingListChanged(object sender, BuildingListChangedEventArgs e)
