@@ -504,7 +504,7 @@ namespace SolidFoundations
                     // Load in any skins, if given
                     if (Directory.Exists(Path.Combine(folder.FullName, "Skins")))
                     {
-                        List<string> skinPaths = Directory.GetFiles(Path.Combine(folder.FullName, "Skins"), "skin_*.png").OrderBy(s => s).ToList();
+                        List<string> skinPaths = Directory.GetFiles(Path.Combine(folder.FullName, "Skins"), "*.png").OrderBy(s => s).ToList();
                         foreach (var skin in buildingModel.Skins)
                         {
                             var skinPath = Path.Combine(folder.FullName, "Skins", String.Concat(skin.Texture, ".png"));
@@ -515,6 +515,24 @@ namespace SolidFoundations
 
                             skin.Texture = contentPack.ModContent.GetInternalAssetName(skinPath).Name;
                             buildingManager.AddTextureAsset(skin.Texture, skinPath);
+                        }
+                    }
+
+                    // Load in the sprites for DrawLayers, if given
+                    if (Directory.Exists(Path.Combine(folder.FullName, "Sprites")) && buildingModel.DrawLayers is not null)
+                    {
+                        List<string> spritePaths = Directory.GetFiles(Path.Combine(folder.FullName, "Sprites"), "*.png").ToList();
+                        foreach (var layer in buildingModel.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
+                        {
+                            var spritePath = Path.Combine(folder.FullName, "Sprites", String.Concat(layer.Texture, ".png"));
+                            if (spritePaths.Contains(spritePath) is false)
+                            {
+                                Monitor.Log($"Unable to find the texture {spritePath} under Sprites from for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
+                                continue;
+                            }
+
+                            layer.Texture = contentPack.ModContent.GetInternalAssetName(spritePath).Name;
+                            buildingManager.AddTextureAsset(layer.Texture, spritePath);
                         }
                     }
 

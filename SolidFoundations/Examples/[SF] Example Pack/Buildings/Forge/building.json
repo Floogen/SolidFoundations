@@ -11,7 +11,8 @@
   "CollisionMap": "XXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX\nXXXXOOXXXX\nXXOOOOOOXX\nXXXOOOOXXX\nXXXXOOXXXX\nXXXXOOXXXX\nXXXXOOXXXX",
   "DrawLayers": [
     {
-      "SourceRect": "0 160 160 160",
+      "Texture": "lava_animations",
+      "SourceRect": "0 0 160 160",
       "DrawPosition": {
         "X": 0,
         "Y": 0
@@ -61,7 +62,7 @@
           "Duration": 250
         }
       ],
-      "OnlyDrawIfChestHasContents":  "Input"
+      "OnlyDrawIfChestHasContents": "Input"
     }
   ],
   "SortTileOffset": 10,
