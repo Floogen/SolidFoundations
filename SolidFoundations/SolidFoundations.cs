@@ -318,6 +318,23 @@ namespace SolidFoundations
                         customBuilding.dayUpdate(Game1.dayOfMonth);
 
                         // Clear any grass
+                        var validIndexesForRemoval = new List<int>()
+                        {
+                            343,
+                            450,
+                            294,
+                            295,
+                            675,
+                            674,
+                            784,
+                            677,
+                            676,
+                            785,
+                            679,
+                            678,
+                            786,
+                            674
+                        };
                         for (int x = 0; x < customBuilding.tilesWide.Value; x++)
                         {
                             for (int y = 0; y < customBuilding.tilesHigh.Value; y++)
@@ -326,6 +343,14 @@ namespace SolidFoundations
                                 if (buildableLocation.terrainFeatures.ContainsKey(targetTile) && buildableLocation.terrainFeatures[targetTile] is Grass grass && grass is not null)
                                 {
                                     buildableLocation.terrainFeatures.Remove(targetTile);
+                                }
+                                else if (buildableLocation.terrainFeatures.ContainsKey(targetTile) && buildableLocation.terrainFeatures[targetTile] is Tree tree && tree is not null)
+                                {
+                                    buildableLocation.terrainFeatures.Remove(targetTile);
+                                }
+                                else if (buildableLocation.objects.ContainsKey(targetTile) && buildableLocation.objects[targetTile] is StardewValley.Object obj && obj is not null && validIndexesForRemoval.Contains(obj.ParentSheetIndex))
+                                {
+                                    buildableLocation.objects.Remove(targetTile);
                                 }
                             }
                         }
