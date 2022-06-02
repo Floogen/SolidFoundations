@@ -54,7 +54,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public OpenShopAction OpenShop { get; set; }
         public List<ModifyModDataAction> ModifyFlags { get; set; }
         public List<SpecialAction> ConditionalActions { get; set; }
-        public BroadcastAction BroadcastAction { get; set; }
+        public BroadcastAction Broadcast { get; set; }
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
@@ -143,7 +143,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                     SolidFoundations.apiManager.GetShopTileFrameworkApi().OpenItemShop(OpenShop.Name);
                 }
             }
-            if (BroadcastAction is not null)
+            if (Broadcast is not null)
             {
                 var triggeredArgs = new IApi.BroadcastEventArgs()
                 {
@@ -151,7 +151,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                     Building = building,
                     Farmer = who,
                     TriggerTile = tile,
-                    Message = BroadcastAction.Message
+                    Message = Broadcast.Message
                 };
                 SolidFoundations.api.OnSpecialActionTriggered(triggeredArgs);
             }
