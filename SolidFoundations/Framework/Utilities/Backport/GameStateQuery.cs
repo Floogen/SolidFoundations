@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Utilities.Backport
 {
-    // TODO: When updated to SDV v1.6, this class should be deleted in favor of using StardewValley.GameStateQuery
+    // TODO: When updated to SDV v1.6, this class should be deleted (except where needed) in favor of using StardewValley.GameStateQuery
     public class GameStateQuery
     {
         public delegate bool QueryDelegate(string[] condition_split);
@@ -854,10 +854,13 @@ namespace SolidFoundations.Framework.Utilities.Backport
             return false;
         }
 
+        // TODO: When updated to SDV v1.6, patch this for the textureName to check the building's name instead
         public static bool query_CAN_BUILD_FOR_CABINS(string[] condition_split)
         {
             int numberBuildingsConstructed = Game1.getFarm().buildings.Count(b => b.indoors is not null && b.indoors.Value is Cabin);
-            return Game1.getFarm().buildings.Count(b => b.textureName().Contains(condition_split[1])) < numberBuildingsConstructed + 1;
+            int buildingCountByName = Game1.getFarm().buildings.Count(b => b.textureName().Contains(condition_split[1]) || (b is GenericBuilding genericBuilding && genericBuilding.Id.Contains(condition_split[1])));
+
+            return buildingCountByName < numberBuildingsConstructed + 1;
         }
 
         public static bool query_TRUE(string[] condition_split)
