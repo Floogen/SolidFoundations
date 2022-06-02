@@ -73,7 +73,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             if (DialogueWithChoices is not null && building.ValidateConditions(this.Condition, this.ModDataFlags))
             {
                 List<Response> responses = new List<Response>();
-                foreach (var response in DialogueWithChoices.Responses.Where(r => r.SpecialAction is not null).OrderBy(r => DialogueWithChoices.ShuffleResponseOrder ? Game1.random.Next() : DialogueWithChoices.Responses.IndexOf(r)))
+                foreach (var response in DialogueWithChoices.Responses.Where(r => String.IsNullOrEmpty(r.Text) is false).OrderBy(r => DialogueWithChoices.ShuffleResponseOrder ? Game1.random.Next() : DialogueWithChoices.Responses.IndexOf(r)))
                 {
                     responses.Add(new Response(DialogueWithChoices.Responses.IndexOf(response).ToString(), HandleSpecialTextTokens(response.Text)));
                 }
