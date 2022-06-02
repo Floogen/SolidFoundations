@@ -1,4 +1,6 @@
-﻿using SolidFoundations.Framework.Utilities;
+﻿using Microsoft.Xna.Framework;
+using SolidFoundations.Framework.Interfaces.Internal;
+using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
 using StardewValley;
 using StardewValley.Locations;
@@ -52,15 +54,16 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public OpenShopAction OpenShop { get; set; }
         public List<ModifyModDataAction> ModifyFlags { get; set; }
         public List<SpecialAction> ConditionalActions { get; set; }
+        public BroadcastAction BroadcastAction { get; set; }
 
-        public void Trigger(Farmer who, GenericBuilding building)
+        public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
             if (ConditionalActions is not null)
             {
                 var validAction = ConditionalActions.Where(d => building.ValidateConditions(d.Condition, d.ModDataFlags)).FirstOrDefault();
                 if (validAction is not null)
                 {
-                    validAction.Trigger(who, building);
+                    validAction.Trigger(who, building, tile);
                 }
             }
             if (Dialogue is not null)
@@ -75,7 +78,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                     responses.Add(new Response(DialogueWithChoices.Responses.IndexOf(response).ToString(), HandleSpecialTextTokens(response.Text)));
                 }
 
-                who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, whichAnswer)));
+                who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer)));
             }
             if (Message is not null)
             {
@@ -140,9 +143,21 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                     SolidFoundations.apiManager.GetShopTileFrameworkApi().OpenItemShop(OpenShop.Name);
                 }
             }
+            if (BroadcastAction is not null)
+            {
+                var triggeredArgs = new IApi.BroadcastEventArgs()
+                {
+                    BuildingId = building.Id,
+                    Building = building,
+                    Farmer = who,
+                    TriggerTile = tile,
+                    Message = BroadcastAction.Message
+                };
+                SolidFoundations.api.OnSpecialActionTriggered(triggeredArgs);
+            }
         }
 
-        private void DialogueResponsePicked(Farmer who, GenericBuilding building, string answerTextIndex)
+        private void DialogueResponsePicked(Farmer who, GenericBuilding building, Point tile, string answerTextIndex)
         {
             int answerIndex = -1;
 
@@ -157,7 +172,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 return;
             }
 
-            response.SpecialAction.Trigger(who, building);
+            response.SpecialAction.Trigger(who, building, tile);
         }
 
         private string HandleSpecialTextTokens(string text)

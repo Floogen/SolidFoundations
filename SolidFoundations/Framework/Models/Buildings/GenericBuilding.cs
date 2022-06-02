@@ -389,7 +389,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         var specialActionAtTile = this.Model.GetSpecialActionAtTile(actualTile.X, actualTile.Y);
                         if (specialActionAtTile is not null)
                         {
-                            specialActionAtTile.Trigger(who, this);
+                            specialActionAtTile.Trigger(who, this, actualTile);
                         }
                         else
                         {
@@ -1705,7 +1705,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     if (specialActionAtTile is not null)
                     {
                         buildingLocation.Value.lastTouchActionLocation = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
-                        specialActionAtTile.Trigger(Game1.player, this);
+                        specialActionAtTile.Trigger(Game1.player, this, actualTile);
                     }
                     else
                     {

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
 using SolidFoundations.Framework.Models.ContentPack;
@@ -27,6 +28,7 @@ namespace SolidFoundations
     public class SolidFoundations : Mod
     {
         // Shared static helpers
+        internal static Api api;
         internal static IMonitor monitor;
         internal static IModHelper modHelper;
         internal static Multiplayer multiplayer;
@@ -46,6 +48,7 @@ namespace SolidFoundations
             }
 
             // Set up the monitor, helper and multiplayer
+            api = new Api();
             monitor = Monitor;
             modHelper = helper;
             multiplayer = helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
@@ -180,6 +183,11 @@ namespace SolidFoundations
             }
 
             _ = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
+        }
+
+        public override object GetApi()
+        {
+            return api;
         }
 
         private void SafelyCacheCustomBuildings()
