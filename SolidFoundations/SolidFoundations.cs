@@ -317,7 +317,7 @@ namespace SolidFoundations
                         // Trigger the missed DayUpdate
                         customBuilding.dayUpdate(Game1.dayOfMonth);
 
-                        // Clear any grass
+                        // Clear any grass and other debris
                         var validIndexesForRemoval = new List<int>()
                         {
                             343,

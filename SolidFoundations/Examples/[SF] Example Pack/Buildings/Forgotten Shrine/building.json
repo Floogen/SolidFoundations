@@ -41,6 +41,8 @@
       ]
     }
   ],
+
+  "Builder": "Wizard",
   "DefaultSpecialAction": {
     "DialogueWithChoices": {
       "Question": "What is your favorite color, @?",
