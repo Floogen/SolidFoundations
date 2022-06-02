@@ -1,4 +1,6 @@
-﻿using StardewValley;
+﻿using SolidFoundations.Framework.Models.ContentPack;
+using StardewModdingAPI;
+using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Network;
 using System;
@@ -40,7 +42,7 @@ namespace SolidFoundations.Framework.Utilities.Backport
                     QueryDelegate query_delegate = (QueryDelegate)Delegate.CreateDelegate(typeof(QueryDelegate), methodInfo);
                     GameStateQuery.RegisterQueryType(methodInfo.Name.Substring("query_".Length), query_delegate);
                 }
-                Console.WriteLine("SetupQueryTypes() registered '{0}' methods", GameStateQuery._queryTypeLookup.Count);
+                SolidFoundations.monitor.Log(String.Format("SetupQueryTypes() registered '{0}' methods", GameStateQuery._queryTypeLookup.Count), LogLevel.Trace);
             }
         }
 
@@ -145,11 +147,11 @@ namespace SolidFoundations.Framework.Utilities.Backport
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("ERROR parsing condition: " + string.Join(" ", condition_split) + "\n" + ex.ToString());
+                        SolidFoundations.monitor.Log("ERROR parsing condition: " + string.Join(" ", condition_split) + "\n" + ex.ToString(), LogLevel.Trace);
                         return false;
                     }
                 }
-                Console.WriteLine("ERROR: Invalid condition: {0}", condition_split[0]);
+                SolidFoundations.monitor.Log(String.Format("ERROR: Invalid condition: {0}", condition_split[0]), LogLevel.Trace);
                 return false;
             }
             finally
