@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using SolidFoundations.Framework.Models.ContentPack.Actions;
+using SolidFoundations.Framework.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using System;
@@ -21,6 +23,10 @@ namespace SolidFoundations.Framework.Interfaces.Internal
         }
 
         event EventHandler<BroadcastEventArgs> BroadcastSpecialActionTriggered;
+
+        public void AddBuildingFlags(Building building, List<string> flags, bool isTemporary = true);
+        public void RemoveBuildingFlags(Building building, List<string> flags);
+        public bool DoesBuildingHaveFlag(Building building, string flag);
     }
 
     public class Api : IApi
@@ -34,6 +40,30 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             {
                 handler(this, e);
             }
+        }
+
+        public void AddBuildingFlags(Building building, List<string> flags, bool isTemporary = true)
+        {
+            foreach (var flag in flags)
+            {
+                var flagKey = String.Concat(ModDataKeys.FLAG_BASE, ".", flag.ToLower());
+                building.modData[flagKey] = (isTemporary ? SpecialAction.FlagType.Temporary : SpecialAction.FlagType.Permanent).ToString();
+            }
+        }
+
+        public void RemoveBuildingFlags(Building building, List<string> flags)
+        {
+            foreach (var flag in flags)
+            {
+                var flagKey = String.Concat(ModDataKeys.FLAG_BASE, ".", flag.ToLower());
+                building.modData.Remove(flagKey);
+            }
+        }
+
+        public bool DoesBuildingHaveFlag(Building building, string flag)
+        {
+            var flagKey = String.Concat(ModDataKeys.FLAG_BASE, ".", flag.ToLower());
+            return building.modData.Keys.Any(k => k.Equals(flagKey, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
