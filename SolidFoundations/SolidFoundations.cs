@@ -581,6 +581,15 @@ namespace SolidFoundations
                 var model = buildingManager.GetSpecificBuildingModel(building.Id);
                 if (model is not null)
                 {
+                    // Remove any FlagType.Temporary stored in the buildings modData
+                    foreach (var key in building.modData.Keys.Where(k => k.Contains(ModDataKeys.FLAG_BASE)).ToList())
+                    {
+                        if (building.modData[key] == SpecialAction.FlagType.Temporary.ToString())
+                        {
+                            building.modData.Remove(key);
+                        }
+                    }
+
                     building.RefreshModel(model);
 
                     if (resetTexture)
