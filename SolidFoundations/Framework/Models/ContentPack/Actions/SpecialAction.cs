@@ -59,6 +59,10 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
+            if (ModifyFlags is not null)
+            {
+                SpecialAction.HandleModifyingBuildingFlags(building, ModifyFlags);
+            }
             if (ConditionalActions is not null)
             {
                 var validAction = ConditionalActions.Where(d => building.ValidateConditions(d.Condition, d.ModDataFlags)).FirstOrDefault();
@@ -104,10 +108,6 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             if (Message is not null)
             {
                 Game1.addHUDMessage(new HUDMessage(Message.Text, (int)Message.Icon + 1));
-            }
-            if (ModifyFlags is not null)
-            {
-                SpecialAction.HandleModifyingBuildingFlags(building, ModifyFlags);
             }
             if (Warp is not null)
             {
