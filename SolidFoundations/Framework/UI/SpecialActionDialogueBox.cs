@@ -1,4 +1,7 @@
-﻿using StardewValley;
+﻿using Microsoft.Xna.Framework;
+using SolidFoundations.Framework.Models.ContentPack;
+using SolidFoundations.Framework.Models.ContentPack.Actions;
+using StardewValley;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
@@ -11,8 +14,19 @@ namespace SolidFoundations.Framework.UI
 {
     internal class SpecialActionDialogueBox : DialogueBox
     {
+        private SpecialAction _actionToTrigger;
+        private GenericBuilding _genericBuilding;
+        private Point _tile;
         private afterQuestionBehavior _afterDialogueBehavior;
-        public SpecialActionDialogueBox(GameLocation location, string dialogue, List<Response> responses, afterQuestionBehavior afterDialogueBehavior, int width = 1200) : base(dialogue, responses, width)
+
+        public SpecialActionDialogueBox(List<string> dialogue, SpecialAction actionToTrigger, GenericBuilding building, Point tile) : base(dialogue)
+        {
+            _actionToTrigger = actionToTrigger;
+            _genericBuilding = building;
+            _tile = tile;
+        }
+
+        public SpecialActionDialogueBox(string dialogue, List<Response> responses, afterQuestionBehavior afterDialogueBehavior, int width = 1200) : base(dialogue, responses, width)
         {
             _afterDialogueBehavior = afterDialogueBehavior;
         }
@@ -27,11 +41,25 @@ namespace SolidFoundations.Framework.UI
         {
             if (ShouldHandleLeftClick())
             {
-                _afterDialogueBehavior.Invoke(Game1.player, this.responses[this.selectedResponse].responseKey);
-                return;
+                if (_afterDialogueBehavior is not null)
+                {
+                    _afterDialogueBehavior.Invoke(Game1.player, this.responses[this.selectedResponse].responseKey);
+                    this.closeDialogue();
+                    return;
+                }
             }
 
             base.receiveLeftClick(x, y, playSound);
+        }
+
+        public new void closeDialogue()
+        {
+            base.closeDialogue();
+
+            if (_actionToTrigger is not null)
+            {
+                _actionToTrigger.Trigger(Game1.player, _genericBuilding, _tile);
+            }
         }
 
         private bool ShouldHandleLeftClick()

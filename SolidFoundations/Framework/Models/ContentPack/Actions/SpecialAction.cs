@@ -69,7 +69,22 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (Dialogue is not null)
             {
-                Game1.activeClickableMenu = new DialogueBox(HandleSpecialTextTokens(Dialogue.Text));
+                var dialogues = new List<string>();
+                foreach (string line in Dialogue.Text)
+                {
+                    dialogues.Add(HandleSpecialTextTokens(line));
+                }
+
+                if (Dialogue.ActionAfterDialogue is not null)
+                {
+                    var dialogue = new SpecialActionDialogueBox(dialogues, Dialogue.ActionAfterDialogue, building, tile);
+                    Game1.activeClickableMenu = dialogue;
+                    dialogue.SetUp();
+                }
+                else
+                {
+                    Game1.activeClickableMenu = new DialogueBox(dialogues);
+                }
             }
             if (DialogueWithChoices is not null && building.ValidateConditions(this.Condition, this.ModDataFlags))
             {
@@ -82,7 +97,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 // Unable to use the vanilla method, as the afterQuestion gets cleared before the second instance of DialogueBox can call it (due to first instance closing)
                 //who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer)));
 
-                var dialogue = new SpecialActionDialogueBox(who.currentLocation, HandleSpecialTextTokens(DialogueWithChoices.Question), responses, (who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer));
+                var dialogue = new SpecialActionDialogueBox(HandleSpecialTextTokens(DialogueWithChoices.Question), responses, (who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer));
                 Game1.activeClickableMenu = dialogue;
                 dialogue.SetUp();
             }
