@@ -15,6 +15,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
     public class ExtendedBuildingDrawLayer : BuildingDrawLayer
     {
         public bool HideBaseTexture { get; set; }
+        public bool DrawBehindBase { get; set; }
         public List<Sequence> Sequences { get; set; }
         public string Condition { get; set; }
         public string[] ModDataFlags { get; set; }

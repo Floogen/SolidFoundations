@@ -1266,6 +1266,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 this.drawShadow(b);
             }
+
             float num = ((int)this.tileY.Value + (int)this.tilesHigh.Value) * 64;
             float num2 = num;
             if (this.Model != null)
@@ -1280,6 +1281,27 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 vector2 = this.Model.DrawOffset * 4f;
             }
             Vector2 vector3 = new Vector2(0f, this.getSourceRect().Height);
+
+            if (this.Model is not null && this.Model.DrawLayers is not null)
+            {
+                foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is true && ValidateConditions(d.Condition, d.ModDataFlags)))
+                {
+                    Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
+                    sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                    vector2 = Vector2.Zero;
+                    if (drawLayer.AnimalDoorOffset != Point.Zero)
+                    {
+                        vector2 = new Vector2((float)drawLayer.AnimalDoorOffset.X * this.animalDoorOpenAmount.Value, (float)drawLayer.AnimalDoorOffset.Y * this.animalDoorOpenAmount.Value);
+                    }
+                    Texture2D texture2D = this.texture.Value;
+                    if (drawLayer.Texture != null)
+                    {
+                        texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                    }
+                    b.Draw(texture2D, Game1.GlobalToLocal(Game1.viewport, vector + (vector2 - vector3 + drawLayer.DrawPosition) * 4f), sourceRect, this.color.Value * this.alpha.Value, 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, num2);
+                    num2 += 0.00001f;
+                }
+            }
             if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.ModDataFlags)) is false)
             {
                 b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
@@ -1311,7 +1333,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => ValidateConditions(d.Condition, d.ModDataFlags)))
+                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is false && ValidateConditions(d.Condition, d.ModDataFlags)))
                     {
                         if (drawLayer.DrawInBackground)
                         {
