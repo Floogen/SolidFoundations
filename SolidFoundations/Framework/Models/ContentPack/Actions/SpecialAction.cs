@@ -92,19 +92,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (ModifyFlags is not null)
             {
-                foreach (var modifyFlag in ModifyFlags)
-                {
-                    // If FlagType is Temporary, then remove it from the building's modData before saving
-                    var flagKey = String.Concat(ModDataKeys.FLAG_BASE, ".", modifyFlag.Name.ToLower());
-                    if (modifyFlag.Operation is OperationName.Add)
-                    {
-                        building.modData[flagKey] = modifyFlag.Type.ToString();
-                    }
-                    else if (modifyFlag.Operation is OperationName.Remove && building.modData.ContainsKey(flagKey))
-                    {
-                        building.modData.Remove(flagKey);
-                    }
-                }
+                SpecialAction.HandleModifyingBuildingFlags(building, ModifyFlags);
             }
             if (Warp is not null)
             {
@@ -261,6 +249,23 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         {
             who.team.synchronizedShopStock.OnItemPurchased(synchedShop, item, amount);
             return false;
+        }
+
+        internal static void HandleModifyingBuildingFlags(GenericBuilding building, List<ModifyModDataAction> modifyFlags)
+        {
+            foreach (var modifyFlag in modifyFlags)
+            {
+                // If FlagType is Temporary, then remove it from the building's modData before saving
+                var flagKey = String.Concat(ModDataKeys.FLAG_BASE, ".", modifyFlag.Name.ToLower());
+                if (modifyFlag.Operation is OperationName.Add)
+                {
+                    building.modData[flagKey] = modifyFlag.Type.ToString();
+                }
+                else if (modifyFlag.Operation is OperationName.Remove && building.modData.ContainsKey(flagKey))
+                {
+                    building.modData.Remove(flagKey);
+                }
+            }
         }
     }
 }

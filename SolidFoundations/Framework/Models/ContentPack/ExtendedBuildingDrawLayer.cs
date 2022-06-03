@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.Backport;
+using SolidFoundations.Framework.Models.ContentPack.Actions;
 using SolidFoundations.Framework.Utilities.Backport;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
             if (building.ValidateConditions(sequence.Condition, sequence.ModDataFlags) is false)
             {
                 currentIndex = GetNextValidFrame(building, currentIndex);
+            }
+
+            // Execute any ModifyFlags
+            if (sequence.ModifyFlags is not null)
+            {
+                SpecialAction.HandleModifyingBuildingFlags(building, sequence.ModifyFlags);
             }
             return currentIndex;
         }
