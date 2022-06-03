@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using SolidFoundations.Framework.Interfaces.Internal;
+using SolidFoundations.Framework.UI;
 using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
 using StardewValley;
@@ -78,7 +79,12 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                     responses.Add(new Response(DialogueWithChoices.Responses.IndexOf(response).ToString(), HandleSpecialTextTokens(response.Text)));
                 }
 
-                who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer)));
+                // Unable to use the vanilla method, as the afterQuestion gets cleared before the second instance of DialogueBox can call it (due to first instance closing)
+                //who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer)));
+
+                var dialogue = new SpecialActionDialogueBox(who.currentLocation, HandleSpecialTextTokens(DialogueWithChoices.Question), responses, (who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer));
+                Game1.activeClickableMenu = dialogue;
+                dialogue.SetUp();
             }
             if (Message is not null)
             {
