@@ -20,7 +20,7 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             public string Message { get; set; }
         }
 
-        public event EventHandler<BroadcastEventArgs> BroadcastSpecialActionTriggered;
+        event EventHandler<BroadcastEventArgs> BroadcastSpecialActionTriggered;
     }
 
     public class Api : IApi
