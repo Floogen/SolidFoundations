@@ -863,6 +863,29 @@ namespace SolidFoundations.Framework.Utilities.Backport
             return buildingCountByName < numberBuildingsConstructed + 1;
         }
 
+        // TODO: When updated to SDV v1.6, add this query to the native GameStateQuery
+        public static bool query_IS_PLAYER_HOLDING_ITEM(string[] condition_split)
+        {
+            if (int.TryParse(condition_split[2], out int itemId) is false)
+            {
+                return false;
+            }
+
+            return GameStateQuery.WithPlayer(condition_split[1], (Farmer target_farmer) => target_farmer.ActiveObject is Item item && item.ParentSheetIndex == itemId);
+        }
+
+        // TODO: When updated to SDV v1.6, add this query to the native GameStateQuery
+        public static bool query_IS_PLAYER_HOLDING_ANYTHING(string[] condition_split)
+        {
+            return GameStateQuery.WithPlayer(condition_split[1], (Farmer target_farmer) => target_farmer.ActiveObject is not null);
+        }
+
+        // TODO: When updated to SDV v1.6, add this query to the native GameStateQuery
+        public static bool query_IS_PLAYER_HOLDING_TOOL(string[] condition_split)
+        {
+            return GameStateQuery.WithPlayer(condition_split[1], (Farmer target_farmer) => target_farmer.CurrentTool is not null);
+        }
+
         public static bool query_TRUE(string[] condition_split)
         {
             return true;
