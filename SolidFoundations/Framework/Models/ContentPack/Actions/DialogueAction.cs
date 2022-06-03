@@ -8,6 +8,6 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
 {
     public class DialogueAction
     {
-        public string Text { get; set; }
+        public List<string> Text { get; set; }
     }
 }

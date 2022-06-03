@@ -67,7 +67,7 @@
                           }
                         ],
                         "Dialogue": {
-                          "Text": "Well done!"
+                          "Text": [ "Well done!" ]
                         },
                         "ModifyInventory": {
                           "ItemId": "{{ItemGiftId}}",
@@ -81,7 +81,7 @@
                       "Text": "{{WrongAnswer}}",
                       "SpecialAction": {
                         "Dialogue": {
-                          "Text": "Hm, that isn't right. Try again tomorrow!"
+                          "Text": [ "Hm, that isn't right. Try again tomorrow!" ]
                         },
                         "ModifyFlags": [
                           {
@@ -96,7 +96,7 @@
                       "Text": "{{SecondaryWrongAnswer}}",
                       "SpecialAction": {
                         "Dialogue": {
-                          "Text": "Hm, that isn't right. Try again tomorrow!"
+                          "Text": [ "Hm, that isn't right. Try again tomorrow!" ]
                         },
                         "ModifyFlags": [
                           {
@@ -112,7 +112,7 @@
               },
               {
                 "Dialogue": {
-                  "Text": "You've already been quizzed for today. Try again tomorrow!"
+                  "Text": [ "You've already been quizzed for today. Try again tomorrow!" ]
                 },
                 "ModDataFlags": [
                   "AttemptedTest"

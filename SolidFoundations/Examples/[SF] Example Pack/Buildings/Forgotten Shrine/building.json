@@ -58,7 +58,7 @@
               }
             ],
             "Dialogue": {
-              "Text": "Right, off you go"
+              "Text": [ "Right, off you go" ]
             }
           }
         },

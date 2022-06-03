@@ -62,7 +62,7 @@
                   }
                 ],
                 "Dialogue": {
-                  "Text": "Well done!"
+                  "Text": [ "Well done!" ]
                 },
                 "ModifyInventory": {
                   "ItemId": 268,
@@ -76,7 +76,7 @@
               "Text": "This isn't correct!",
               "SpecialAction": {
                 "Dialogue": {
-                  "Text": "Hm, that isn't right. Try again tomorrow!"
+                  "Text": [ "Hm, that isn't right. Try again tomorrow!" ]
                 },
                 "ModifyFlags": [
                   {
@@ -91,7 +91,7 @@
               "Text": "This is also not correct...",
               "SpecialAction": {
                 "Dialogue": {
-                  "Text": "Hm, that isn't right. Try again tomorrow!"
+                  "Text": [ "Hm, that isn't right. Try again tomorrow!" ]
                 },
                 "ModifyFlags": [
                   {
@@ -110,7 +110,7 @@
       },
       {
         "Dialogue": {
-          "Text": "You've already been quizzed for today. Try again tomorrow!"
+          "Text": [ "You've already been quizzed for today. Try again tomorrow!" ]
         },
         "ModDataFlags": [
           "AttemptedTest"
