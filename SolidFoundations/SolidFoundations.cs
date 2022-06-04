@@ -428,6 +428,8 @@ namespace SolidFoundations
                     {
                         var mapPath = contentPack.ModContent.GetInternalAssetName(interiorFile.FullName).Name;
                         buildingManager.AddMapAsset(Path.GetFileNameWithoutExtension(interiorFile.Name), interiorFile.FullName);
+
+                        Monitor.Log($"Loaded the interior {mapPath}", LogLevel.Trace);
                     }
                     else
                     {
