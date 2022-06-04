@@ -6,7 +6,7 @@
   "UniqueID": "PeacefulEnd.SolidFoundations",
   "EntryDll": "SolidFoundations.dll",
   "MinimumApiVersion": "3.14.4",
-  "UpdateKeys": [ "Nexus:????" ],
+  "UpdateKeys": [ "Nexus:12311" ],
   "Dependencies": [
     {
       "UniqueID": "PeacefulEnd.AlternativeTextures",
