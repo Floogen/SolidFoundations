@@ -31,6 +31,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
         protected Dictionary<Point, SpecialAction> _specialEventTiles;
         [ContentSerializer(Optional = true)]
         public List<Point> TunnelDoors = new List<Point>();
+        [ContentSerializer(Optional = true)]
+        public List<Point> AuxiliaryHumanDoors = new List<Point>();
 
         [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialAction { get; set; }

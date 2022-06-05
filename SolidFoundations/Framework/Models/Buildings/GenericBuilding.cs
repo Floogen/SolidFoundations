@@ -168,6 +168,25 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return false;
         }
 
+        public bool IsAuxiliaryTile(Vector2 tileLocation)
+        {
+            if (this.Model is null || this.Model.AuxiliaryHumanDoors.Count == 0)
+            {
+                return false;
+            }
+
+            var tilePoint = new Point((int)tileLocation.X, (int)tileLocation.Y);
+            foreach (var door in this.Model.AuxiliaryHumanDoors)
+            {
+                if (door.X + this.tileX.Value == tilePoint.X && door.Y + this.tileY.Value == tilePoint.Y)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void ProcessItemConversions(int minutesElapsed, bool isDayStart = false)
         {
             if (this.Model is null || this.Model.ItemConversions is null)
@@ -346,7 +365,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
             else
             {
-                if (who.IsLocalPlayer && tileLocation.X == (float)(this.humanDoor.X + (int)this.tileX) && tileLocation.Y == (float)(this.humanDoor.Y + (int)this.tileY) && this.IndoorOrInstancedIndoor != null)
+                if (who.IsLocalPlayer && (IsAuxiliaryTile(tileLocation) || tileLocation.X == (float)(this.humanDoor.X + (int)this.tileX) && tileLocation.Y == (float)(this.humanDoor.Y + (int)this.tileY)) && this.IndoorOrInstancedIndoor != null)
                 {
                     if (who.mount != null)
                     {

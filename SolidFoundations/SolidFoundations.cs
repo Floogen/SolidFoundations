@@ -586,6 +586,12 @@ namespace SolidFoundations
                     buildingModel.Texture = contentPack.ModContent.GetInternalAssetName(texturePath).Name;
                     buildingManager.AddTextureAsset(buildingModel.Texture, texturePath);
 
+                    // Handle setting HumanDoor, if AuxiliaryHumanDoors is populated but the former isn't
+                    if (buildingModel.HumanDoor.X == -1 && buildingModel.HumanDoor.Y == -1 && buildingModel.AuxiliaryHumanDoors.Count > 0)
+                    {
+                        buildingModel.HumanDoor = buildingModel.AuxiliaryHumanDoors.First();
+                    }
+
                     // Track the model
                     buildingManager.AddBuilding(buildingModel);
 
