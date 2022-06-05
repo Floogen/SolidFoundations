@@ -1,7 +1,7 @@
 {
   "Name": "Expanded Barn",
   "Description": "...",
-  "DrawShadow": false,
+  "DrawShadow": true,
 
   "Size": {
     "X": 7,
