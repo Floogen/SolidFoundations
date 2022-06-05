@@ -1449,12 +1449,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 if (buildingRectangle.Height + buildingRectangle.Width > 300)
                 {
                     adjustedScale = 2f;
-                    adjustedOffset = new Vector2(-80, -80);
+                    adjustedOffset = new Vector2(-(this.tilesWide.Value * adjustedScale * 4), -(this.tilesHigh.Value * adjustedScale * 4));
                 }
                 else if (buildingRectangle.Height + buildingRectangle.Width > 250)
                 {
                     adjustedScale = 3f;
-                    adjustedOffset = new Vector2(-16, -24);
+                    adjustedOffset = new Vector2(-(this.tilesWide.Value * adjustedScale), -(this.tilesHigh.Value * adjustedScale));
                 }
 
                 if (this.Model.DrawLayers != null)
@@ -1513,6 +1513,38 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
             }
         }
+
+
+        // Preserve this override when updated to SDV v1.6
+        public override void drawShadow(SpriteBatch b, int localX = -1, int localY = -1)
+        {
+            var adjustedScale = 4f;
+            var adjustedOffset = new Vector2(0f, 0f);
+            var buildingRectangle = this.getSourceRect();
+
+            if (localX != -1)
+            {
+                if (buildingRectangle.Height + buildingRectangle.Width > 300)
+                {
+                    adjustedScale = 2f;
+                    adjustedOffset = new Vector2(-(this.tilesWide.Value * adjustedScale * 4), -(this.tilesHigh.Value * adjustedScale * 4));
+                }
+                else if (buildingRectangle.Height + buildingRectangle.Width > 250)
+                {
+                    adjustedScale = 3f;
+                    adjustedOffset = new Vector2(-(this.tilesWide.Value * adjustedScale), -(this.tilesHigh.Value * adjustedScale));
+                }
+            }
+
+            Vector2 vector = ((localX == -1) ? Game1.GlobalToLocal(new Vector2((int)this.tileX * 64, ((int)this.tileY + (int)this.tilesHigh) * 64)) : new Vector2(localX, localY + this.getSourceRectForMenu().Height * adjustedScale));
+            b.Draw(Game1.mouseCursors, vector, Building.leftShadow, Color.White * ((localX == -1) ? ((float)this.alpha) : 1f), 0f, adjustedOffset, adjustedScale, SpriteEffects.None, 1E-05f);
+            for (int i = 1; i < (int)this.tilesWide.Value - 1; i++)
+            {
+                b.Draw(Game1.mouseCursors, vector + new Vector2(i * 16 * adjustedScale, 0f), Building.middleShadow, Color.White * ((localX == -1) ? ((float)this.alpha) : 1f), 0f, adjustedOffset, adjustedScale, SpriteEffects.None, 1E-05f);
+            }
+            b.Draw(Game1.mouseCursors, vector + new Vector2(((int)this.tilesWide - 1) * 16 * adjustedScale, 0f), Building.rightShadow, Color.White * ((localX == -1) ? ((float)this.alpha) : 1f), 0f, adjustedOffset, adjustedScale, SpriteEffects.None, 1E-05f);
+        }
+
 
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.draw
         public override void drawBackground(SpriteBatch b)
