@@ -925,9 +925,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     {
                         GameLocation locationFromName = Game1.getLocationFromName(this.Model.NonInstancedIndoorLocation);
                         bool flag = false;
-                        foreach (BuildableGameLocation location in Game1.locations)
+                        foreach (BuildableGameLocation location in Game1.locations.Where(b => b is BuildableGameLocation))
                         {
-                            foreach (GenericBuilding building in location.buildings)
+                            foreach (GenericBuilding building in location.buildings.Where(b => b is GenericBuilding))
                             {
                                 if (building.Model != null && building.nonInstancedIndoors.Value == locationFromName)
                                 {
