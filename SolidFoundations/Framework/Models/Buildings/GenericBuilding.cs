@@ -352,7 +352,18 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return true;
         }
 
-        // Preserve this override (specifically the CustomAction) when updated to SDV v1.6, but call the base doAction method if ExtendedBuildingModel.
+        // Preserve this override (IsAuxiliaryTile) when updated to SDV v1.6, but call the base doAction method if ExtendedBuildingModel.
+        public override bool isActionableTile(int xTile, int yTile, Farmer who)
+        {
+            if (IsAuxiliaryTile(new Vector2(xTile, yTile)))
+            {
+                return true;
+            }
+
+            return base.isActionableTile(xTile, yTile, who);
+        }
+
+        // Preserve this override (specifically the CustomAction / IsAuxiliaryTile) when updated to SDV v1.6, but call the base doAction method if ExtendedBuildingModel.
         public override bool doAction(Vector2 tileLocation, Farmer who)
         {
             if (who.isRidingHorse())
