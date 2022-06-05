@@ -13,8 +13,6 @@ namespace SolidFoundations.Framework.External.ContentPatcher
 {
     internal class IsBuildingHereToken
     {
-
-
         /// <summary>Get whether the token allows input arguments (e.g. an NPC name for a relationship token).</summary>
         /// <remarks>Default false.</remarks>
         public bool AllowsInput() { return true; }
