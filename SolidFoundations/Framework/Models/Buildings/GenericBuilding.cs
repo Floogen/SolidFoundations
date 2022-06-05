@@ -1194,6 +1194,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     baseY = firstTunnelDoor.Y;
                 }
 
+                if (interior.warps is not null && interior.warps.Count == 0)
+                {
+                    interior.warps.Add(new Warp(0, 0, targetName, baseX + (int)this.tileX.Value, baseY + (int)this.tileY.Value + 1, false));
+                }
+
                 foreach (Warp warp in interior.warps)
                 {
                     warp.TargetName = targetName;
