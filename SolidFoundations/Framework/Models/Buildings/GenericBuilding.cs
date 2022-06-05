@@ -488,7 +488,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 Rectangle rectangle = this.Model.GetSourceRect();
                 if (rectangle != Rectangle.Empty)
                 {
-                    return rectangle;
+                    return this.ApplySourceRectOffsets(rectangle);
                 }
             }
 
