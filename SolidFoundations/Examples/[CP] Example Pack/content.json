@@ -141,6 +141,19 @@
           "DefaultAction": "Dialogue Does Balloon building exist on the farm: {{PeacefulEnd.SolidFoundations/IsBuildingHere:PeacefulEnd.SolidFoundations.ExamplePack_Balloon@Farm}}"
         }
       }
+    },
+    {
+      "Action": "EditImage",
+      "Target": "{{PeacefulEnd.SolidFoundations/BuildingTexture:PeacefulEnd.SolidFoundations.ExamplePack_Balloon}}",
+      "FromFile": "assets/balloon_override.png",
+      "PatchMode": "Replace",
+      "ToArea": {
+        "X": 0,
+        "Y": 0,
+        "Width": 288,
+        "Height": 176
+      },
+      "Update": "OnTimeChange"
     }
   ]
 }
