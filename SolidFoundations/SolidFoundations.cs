@@ -135,6 +135,7 @@ namespace SolidFoundations
             if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
             {
                 apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "IsBuildingHere", new IsBuildingHereToken());
+                apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "BuildingTexture", new BuildingTextureToken());
             }
 
             if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
@@ -591,6 +592,11 @@ namespace SolidFoundations
                     var texturePath = Path.Combine(folder.FullName, "building.png");
                     buildingModel.Texture = contentPack.ModContent.GetInternalAssetName(texturePath).Name;
                     buildingManager.AddTextureAsset(buildingModel.Texture, texturePath);
+
+                    // Add building's ID to texture tracker so we can quickly reference it for Content Patcher
+                    buildingManager.AddTextureAsset(buildingModel.ID.ToLower(), buildingModel.Texture);
+
+                    Monitor.Log($"Loaded the building texture {buildingModel.Texture}", LogLevel.Trace);
 
                     // Handle setting HumanDoor, if AuxiliaryHumanDoors is populated but the former isn't
                     if (buildingModel.HumanDoor.X == -1 && buildingModel.HumanDoor.Y == -1 && buildingModel.AuxiliaryHumanDoors.Count > 0)
