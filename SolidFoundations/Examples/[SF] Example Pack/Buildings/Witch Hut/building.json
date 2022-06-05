@@ -1,0 +1,17 @@
+{
+  "Name": "Witch Hut",
+  "Description": "...",
+  "DrawShadow": true,
+
+  "Size": {
+    "X": 7,
+    "Y": 3
+  },
+
+  "IndoorMap": "IslandWitchHouse",
+  "NonInstancedIndoorLocation": "IslandWitchHouse",
+  "HumanDoor": {
+    "X": 3,
+    "Y": 3
+  }
+}
