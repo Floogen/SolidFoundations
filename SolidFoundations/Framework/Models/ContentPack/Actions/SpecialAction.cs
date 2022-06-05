@@ -56,12 +56,17 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public List<ModifyModDataAction> ModifyFlags { get; set; }
         public List<SpecialAction> ConditionalActions { get; set; }
         public BroadcastAction Broadcast { get; set; }
+        public List<ModifyMailFlagAction> ModifyMailFlags { get; set; }
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
             if (ModifyFlags is not null)
             {
                 SpecialAction.HandleModifyingBuildingFlags(building, ModifyFlags);
+            }
+            if (ModifyMailFlags is not null)
+            {
+                SpecialAction.HandleModifyingMailFlags(ModifyMailFlags);
             }
             if (ConditionalActions is not null)
             {
@@ -279,6 +284,21 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 else if (modifyFlag.Operation is OperationName.Remove && building.modData.ContainsKey(flagKey))
                 {
                     building.modData.Remove(flagKey);
+                }
+            }
+        }
+
+        internal static void HandleModifyingMailFlags(List<ModifyMailFlagAction> modifyMailFlags)
+        {
+            foreach (var mailFlag in modifyMailFlags)
+            {
+                if (mailFlag.Operation is OperationName.Add)
+                {
+                    Game1.addMail(mailFlag.Name, true, false);
+                }
+                else if (mailFlag.Operation is OperationName.Remove)
+                {
+                    Game1.player.RemoveMail(mailFlag.Name, false);
                 }
             }
         }
