@@ -55,6 +55,10 @@ namespace SolidFoundations.Framework.Patches.Buildings
             {
                 Vector2 tile = new Vector2((int)((Utility.ModifyCoordinateFromUIScale(x) + (float)Game1.viewport.X) / 64f), (int)((Utility.ModifyCoordinateFromUIScale(y) + (float)Game1.viewport.Y) / 64f));
                 GenericBuilding buildingAt = (Game1.getLocationFromName("Farm") as Farm).getBuildingAt(tile) as GenericBuilding;
+                if (buildingAt is null)
+                {
+                    return true;
+                }
                 if (buildingAt != null && !___namingAnimal)
                 {
                     if (buildingAt.Model != null && buildingAt.Model.ValidOccupantTypes.Contains(___animalBeingPurchased.buildingTypeILiveIn.Value))
@@ -84,7 +88,6 @@ namespace SolidFoundations.Framework.Patches.Buildings
                                 __instance.currentlySnappedComponent = __instance.getComponentWithID(104);
                                 __instance.snapCursorToCurrentSnappedComponent();
                             }
-                            _monitor.Log(buildingAt.indoors.Value.GetType().ToString(), LogLevel.Debug);
                         }
                         else if (Game1.player.Money >= ___priceOfAnimal)
                         {
@@ -179,6 +182,10 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         {
                             selection.color.Value = Color.Red * 0.8f;
                         }
+                    }
+                    else
+                    {
+                        return true;
                     }
                 }
                 if (__instance.doneNamingButton != null)
