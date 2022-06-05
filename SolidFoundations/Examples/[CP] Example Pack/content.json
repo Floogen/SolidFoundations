@@ -132,6 +132,15 @@
           "DefaultAction": "Dialogue This has been edited by Content Patcher. Neat!"
         }
       }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/BuildingsData",
+      "Fields": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_WornDownBuilding": {
+          "DefaultAction": "Dialogue Does Balloon building exist on the farm: {{PeacefulEnd.SolidFoundations/IsBuildingHere:PeacefulEnd.SolidFoundations.ExamplePack_Balloon@Farm}}"
+        }
+      }
     }
   ]
 }
