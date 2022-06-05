@@ -15,6 +15,7 @@ namespace SolidFoundations.Framework.Managers
         private IModHelper _helper;
 
         private Dictionary<string, string> _assetPathToMap;
+        private Dictionary<string, string> _assetToTileSheet;
         private Dictionary<string, string> _assetPathToTexture;
         private Dictionary<string, ExtendedBuildingModel> _idToModels;
 
@@ -24,6 +25,7 @@ namespace SolidFoundations.Framework.Managers
             _helper = helper;
 
             _assetPathToMap = new Dictionary<string, string>();
+            _assetToTileSheet = new Dictionary<string, string>();
             _assetPathToTexture = new Dictionary<string, string>();
             _idToModels = new Dictionary<string, ExtendedBuildingModel>();
         }
@@ -31,6 +33,7 @@ namespace SolidFoundations.Framework.Managers
         public void Reset()
         {
             _assetPathToMap.Clear();
+            _assetToTileSheet.Clear();
             _assetPathToTexture.Clear();
             _idToModels.Clear();
         }
@@ -50,6 +53,16 @@ namespace SolidFoundations.Framework.Managers
             _assetPathToMap[$"Maps/{assetPath}"] = pathToMap;
         }
 
+        public void AddTileSheetAsset(string assetPath, string pathToTileSheet)
+        {
+            if (String.IsNullOrEmpty(assetPath) || String.IsNullOrEmpty(pathToTileSheet))
+            {
+                return;
+            }
+
+            _assetToTileSheet[assetPath] = pathToTileSheet;
+        }
+
         public void AddTextureAsset(string assetPath, string pathToTexture)
         {
             if (String.IsNullOrEmpty(assetPath) || String.IsNullOrEmpty(pathToTexture))
@@ -65,6 +78,16 @@ namespace SolidFoundations.Framework.Managers
             if (_assetPathToMap.ContainsKey(assetPath))
             {
                 return _assetPathToMap[assetPath];
+            }
+
+            return null;
+        }
+
+        public string GetTileSheetAsset(string assetPath)
+        {
+            if (_assetToTileSheet.ContainsKey(assetPath))
+            {
+                return _assetToTileSheet[assetPath];
             }
 
             return null;

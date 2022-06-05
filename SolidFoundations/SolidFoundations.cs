@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Xml.Serialization;
 using xTile;
+using xTile.Tiles;
 
 namespace SolidFoundations
 {
@@ -162,6 +163,10 @@ namespace SolidFoundations
                 if (buildingManager.GetTextureAsset(asset.Name) is var texturePath && texturePath is not null)
                 {
                     e.LoadFrom(() => Helper.ModContent.Load<Texture2D>(texturePath), AssetLoadPriority.Exclusive);
+                }
+                else if (buildingManager.GetTileSheetAsset(asset.Name) is var tileSheetPath && tileSheetPath is not null)
+                {
+                    e.LoadFrom(() => Helper.ModContent.Load<Texture2D>(tileSheetPath), AssetLoadPriority.Exclusive);
                 }
             }
             else if (e.DataType == typeof(Map))
@@ -437,10 +442,40 @@ namespace SolidFoundations
                         continue;
                     }
                 }
+
+                var tilesheetFiles = directoryPath.GetFiles("*.png", SearchOption.AllDirectories);
+                if (tilesheetFiles.Count() == 0)
+                {
+                    Monitor.Log($"No tilesheets found under Interiors for the content pack {contentPack.Manifest.Name}", LogLevel.Trace);
+                    return;
+                }
+
+                foreach (var tileSheetFile in tilesheetFiles)
+                {
+                    // Cache the interior map
+                    if (tileSheetFile.Exists)
+                    {
+                        var tilesheetPath = contentPack.ModContent.GetInternalAssetName(tileSheetFile.FullName).Name;
+                        var tilesheetPathWithoutExtension = tilesheetPath.Replace(".png", null);
+                        buildingManager.AddTileSheetAsset(tilesheetPath, tileSheetFile.FullName);
+
+                        if (tilesheetPath != tilesheetPathWithoutExtension)
+                        {
+                            buildingManager.AddTileSheetAsset(tilesheetPathWithoutExtension, tileSheetFile.FullName);
+                        }
+
+                        Monitor.Log($"Loaded the tilesheet {tilesheetPath} | {tilesheetPathWithoutExtension}", LogLevel.Trace);
+                    }
+                    else
+                    {
+                        Monitor.Log($"Unable to add tilesheet for {tileSheetFile.FullName} from {contentPack.Manifest.Name}!", LogLevel.Warn);
+                        continue;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Monitor.Log($"Error loading interiors from content pack {contentPack.Manifest.Name}: {ex}", LogLevel.Error);
+                Monitor.Log($"Error loading interiors / tilesheets from content pack {contentPack.Manifest.Name}: {ex}", LogLevel.Error);
             }
         }
 
