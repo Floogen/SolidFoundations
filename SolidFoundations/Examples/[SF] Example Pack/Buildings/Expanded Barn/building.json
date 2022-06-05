@@ -76,6 +76,12 @@
     "X": 1,
     "Y": 7
   },
+  "AuxiliaryHumanDoors": [
+    {
+      "X": 2,
+      "Y": 7
+    }
+  ],
 
   "AnimalDoor": "4 7 2 1",
   "AnimalDoorOpenDuration": 0.4,
