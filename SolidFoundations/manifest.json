@@ -9,7 +9,7 @@
   "UpdateKeys": [ "Nexus:12311" ],
   "Dependencies": [
     {
-      "UniqueID": "PeacefulEnd.AlternativeTextures",
+      "UniqueID": "Pathoschild.ContentPatcher",
       "IsRequired": false
     },
     {

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SolidFoundations.Framework.External.ContentPatcher;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
@@ -131,6 +132,11 @@ namespace SolidFoundations
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             // Hook into the APIs we utilize
+            if (Helper.ModRegistry.IsLoaded("Pathoschild.ContentPatcher") && apiManager.HookIntoContentPatcher(Helper))
+            {
+                apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "IsBuildingHere", new IsBuildingHereToken());
+            }
+
             if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
             {
                 // Do nothing

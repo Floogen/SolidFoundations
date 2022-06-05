@@ -13,10 +13,30 @@ namespace SolidFoundations.Framework.Managers
         private IMonitor _monitor;
         private ISTFApi _shopTileFrameworkApi;
         private ISaveAnywhereApi _saveAnywhereApi;
+        private IContentPatcherApi _contentPatcherApi;
 
         public ApiManager(IMonitor monitor)
         {
             _monitor = monitor;
+        }
+
+        internal bool HookIntoContentPatcher(IModHelper helper)
+        {
+            _contentPatcherApi = helper.ModRegistry.GetApi<IContentPatcherApi>("Pathoschild.ContentPatcher");
+
+            if (_contentPatcherApi is null)
+            {
+                _monitor.Log("Failed to hook into Pathoschild.ContentPatcher.", LogLevel.Error);
+                return false;
+            }
+
+            _monitor.Log("Successfully hooked into Pathoschild.ContentPatcher.", LogLevel.Debug);
+            return true;
+        }
+
+        public IContentPatcherApi GetContentPatcherApi()
+        {
+            return _contentPatcherApi;
         }
 
         internal bool HookIntoShopTileFramework(IModHelper helper)
