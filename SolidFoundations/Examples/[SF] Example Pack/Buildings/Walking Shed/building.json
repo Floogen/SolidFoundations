@@ -1,0 +1,32 @@
+{
+  "Name": "Walking Shed",
+  "Description": "An odd shed.",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 4,
+    "Y": 4
+  },
+  "CollisionMap": "XXXX\nXXXX\nXXXX\nXOOX",
+
+  "IndoorMap": "Shed",
+  "IndoorMapType": "StardewValley.Shed",
+  "AuxiliaryHumanDoors": [
+    {
+      "X": 1,
+      "Y": 3
+    },
+    {
+      "X": 2,
+      "Y": 3
+    }
+  ],
+
+  "BuildCost": 5000,
+  "BuildMaterials": [
+    {
+      "ItemID": 388,
+      "Amount": 100
+    }
+  ]
+}
