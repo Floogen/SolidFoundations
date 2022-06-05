@@ -1,5 +1,5 @@
 # Solid Foundations
- Framework allows for custom buildings, as well as the ability to build buildings outside the farm.
+Stardew Valley framework which allows for custom buildings with lots of extra features. 
  
 ## Requirements
 Solid Foundations only requires [SMAPI](https://smapi.io/).
