@@ -169,7 +169,7 @@ namespace SolidFoundations
                 var asset = e.Name;
                 if (buildingManager.GetTextureAsset(asset.Name) is var texturePath && texturePath is not null)
                 {
-                    e.LoadFrom(() => Helper.ModContent.Load<Texture2D>(texturePath), AssetLoadPriority.Exclusive);
+                    e.LoadFrom(() => Game1.content.Load<Texture2D>(texturePath), AssetLoadPriority.Exclusive);
                 }
                 else if (buildingManager.GetTileSheetAsset(asset.Name) is var tileSheetPath && tileSheetPath is not null)
                 {
@@ -181,7 +181,7 @@ namespace SolidFoundations
                 var asset = e.Name;
                 if (buildingManager.GetMapAsset(asset.Name) is var mapPath && mapPath is not null)
                 {
-                    e.LoadFrom(() => Helper.ModContent.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
+                    e.LoadFrom(() => Game1.content.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
                 }
             }
         }
@@ -433,13 +433,14 @@ namespace SolidFoundations
                     return;
                 }
 
+                var parentFolderName = "Interiors";
                 foreach (var interiorFile in interiorFiles)
                 {
                     // Cache the interior map
                     if (interiorFile.Exists)
                     {
-                        var mapPath = contentPack.ModContent.GetInternalAssetName(interiorFile.FullName).Name;
-                        buildingManager.AddMapAsset(Path.GetFileNameWithoutExtension(interiorFile.Name), interiorFile.FullName);
+                        var mapPath = contentPack.ModContent.GetInternalAssetName(Path.Combine(parentFolderName, interiorFile.Name)).Name;
+                        buildingManager.AddMapAsset(Path.GetFileNameWithoutExtension(interiorFile.Name), mapPath);
 
                         Monitor.Log($"Loaded the interior {mapPath}", LogLevel.Trace);
                     }
@@ -559,8 +560,9 @@ namespace SolidFoundations
                         List<string> skinPaths = Directory.GetFiles(Path.Combine(folder.FullName, "Skins"), "*.png").OrderBy(s => s).ToList();
                         foreach (var skin in buildingModel.Skins)
                         {
-                            var skinPath = Path.Combine(folder.FullName, "Skins", String.Concat(skin.Texture, ".png"));
-                            if (skinPaths.Contains(skinPath) is false)
+                            var actualSkinPath = Path.Combine(folder.FullName, "Skins", String.Concat(skin.Texture, ".png"));
+                            var skinPath = Path.Combine(parentFolderName, folder.Name, "Skins", String.Concat(skin.Texture, ".png"));
+                            if (skinPaths.Contains(actualSkinPath) is false)
                             {
                                 continue;
                             }
@@ -576,27 +578,29 @@ namespace SolidFoundations
                         List<string> spritePaths = Directory.GetFiles(Path.Combine(folder.FullName, "Sprites"), "*.png").ToList();
                         foreach (var layer in buildingModel.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
                         {
-                            var spritePath = Path.Combine(folder.FullName, "Sprites", String.Concat(layer.Texture, ".png"));
-                            if (spritePaths.Contains(spritePath) is false)
+                            var actualSpritePath = Path.Combine(folder.FullName, "Sprites", String.Concat(layer.Texture, ".png"));
+                            var spritePath = Path.Combine(parentFolderName, folder.Name, "Sprites", String.Concat(layer.Texture, ".png"));
+                            if (spritePaths.Contains(actualSpritePath) is false)
                             {
-                                Monitor.Log($"Unable to find the texture {spritePath} under Sprites from for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
+                                Monitor.Log($"Unable to find the texture {actualSpritePath} under Sprites from for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
                                 continue;
                             }
 
                             layer.Texture = contentPack.ModContent.GetInternalAssetName(spritePath).Name;
                             buildingManager.AddTextureAsset(layer.Texture, spritePath);
+                            Monitor.Log($"Loaded the building {buildingModel.ID} Sprites texture: {layer.Texture} | {spritePath}", LogLevel.Trace);
                         }
                     }
 
                     // Load in the texture
-                    var texturePath = Path.Combine(folder.FullName, "building.png");
-                    buildingModel.Texture = contentPack.ModContent.GetInternalAssetName(texturePath).Name;
-                    buildingManager.AddTextureAsset(buildingModel.Texture, texturePath);
+                    var texturePath = Path.Combine(parentFolderName, folder.Name, "building.png");
+                    buildingModel.Texture = $"{buildingModel.ID}_BaseTexture";
+                    buildingManager.AddTextureAsset(buildingModel.Texture, contentPack.ModContent.GetInternalAssetName(texturePath).Name);
 
                     // Add building's ID to texture tracker so we can quickly reference it for Content Patcher
                     buildingManager.AddTextureAsset(buildingModel.ID.ToLower(), buildingModel.Texture);
 
-                    Monitor.Log($"Loaded the building texture {buildingModel.Texture}", LogLevel.Trace);
+                    Monitor.Log($"Loaded the building texture {buildingModel.Texture} | {texturePath}", LogLevel.Trace);
 
                     // Handle setting HumanDoor, if AuxiliaryHumanDoors is populated but the former isn't
                     if (buildingModel.HumanDoor.X == -1 && buildingModel.HumanDoor.Y == -1 && buildingModel.AuxiliaryHumanDoors.Count > 0)

@@ -1193,11 +1193,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     {
                         if (skin.ID == this.skinID.Value)
                         {
-                            return SolidFoundations.buildingManager.GetTextureAsset(skin.Texture);
+                            return skin.Texture;
                         }
                     }
                 }
-                return SolidFoundations.buildingManager.GetTextureAsset(this.Model.Texture);
+                return this.Model.Texture;
             }
 
             return "Buildings\\" + (string)this.buildingType.Value;

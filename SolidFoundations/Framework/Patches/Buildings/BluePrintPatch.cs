@@ -86,9 +86,11 @@ namespace SolidFoundations.Framework.Patches.Buildings
                     var textureImage = _helper.Reflection.GetField<Texture2D>(__instance, "texture");
                     textureImage.SetValue(Game1.content.Load<Texture2D>(__instance.textureName));
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // Flag failure here
+                    SolidFoundations.monitor.Log($"There was an issue setting the texture for {buildingData.ID}", LogLevel.Warn);
+                    SolidFoundations.monitor.Log($"Failed to set blueprint.texture via reflection: {ex}", LogLevel.Trace);
                 }
 
                 return false;
