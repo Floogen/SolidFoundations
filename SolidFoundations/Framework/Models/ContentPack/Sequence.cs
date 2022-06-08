@@ -17,5 +17,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public string Condition { get; set; }
         public string[] ModDataFlags { get; set; }
         public List<ModifyModDataAction> ModifyFlags { get; set; }
+        public PlaySoundAction PlaySound { get; set; }
     }
 }

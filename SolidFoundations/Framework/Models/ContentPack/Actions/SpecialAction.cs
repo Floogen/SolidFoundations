@@ -57,6 +57,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public List<SpecialAction> ConditionalActions { get; set; }
         public BroadcastAction Broadcast { get; set; }
         public List<ModifyMailFlagAction> ModifyMailFlags { get; set; }
+        public PlaySoundAction PlaySound { get; set; }
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
@@ -114,10 +115,6 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             {
                 Game1.addHUDMessage(new HUDMessage(Message.Text, (int)Message.Icon + 1));
             }
-            if (Warp is not null)
-            {
-                Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Warp.FacingDirection == -1 ? who.FacingDirection : Warp.FacingDirection);
-            }
             if (ModifyInventory is not null)
             {
                 var quantity = ModifyInventory.Quantity;
@@ -156,6 +153,14 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 {
                     SolidFoundations.apiManager.GetShopTileFrameworkApi().OpenItemShop(OpenShop.Name);
                 }
+            }
+            if (PlaySound is not null)
+            {
+                SpecialAction.HandlePlayingSound(building, PlaySound);
+            }
+            if (Warp is not null)
+            {
+                Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Warp.FacingDirection == -1 ? who.FacingDirection : Warp.FacingDirection);
             }
             if (Broadcast is not null)
             {
@@ -300,6 +305,25 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 {
                     Game1.player.RemoveMail(mailFlag.Name, false);
                 }
+            }
+        }
+
+        internal static void HandlePlayingSound(GenericBuilding building, PlaySoundAction playSound)
+        {
+            if (playSound.IsValid())
+            {
+                if (playSound.Pitch == -1)
+                {
+                    Game1.player.currentLocation.playSound(playSound.Sound);
+                }
+                else
+                {
+                    Game1.player.currentLocation.playSoundPitched(playSound.Sound, playSound.Pitch + playSound.GetPitchRandomized());
+                }
+            }
+            else
+            {
+                SolidFoundations.monitor.LogOnce($"Invalid sound ({playSound.Sound}) given for {building.Id}", StardewModdingAPI.LogLevel.Warn);
             }
         }
     }

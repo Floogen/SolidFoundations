@@ -82,6 +82,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 SpecialAction.HandleModifyingBuildingFlags(building, sequence.ModifyFlags);
             }
+            if (sequence.PlaySound is not null)
+            {
+                SpecialAction.HandlePlayingSound(building, sequence.PlaySound);
+            }
             return currentIndex;
         }
     }
