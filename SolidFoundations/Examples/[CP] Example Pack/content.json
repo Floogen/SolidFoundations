@@ -143,6 +143,44 @@
       }
     },
     {
+      "Action": "EditData",
+      "Target": "Data/BuildingsData",
+      "Fields": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_ForgottenShrine": {
+          "DrawLayers": [
+            {
+              "Texture": "alt_fire_animations",
+              "SourceRect": "0 0 16 16",
+              "DrawPosition": "16, 28",
+              "DrawInBackground": false,
+              "SortTileOffset": 0,
+              "Sequences": [
+                {
+                  "Frame": 0,
+                  "Duration": 100
+                },
+                {
+                  "Frame": 1,
+                  "Duration": 100
+                },
+                {
+                  "Frame": 2,
+                  "Duration": 100
+                },
+                {
+                  "Frame": 3,
+                  "Duration": 100
+                }
+              ],
+              "ModDataFlags": [
+                "PassedTest"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
       "Action": "EditImage",
       "Target": "{{PeacefulEnd.SolidFoundations/BuildingTexture:PeacefulEnd.SolidFoundations.ExamplePack_Balloon}}",
       "FromFile": "assets/balloon_override.png",

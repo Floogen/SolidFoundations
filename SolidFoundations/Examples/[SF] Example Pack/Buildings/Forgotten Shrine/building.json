@@ -11,7 +11,8 @@
   },
   "DrawLayers": [
     {
-      "SourceRect": "48 32 16 16",
+      "Texture": "fire_animations",
+      "SourceRect": "0 0 16 16",
       "DrawPosition": {
         "X": 16,
         "Y": 28

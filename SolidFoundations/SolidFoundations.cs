@@ -194,7 +194,24 @@ namespace SolidFoundations
                 return;
             }
 
-            _ = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
+            // Force load the changes
+            var idToModels = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
+
+            // Correct the DrawLayers.Texture ids
+            foreach (ExtendedBuildingModel model in idToModels.Values)
+            {
+                if (model.DrawLayers is not null)
+                {
+                    foreach (var layer in model.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
+                    {
+                        var spriteAsset = $"{model.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
+                        if (buildingManager.GetTextureAsset(spriteAsset) is not null)
+                        {
+                            layer.Texture = spriteAsset;
+                        }
+                    }
+                }
+            }
         }
 
         public override object GetApi()
@@ -575,20 +592,23 @@ namespace SolidFoundations
                     // Load in the sprites for DrawLayers, if given
                     if (Directory.Exists(Path.Combine(folder.FullName, "Sprites")) && buildingModel.DrawLayers is not null)
                     {
-                        List<string> spritePaths = Directory.GetFiles(Path.Combine(folder.FullName, "Sprites"), "*.png").ToList();
+                        foreach (var spritePath in Directory.GetFiles(Path.Combine(folder.FullName, "Sprites"), "*.png"))
+                        {
+                            var localSpritePath = Path.Combine(parentFolderName, folder.Name, "Sprites", Path.GetFileName(spritePath));
+                            buildingManager.AddTextureAsset($"{buildingModel.ID}_Sprites_{Path.GetFileNameWithoutExtension(spritePath)}", contentPack.ModContent.GetInternalAssetName(localSpritePath).Name);
+                        }
+
                         foreach (var layer in buildingModel.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
                         {
-                            var actualSpritePath = Path.Combine(folder.FullName, "Sprites", String.Concat(layer.Texture, ".png"));
-                            var spritePath = Path.Combine(parentFolderName, folder.Name, "Sprites", String.Concat(layer.Texture, ".png"));
-                            if (spritePaths.Contains(actualSpritePath) is false)
+                            var spriteAsset = $"{buildingModel.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
+                            if (buildingManager.GetTextureAsset(spriteAsset) is null)
                             {
-                                Monitor.Log($"Unable to find the texture {actualSpritePath} under Sprites from for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
+                                Monitor.Log($"Unable to find the texture {layer.Texture} under Sprites from for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
                                 continue;
                             }
 
-                            layer.Texture = contentPack.ModContent.GetInternalAssetName(spritePath).Name;
-                            buildingManager.AddTextureAsset(layer.Texture, spritePath);
-                            Monitor.Log($"Loaded the building {buildingModel.ID} Sprites texture: {layer.Texture} | {spritePath}", LogLevel.Trace);
+                            layer.Texture = spriteAsset;
+                            Monitor.Log($"Loaded the building {buildingModel.ID} Sprites texture: {layer.Texture} | {spriteAsset}", LogLevel.Trace);
                         }
                     }
 
