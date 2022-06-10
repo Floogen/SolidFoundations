@@ -871,7 +871,13 @@ namespace SolidFoundations.Framework.Utilities.Backport
                 return false;
             }
 
-            return GameStateQuery.WithPlayer(condition_split[1], (Farmer target_farmer) => target_farmer.ActiveObject is Item item && item.ParentSheetIndex == itemId);
+            int requiredStack;
+            if (int.TryParse(condition_split[3], out requiredStack) is false)
+            {
+                requiredStack = 1;
+            }
+
+            return GameStateQuery.WithPlayer(condition_split[1], (Farmer target_farmer) => target_farmer.ActiveObject is Item item && item.ParentSheetIndex == itemId && item.Stack >= requiredStack);
         }
 
         // TODO: When updated to SDV v1.6, add this query to the native GameStateQuery
