@@ -23,6 +23,8 @@ namespace SolidFoundations.Framework.Interfaces.Internal
         }
 
         event EventHandler<BroadcastEventArgs> BroadcastSpecialActionTriggered;
+        event EventHandler BeforeBuildingSerialization; // TODO: Make this obsolete with SDV v1.6
+        event EventHandler AfterBuildingRestoration; // TODO: Make this obsolete with SDV v1.6
 
         public void AddBuildingFlags(Building building, List<string> flags, bool isTemporary = true);
         public void RemoveBuildingFlags(Building building, List<string> flags);
@@ -32,10 +34,30 @@ namespace SolidFoundations.Framework.Interfaces.Internal
     public class Api : IApi
     {
         public event EventHandler<IApi.BroadcastEventArgs> BroadcastSpecialActionTriggered;
+        public event EventHandler BeforeBuildingSerialization;
+        public event EventHandler AfterBuildingRestoration;
 
         internal void OnSpecialActionTriggered(IApi.BroadcastEventArgs e)
         {
             EventHandler<IApi.BroadcastEventArgs> handler = BroadcastSpecialActionTriggered;
+            if (handler is not null)
+            {
+                handler(this, e);
+            }
+        }
+
+        internal void OnBeforeBuildingSerialization(EventArgs e)
+        {
+            EventHandler handler = BeforeBuildingSerialization;
+            if (handler is not null)
+            {
+                handler(this, e);
+            }
+        }
+
+        internal void OnAfterBuildingRestoration(EventArgs e)
+        {
+            EventHandler handler = AfterBuildingRestoration;
             if (handler is not null)
             {
                 handler(this, e);

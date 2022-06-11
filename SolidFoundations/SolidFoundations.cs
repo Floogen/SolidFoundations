@@ -119,6 +119,7 @@ namespace SolidFoundations
         [EventPriority(EventPriority.High + 1)]
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
+            api.OnBeforeBuildingSerialization(new EventArgs());
             SafelyCacheCustomBuildings();
         }
 
@@ -127,6 +128,7 @@ namespace SolidFoundations
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             LoadCachedCustomBuildings();
+            api.OnAfterBuildingRestoration(new EventArgs());
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
