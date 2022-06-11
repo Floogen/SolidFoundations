@@ -181,6 +181,40 @@
       }
     },
     {
+      "Action": "EditData",
+      "Target": "Data/BuildingsData",
+      "Fields": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_CampingTent": {
+          "Skins": [
+            {
+              "ID": "Stardrop",
+              "Name": "Stardrop Camping Tent",
+              "Description": "First skin.",
+              "Texture": "skin_1"
+            },
+            {
+              "ID": "Leather",
+              "Name": "Leather Camping Tent",
+              "Description": "...",
+              "Texture": "skin_2"
+            },
+            {
+              "ID": "Monster",
+              "Name": "Monster Leather Camping Tent",
+              "Description": "...",
+              "Texture": "skin_3"
+            },
+            {
+              "ID": "Unused",
+              "Name": "Unused - Patched via Content Patcher",
+              "Description": "...",
+              "Texture": "unused_skin"
+            },
+          ]
+        }
+      }
+    },
+    {
       "Action": "EditImage",
       "Target": "{{PeacefulEnd.SolidFoundations/BuildingTexture:PeacefulEnd.SolidFoundations.ExamplePack_Balloon}}",
       "FromFile": "assets/balloon_override.png",

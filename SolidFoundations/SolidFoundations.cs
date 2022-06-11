@@ -197,7 +197,7 @@ namespace SolidFoundations
             // Force load the changes
             var idToModels = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
 
-            // Correct the DrawLayers.Texture ids
+            // Correct the DrawLayers.Texture and Skins.Texture ids
             foreach (ExtendedBuildingModel model in idToModels.Values)
             {
                 if (model.DrawLayers is not null)
@@ -208,6 +208,18 @@ namespace SolidFoundations
                         if (buildingManager.GetTextureAsset(spriteAsset) is not null)
                         {
                             layer.Texture = spriteAsset;
+                        }
+                    }
+                }
+
+                if (model.Skins is not null)
+                {
+                    foreach (var skin in model.Skins.Where(t => String.IsNullOrEmpty(t.Texture) is false))
+                    {
+                        var skinAsset = $"{model.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.Texture)}";
+                        if (buildingManager.GetTextureAsset(skinAsset) is not null)
+                        {
+                            skin.Texture = skinAsset;
                         }
                     }
                 }
@@ -572,20 +584,25 @@ namespace SolidFoundations
                     }
 
                     // Load in any skins, if given
-                    if (Directory.Exists(Path.Combine(folder.FullName, "Skins")))
+                    if (Directory.Exists(Path.Combine(folder.FullName, "Skins")) && buildingModel.Skins is not null)
                     {
-                        List<string> skinPaths = Directory.GetFiles(Path.Combine(folder.FullName, "Skins"), "*.png").OrderBy(s => s).ToList();
-                        foreach (var skin in buildingModel.Skins)
+                        foreach (var skinPath in Directory.GetFiles(Path.Combine(folder.FullName, "Skins"), "*.png").OrderBy(s => s))
                         {
-                            var actualSkinPath = Path.Combine(folder.FullName, "Skins", String.Concat(skin.Texture, ".png"));
-                            var skinPath = Path.Combine(parentFolderName, folder.Name, "Skins", String.Concat(skin.Texture, ".png"));
-                            if (skinPaths.Contains(actualSkinPath) is false)
+                            var localSkinPath = Path.Combine(parentFolderName, folder.Name, "Skins", Path.GetFileName(skinPath));
+                            buildingManager.AddTextureAsset($"{buildingModel.ID}_Skins_{Path.GetFileNameWithoutExtension(skinPath)}", contentPack.ModContent.GetInternalAssetName(localSkinPath).Name);
+                        }
+
+                        foreach (var skin in buildingModel.Skins.Where(t => String.IsNullOrEmpty(t.Texture) is false))
+                        {
+                            var skinAsset = $"{buildingModel.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.Texture)}";
+                            if (buildingManager.GetTextureAsset(skinAsset) is null)
                             {
+                                Monitor.Log($"Unable to find the skin {skin.Texture} under Skins for {buildingModel.Name} from {contentPack.Manifest.Name}, skipping.", LogLevel.Trace);
                                 continue;
                             }
 
-                            skin.Texture = contentPack.ModContent.GetInternalAssetName(skinPath).Name;
-                            buildingManager.AddTextureAsset(skin.Texture, skinPath);
+                            skin.Texture = skinAsset;
+                            Monitor.Log($"Loaded the building {buildingModel.ID} Skins texture: {skin.Texture} | {skinAsset}", LogLevel.Trace);
                         }
                     }
 
@@ -603,7 +620,7 @@ namespace SolidFoundations
                             var spriteAsset = $"{buildingModel.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
                             if (buildingManager.GetTextureAsset(spriteAsset) is null)
                             {
-                                Monitor.Log($"Unable to find the texture {layer.Texture} under Sprites from for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
+                                Monitor.Log($"Unable to find the texture {layer.Texture} under Sprites for {buildingModel.Name} from {contentPack.Manifest.Name}, assuming to be vanilla or a texture loaded via Content Patcher.", LogLevel.Trace);
                                 continue;
                             }
 
