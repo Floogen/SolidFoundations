@@ -1,0 +1,52 @@
+{
+  "Name": "Doghouse",
+  "Description": "...",
+  "DrawShadow": false,
+
+  "SourceRect": "0 0 16 32",
+  "Size": {
+    "X": 1,
+    "Y": 2
+  },
+  "EventTiles": [
+    {
+      "Tile": {
+        "X": 0,
+        "Y": 2
+      },
+      "SpecialAction": {
+        "ModifyFlags": [
+          {
+            "Name": "PlayerNearby",
+            "Type": "Temporary",
+            "Operation": "Add"
+          }
+        ],
+        "PlaySound": {
+          "Sound": "dog_bark"
+        }
+      }
+    }
+  ],
+
+  "DrawLayers": [
+    {
+      "SourceRect": "16 0 16 16",
+      "DrawPosition": {
+        "X": 0,
+        "Y": 12
+      },
+      "DrawInBackground": false,
+      "SortTileOffset": 0,
+      "Sequences": [
+        {
+          "Frame": 0,
+          "Duration": 100
+        }
+      ],
+      "ModDataFlags": [
+        "PlayerNearby"
+      ]
+    }
+  ]
+}
