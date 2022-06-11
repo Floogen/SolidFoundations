@@ -164,7 +164,7 @@ namespace SolidFoundations
         {
             if (e.NameWithoutLocale.IsEquivalentTo("Data/BuildingsData"))
             {
-                e.LoadFrom(() => buildingManager.GetIdToModels(), AssetLoadPriority.Exclusive);
+                e.LoadFrom(() => buildingManager.GetIdToModels(), AssetLoadPriority.High);
             }
             else if (e.DataType == typeof(Texture2D))
             {
