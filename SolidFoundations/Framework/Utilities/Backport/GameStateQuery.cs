@@ -871,8 +871,8 @@ namespace SolidFoundations.Framework.Utilities.Backport
                 return false;
             }
 
-            int requiredStack;
-            if (int.TryParse(condition_split[3], out requiredStack) is false)
+            int requiredStack = 1;
+            if (condition_split.Length > 3 && int.TryParse(condition_split[3], out requiredStack) is false)
             {
                 requiredStack = 1;
             }
