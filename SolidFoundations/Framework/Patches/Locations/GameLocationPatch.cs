@@ -108,7 +108,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             return true;
         }
 
-        private static bool AttemptToBuildStructure(BuildableGameLocation farm, BluePrint blueprint, Building currentBuilding)
+        internal static bool AttemptToBuildStructure(BuildableGameLocation farm, BluePrint blueprint, Building currentBuilding)
         {
             Vector2 tileLocation = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
             if (!CanBuildHere(farm, blueprint, tileLocation))

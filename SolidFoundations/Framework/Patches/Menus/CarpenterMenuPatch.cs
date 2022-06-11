@@ -32,6 +32,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
         {
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.setNewActiveBlueprint), null), prefix: new HarmonyMethod(GetType(), nameof(SetNewActiveBlueprintPrefix)));
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.receiveLeftClick), new[] { typeof(int), typeof(int), typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(ReceiveLeftClickPostfix)));
+            harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.tryToBuild), null), prefix: new HarmonyMethod(GetType(), nameof(TryToBuildPrefix)));
 
             harmony.Patch(AccessTools.Method(typeof(CarpenterMenu), nameof(CarpenterMenu.draw), new[] { typeof(SpriteBatch) }), transpiler: new HarmonyMethod(typeof(CarpenterMenuPatch), nameof(DrawTranspiler)));
             harmony.Patch(AccessTools.Constructor(typeof(CarpenterMenu), new[] { typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(CarpenterMenuPostfix)));
@@ -153,6 +154,19 @@ namespace SolidFoundations.Framework.Patches.Buildings
                     __instance.SetChildMenu(buildingSkinMenu);
                 }
             }
+        }
+
+        private static bool TryToBuildPrefix(CarpenterMenu __instance, ref bool __result, Building ___currentBuilding)
+        {
+            if (SolidFoundations.buildingManager.DoesBuildingModelExist(__instance.CurrentBlueprint.name) is false)
+            {
+                return true;
+            }
+
+            // TODO: Replace Game1.getFarm() with flexible location, to enable building on the island farm
+            __result = GameLocationPatch.AttemptToBuildStructure(Game1.getFarm(), __instance.CurrentBlueprint, ___currentBuilding);
+
+            return false;
         }
 
         private static void CarpenterMenuPostfix(CarpenterMenu __instance, ref List<BluePrint> ___blueprints, ref ClickableTextureComponent ___upgradeIcon, bool magicalConstruction = false)
