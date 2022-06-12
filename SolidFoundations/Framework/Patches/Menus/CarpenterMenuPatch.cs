@@ -123,6 +123,12 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 if (buildingAt != null && __instance.CurrentBlueprint.name != null && buildingAt.buildingType.Equals(__instance.CurrentBlueprint.nameOfBuildingToUpgrade))
                 {
                     buildingAt.upgradeName.Value = __instance.CurrentBlueprint.name;
+                    buildingAt.daysUntilUpgrade.Value = __instance.CurrentBlueprint.daysToConstruct;
+
+                    if (buildingAt.daysUntilUpgrade.Value <= 0)
+                    {
+                        buildingAt.dayUpdate(Game1.dayOfMonth);
+                    }
                 };
             }
 
