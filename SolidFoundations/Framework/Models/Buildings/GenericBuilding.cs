@@ -206,22 +206,24 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         itemConversion.MinutesRemaining -= minutesElapsed;
                         continue;
                     }
-                    else if (itemConversion.RefreshMaxDailyConversions)
-                    {
-                        if (itemConversion.CachedMaxDailyConversions is null)
-                        {
-                            itemConversion.CachedMaxDailyConversions = itemConversion.MaxDailyConversions;
-                        }
-                        else
-                        {
-                            itemConversion.MaxDailyConversions = (int)itemConversion.CachedMaxDailyConversions;
-                        }
-                    }
                     itemConversion.MinutesRemaining = itemConversion.MinutesPerConversion;
                 }
                 else if (isDayStart is false)
                 {
                     continue;
+                }
+
+                // Reset the MaxDailyConversions
+                if (isDayStart || itemConversion.RefreshMaxDailyConversions)
+                {
+                    if (itemConversion.CachedMaxDailyConversions is null)
+                    {
+                        itemConversion.CachedMaxDailyConversions = itemConversion.MaxDailyConversions;
+                    }
+                    else
+                    {
+                        itemConversion.MaxDailyConversions = (int)itemConversion.CachedMaxDailyConversions;
+                    }
                 }
 
                 int num = 0;
@@ -268,6 +270,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         num += num3;
                         num2 -= num3 * itemConversion.RequiredCount;
                     }
+
+                    itemConversion.MaxDailyConversions -= num;
                     if (itemConversion.MaxDailyConversions >= 0 && num >= itemConversion.MaxDailyConversions)
                     {
                         break;
