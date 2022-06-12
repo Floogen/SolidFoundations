@@ -42,6 +42,17 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 _elapsedTime = 0;
                 _currentSequenceIndex = GetNextValidFrame(building, _currentSequenceIndex);
+                sequence = Sequences[_currentSequenceIndex];
+
+                // Execute any ModifyFlags
+                if (sequence.ModifyFlags is not null)
+                {
+                    SpecialAction.HandleModifyingBuildingFlags(building, sequence.ModifyFlags);
+                }
+                if (sequence.PlaySound is not null)
+                {
+                    SpecialAction.HandlePlayingSound(building, sequence.PlaySound);
+                }
             }
             _elapsedTime += time - _cachedTime;
             _cachedTime = time;
@@ -77,15 +88,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 currentIndex = GetNextValidFrame(building, currentIndex);
             }
 
-            // Execute any ModifyFlags
-            if (sequence.ModifyFlags is not null)
-            {
-                SpecialAction.HandleModifyingBuildingFlags(building, sequence.ModifyFlags);
-            }
-            if (sequence.PlaySound is not null)
-            {
-                SpecialAction.HandlePlayingSound(building, sequence.PlaySound);
-            }
             return currentIndex;
         }
     }
