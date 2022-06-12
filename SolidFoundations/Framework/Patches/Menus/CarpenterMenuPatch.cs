@@ -182,7 +182,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 if (String.IsNullOrEmpty(building.Builder) || building.Builder.Equals(builder, StringComparison.OrdinalIgnoreCase))
                 {
                     bool flag = false;
-                    if (building.BuildingToUpgrade != null && Game1.getFarm().getNumberBuildingsConstructed(building.BuildingToUpgrade) == 0)
+                    if (building.BuildingToUpgrade != null && Game1.getFarm().getNumberBuildingsConstructed(building.BuildingToUpgrade) == 0 && Game1.getFarm().getNumberBuildingsConstructed(building.BuildingToUpgrade.Replace(" ", null)) == 0)
                     {
                         flag = true;
                     }
