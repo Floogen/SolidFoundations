@@ -34,6 +34,14 @@ namespace SolidFoundations.Framework.Models.ContentPack
         protected Dictionary<Point, SpecialAction> _specialActionTiles;
 
         [ContentSerializer(Optional = true)]
+        public List<ChestActionTile> LoadChestTiles;
+        protected Dictionary<Point, string> _loadChestTiles;
+
+        [ContentSerializer(Optional = true)]
+        public List<ChestActionTile> CollectChestTiles;
+        protected Dictionary<Point, string> _collectChestTiles;
+
+        [ContentSerializer(Optional = true)]
         public List<ExtendedBuildingActionTiles> EventTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, string> _eventTiles;
         protected Dictionary<Point, SpecialAction> _specialEventTiles;
@@ -99,6 +107,52 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 value = DefaultSpecialAction;
             }
             return value;
+        }
+
+        public string GetLoadChestActionAtTile(int relative_x, int relative_y)
+        {
+            Point key = new Point(relative_x, relative_y);
+            if (_loadChestTiles == null)
+            {
+                _loadChestTiles = new Dictionary<Point, string>();
+                foreach (ChestActionTile chestTile in LoadChestTiles)
+                {
+                    _loadChestTiles[chestTile.Tile] = chestTile.Name;
+                }
+            }
+
+            string chestName = null;
+            if (!_loadChestTiles.TryGetValue(key, out chestName))
+            {
+                if (relative_x < 0 || relative_x >= Size.X || relative_y < 0 || relative_y >= Size.Y)
+                {
+                    return null;
+                }
+            }
+            return chestName;
+        }
+
+        public string GetCollectChestActionAtTile(int relative_x, int relative_y)
+        {
+            Point key = new Point(relative_x, relative_y);
+            if (_collectChestTiles == null)
+            {
+                _collectChestTiles = new Dictionary<Point, string>();
+                foreach (ChestActionTile chestTile in CollectChestTiles)
+                {
+                    _collectChestTiles[chestTile.Tile] = chestTile.Name;
+                }
+            }
+
+            string chestName = null;
+            if (!_collectChestTiles.TryGetValue(key, out chestName))
+            {
+                if (relative_x < 0 || relative_x >= Size.X || relative_y < 0 || relative_y >= Size.Y)
+                {
+                    return null;
+                }
+            }
+            return chestName;
         }
 
         public string GetEventAtTile(int relative_x, int relative_y)

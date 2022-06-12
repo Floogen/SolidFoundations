@@ -453,16 +453,25 @@ namespace SolidFoundations.Framework.Models.ContentPack
                             specialActionAtTile.Trigger(who, this, actualTile);
                             return true;
                         }
-                        else
+
+                        if (who.ActiveObject is not null && this.Model.LoadChestTiles is not null && this.Model.GetLoadChestActionAtTile(actualTile.X, actualTile.Y) is var loadChestName && String.IsNullOrEmpty(loadChestName) is false)
                         {
-                            string actionAtTile = this.Model.GetActionAtTile(actualTile.X, actualTile.Y);
-                            if (actionAtTile != null)
+                            this.PerformBuildingChestAction(loadChestName, who);
+                            return true;
+                        }
+                        if (who.ActiveObject is null && this.Model.CollectChestTiles is not null && this.Model.GetCollectChestActionAtTile(actualTile.X, actualTile.Y) is var collectChestName && String.IsNullOrEmpty(collectChestName) is false)
+                        {
+                            this.PerformBuildingChestAction(collectChestName, who);
+                            return true;
+                        }
+
+                        string actionAtTile = this.Model.GetActionAtTile(actualTile.X, actualTile.Y);
+                        if (actionAtTile != null)
+                        {
+                            actionAtTile = TextParser.ParseText(actionAtTile);
+                            if (who.currentLocation.performAction(actionAtTile, who, new xTile.Dimensions.Location((int)tileLocation.X, (int)tileLocation.Y)))
                             {
-                                actionAtTile = TextParser.ParseText(actionAtTile);
-                                if (who.currentLocation.performAction(actionAtTile, who, new xTile.Dimensions.Location((int)tileLocation.X, (int)tileLocation.Y)))
-                                {
-                                    return true;
-                                }
+                                return true;
                             }
                         }
                     }

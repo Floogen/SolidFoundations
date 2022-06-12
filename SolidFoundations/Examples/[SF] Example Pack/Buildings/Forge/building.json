@@ -67,20 +67,36 @@
   ],
   "SortTileOffset": 10,
 
-  "ActionTiles": [
+  "LoadChestTiles": [
     {
       "Tile": {
         "X": 4,
         "Y": 3
       },
-      "Action": "BuildingChest Input"
+      "Name": "Input"
     },
     {
       "Tile": {
         "X": 5,
         "Y": 3
       },
-      "Action": "BuildingChest Output"
+      "Name": "Input"
+    }
+  ],
+  "CollectChestTiles": [
+    {
+      "Tile": {
+        "X": 4,
+        "Y": 3
+      },
+      "Name": "Output"
+    },
+    {
+      "Tile": {
+        "X": 5,
+        "Y": 3
+      },
+      "Name": "Output"
     }
   ],
   "Chests": [
