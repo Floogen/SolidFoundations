@@ -450,6 +450,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         if (specialActionAtTile is not null)
                         {
                             specialActionAtTile.Trigger(who, this, actualTile);
+                            return true;
                         }
                         else
                         {
