@@ -297,8 +297,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         {
                             if (item is Object obj)
                             {
-                                obj.Price = additionalChopDrops.AddPrice + (int)(obj.Price * additionalChopDrops.MultiplyPrice);
-
                                 if (!string.IsNullOrEmpty(additionalChopDrops.PreserveType))
                                 {
                                     obj.preserve.Value = (PreserveType)Enum.Parse(typeof(PreserveType), additionalChopDrops.PreserveType);
@@ -314,7 +312,15 @@ namespace SolidFoundations.Framework.Models.ContentPack
                                     {
                                         obj.preservedParentSheetIndex.Value = parentId;
                                     }
+
+                                    if (obj.preservedParentSheetIndex.Value != default(int) && Toolkit.CreateItemByID(obj.preservedParentSheetIndex.Value.ToString(), 1, 0) is Object preserveItem && preserveItem is not null)
+                                    {
+                                        obj.name = preserveItem.Name;
+                                        obj.Price = preserveItem.Price;
+                                    }
                                 }
+
+                                obj.Price = additionalChopDrops.AddPrice + (int)(obj.Price * additionalChopDrops.MultiplyPrice);
                             }
 
                             Item item2 = buildingChest2.addItem(item);
