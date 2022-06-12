@@ -10,19 +10,60 @@
       "ID": "Stardrop",
       "Name": "Stardrop Camping Tent",
       "Description": "First skin.",
-      "Texture": "skin_1"
+      "Texture": "skin_1",
+      "PaintMaskTexture": "special_mask",
+      "PaintMasks": [
+        {
+          "Name": "Flare"
+        },
+        {
+          "Name": "Stakes",
+          "MinBrightness": -10,
+          "MaxBrightness": 5
+        }
+      ]
     },
     {
       "ID": "Leather",
       "Name": "Leather Camping Tent",
       "Description": "...",
-      "Texture": "skin_2"
+      "Texture": "skin_2",
+      "PaintMasks": [
+        {
+          "Name": "Flare"
+        },
+        {
+          "Name": "Stakes",
+          "MinBrightness": -10,
+          "MaxBrightness": 5
+        }
+      ]
     },
     {
       "ID": "Monster",
       "Name": "Monster Leather Camping Tent",
       "Description": "...",
-      "Texture": "skin_3"
+      "Texture": "skin_3",
+      "PaintMasks": [
+        {
+          "Name": "Flare"
+        },
+        {
+          "Name": "Stakes",
+          "MinBrightness": -10,
+          "MaxBrightness": 5
+        }
+      ]
+    }
+  ],
+  "PaintMasks": [
+    {
+      "Name": "Flare"
+    },
+    {
+      "Name": "Stakes",
+      "MinBrightness": -10,
+      "MaxBrightness": 5
     }
   ],
 

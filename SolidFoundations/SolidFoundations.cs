@@ -171,7 +171,10 @@ namespace SolidFoundations
                 e.Edit(asset =>
                 {
                     var data = asset.AsDictionary<string, string>().Data;
-                    foreach (var model in buildingManager.GetAllBuildingModels().Where(m => m.PaintMasks is not null))
+
+                    // Add any building masks
+                    var models = buildingManager.GetAllBuildingModels();
+                    foreach (var model in models.Where(m => m.PaintMasks is not null))
                     {
                         string parsedMaskText = null;
                         foreach (var mask in model.PaintMasks)
@@ -182,6 +185,21 @@ namespace SolidFoundations
                         if (String.IsNullOrEmpty(parsedMaskText) is false)
                         {
                             data[model.ID] = parsedMaskText;
+                        }
+                    }
+
+                    // Add any building skin masks
+                    foreach (var skin in models.Where(m => m.Skins is not null && m.Skins.Any(s => s.PaintMasks is not null)).SelectMany(m => m.Skins))
+                    {
+                        string parsedMaskText = null;
+                        foreach (var mask in skin.PaintMasks)
+                        {
+                            parsedMaskText += $"{mask.Name}/{mask.MinBrightness} {mask.MaxBrightness}/";
+                        }
+
+                        if (String.IsNullOrEmpty(parsedMaskText) is false)
+                        {
+                            data[skin.ID] = parsedMaskText;
                         }
                     }
                 });
@@ -605,6 +623,16 @@ namespace SolidFoundations
                         continue;
                     }
 
+                    // Load in the paint mask, if given
+                    if (File.Exists(Path.Combine(folder.FullName, "paint_mask.png")))
+                    {
+                        var paintMaskPath = Path.Combine(parentFolderName, folder.Name, "paint_mask.png");
+                        buildingModel.PaintMaskTexture = $"{buildingModel.ID}_BaseTexture_PaintMask";
+                        buildingManager.AddTextureAsset(buildingModel.PaintMaskTexture, contentPack.ModContent.GetInternalAssetName(paintMaskPath).Name);
+
+                        Monitor.Log($"Loaded the building {buildingModel.ID} PaintMask texture: {buildingModel.PaintMaskTexture} | {paintMaskPath}", LogLevel.Trace);
+                    }
+
                     // Load in any skins, if given
                     if (Directory.Exists(Path.Combine(folder.FullName, "Skins")))
                     {
@@ -623,6 +651,29 @@ namespace SolidFoundations
                                 {
                                     Monitor.Log($"Unable to find the skin {skin.Texture} under Skins for {buildingModel.Name} from {contentPack.Manifest.Name}, skipping.", LogLevel.Trace);
                                     continue;
+                                }
+
+                                if (String.IsNullOrEmpty(skin.PaintMaskTexture) is false)
+                                {
+                                    var maskAsset = $"{buildingModel.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.PaintMaskTexture)}";
+                                    if (buildingManager.GetTextureAsset(maskAsset) is null)
+                                    {
+                                        Monitor.Log($"Unable to find the skin mask {skin.PaintMaskTexture} under Skins for {buildingModel.Name} from {contentPack.Manifest.Name}, skipping.", LogLevel.Trace);
+                                    }
+                                    else
+                                    {
+                                        skin.PaintMaskTexture = $"{skinAsset}_PaintMask";
+                                        buildingManager.AddTextureAsset(skin.PaintMaskTexture, buildingManager.GetTextureAsset(maskAsset));
+
+                                        Monitor.Log($"Loaded the building {buildingModel.ID} skin {skin.ID} mask texture: {skin.PaintMaskTexture}", LogLevel.Trace);
+                                    }
+                                }
+                                else if (File.Exists(Path.Combine(folder.FullName, "paint_mask.png")))
+                                {
+                                    skin.PaintMaskTexture = $"{skinAsset}_PaintMask";
+                                    buildingManager.AddTextureAsset(skin.PaintMaskTexture, contentPack.ModContent.GetInternalAssetName(Path.Combine(parentFolderName, folder.Name, "paint_mask.png")).Name);
+
+                                    Monitor.Log($"Loaded the building {buildingModel.ID} skin {skin.ID} mask texture using the default paint mask", LogLevel.Trace);
                                 }
 
                                 skin.Texture = skinAsset;
@@ -664,16 +715,6 @@ namespace SolidFoundations
 
                     // Add building's ID to texture tracker so we can quickly reference it for Content Patcher
                     buildingManager.AddTextureAsset(buildingModel.ID.ToLower(), buildingModel.Texture);
-
-                    // Load in the paint mask, if given
-                    if (File.Exists(Path.Combine(folder.FullName, "paint_mask.png")))
-                    {
-                        var paintMaskPath = Path.Combine(parentFolderName, folder.Name, "paint_mask.png");
-                        buildingModel.PaintMaskTexture = $"{buildingModel.ID}_BaseTexture_PaintMask";
-                        buildingManager.AddTextureAsset(buildingModel.PaintMaskTexture, contentPack.ModContent.GetInternalAssetName(paintMaskPath).Name);
-
-                        Monitor.Log($"Loaded the building {buildingModel.ID} PaintMask texture: {buildingModel.PaintMaskTexture} | {paintMaskPath}", LogLevel.Trace);
-                    }
 
                     Monitor.Log($"Loaded the building texture {buildingModel.Texture} | {texturePath}", LogLevel.Trace);
 
