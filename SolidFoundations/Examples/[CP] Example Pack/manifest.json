@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Content Patcher Examples For Solid Foundations",
   "Author": "PeacefulEnd",
-  "Version": "1.4.0",
+  "Version": "1.5.0",
   "Description": "Tests for using Content Patcher to modify Solid Foundations packs.",
   "UniqueID": "PeacefulEnd.ContentPatcherForSolidFoundations",
   "UpdateKeys": [ "Nexus:???" ],
