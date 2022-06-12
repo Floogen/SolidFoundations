@@ -13,18 +13,18 @@ namespace SolidFoundations.Framework.Models.ContentPack
     public class ExtendedAdditionalChopDrops : AdditionalChopDrops
     {
         [ContentSerializer(Optional = true)]
-        public int Quality;
+        public int Quality { get; set; }
 
         [ContentSerializer(Optional = true)]
-        public string PreserveType;
+        public string PreserveType { get; set; }
 
         [ContentSerializer(Optional = true)]
-        public string PreserveID;
+        public string PreserveID { get; set; }
 
         [ContentSerializer(Optional = true)]
-        public int AddPrice;
+        public int AddPrice { get; set; }
 
         [ContentSerializer(Optional = true)]
-        public float MultiplyPrice;
+        public float MultiplyPrice { get; set; } = 1f;
     }
 }
