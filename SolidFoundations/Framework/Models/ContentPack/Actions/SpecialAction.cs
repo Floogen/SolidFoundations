@@ -58,6 +58,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public BroadcastAction Broadcast { get; set; }
         public List<ModifyMailFlagAction> ModifyMailFlags { get; set; }
         public PlaySoundAction PlaySound { get; set; }
+        public ChestAction UseChest { get; set; }
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
@@ -75,6 +76,13 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 if (validAction is not null)
                 {
                     validAction.Trigger(who, building, tile);
+                }
+            }
+            if (UseChest is not null)
+            {
+                if (building.GetBuildingChest(UseChest.Name) is not null)
+                {
+                    building.PerformBuildingChestAction(UseChest.Name, who);
                 }
             }
             if (Dialogue is not null)
