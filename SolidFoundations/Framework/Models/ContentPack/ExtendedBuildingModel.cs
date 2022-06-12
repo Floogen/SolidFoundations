@@ -50,6 +50,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialEventAction { get; set; }
 
+        [ContentSerializer(Optional = true)]
+        public List<InputFilter> InputFilters;
+
         public new string GetActionAtTile(int relative_x, int relative_y)
         {
             Point key = new Point(relative_x, relative_y);

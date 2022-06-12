@@ -48,13 +48,27 @@
       "DisplayHeight": 1.5
     }
   ],
+  "InputFilters": [
+    {
+      "InputChest": "Input",
+      "RestrictedItems": [
+        {
+          "RequiredTags": [
+            "category_fruits"
+          ],
+          "MaxAllowed": 40
+        }
+      ],
+      "FilteredItemMessage": "The wine maker can't process anymore items."
+    }
+  ],
   "ItemConversions": [
     {
       "RequiredTags": [
         "category_fruits"
       ],
-      "RequiredCount": 1,
-      "MaxDailyConversions": 10,
+      "RequiredCount": 10,
+      "MaxDailyConversions": 40,
       "MinutesPerConversion": 10,
       "RefreshMaxDailyConversions": true,
       "SourceChest": "Input",

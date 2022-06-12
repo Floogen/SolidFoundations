@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using static SolidFoundations.Framework.Models.ContentPack.InputFilter;
 using static StardewValley.Object;
 using Object = StardewValley.Object;
 
@@ -246,7 +247,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                             flag = true;
                             break;
                         }
-                        else if (item4.HasContextTag("category_fruits") || item4.HasContextTag("category_vegetable") || item4.ParentSheetIndex == 812)
+                        else if (preserveDroppedInId == -1 && (item4.HasContextTag("category_fruits") || item4.HasContextTag("category_vegetable") || item4.ParentSheetIndex == 812))
                         {
                             // Item is a fruit, vegetable or roe
                             preserveDroppedInId = item4.ParentSheetIndex;
@@ -854,6 +855,61 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return this.GetItemConversionForItem(item, chest) != null;
         }
 
+        // Preserve this custom implementation
+        public bool IsObjectFilteredForChest(Item inputItem, Chest chest)
+        {
+            if (this.Model == null || this.Model.InputFilters is null)
+            {
+                return false;
+            }
+            if (inputItem == null)
+            {
+                return true;
+            }
+            if (chest == null)
+            {
+                return true;
+            }
+
+            foreach (InputFilter inputFilter in this.Model.InputFilters)
+            {
+                if (chest.Name != inputFilter.InputChest)
+                {
+                    continue;
+                }
+
+                foreach (RestrictedItem restriction in inputFilter.RestrictedItems)
+                {
+                    if (restriction.RequiredTags.Any(t => inputItem.HasContextTag(t) is false))
+                    {
+                        continue;
+                    }
+
+                    int currentTagStackCount = 0;
+                    foreach (var chestItem in chest.items.Where(i => i is not null))
+                    {
+                        if (restriction.RequiredTags.Any(t => chestItem.HasContextTag(t) is false))
+                        {
+                            continue;
+                        }
+
+                        currentTagStackCount += chestItem.Stack;
+                        if (currentTagStackCount > restriction.MaxAllowed)
+                        {
+                            if (inputFilter.FilteredItemMessage != null)
+                            {
+                                Game1.showRedMessage(TextParser.ParseText(inputFilter.FilteredItemMessage));
+                            }
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         // TODO: When updated to SDV v1.6, this method (StardewValley.Buildings.Building.PerformBuildingChestAction) should be patched to utilize fixes
         // Current fixes:
         // - Only take required amount from player's active stack, instead of all that can fit within chest
@@ -893,6 +949,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         }
                         return false;
                     }
+                    if (this.IsObjectFilteredForChest(who.ActiveObject, chest))
+                    {
+                        return false;
+                    }
                     BuildingItemConversion itemConversionForItem = this.GetItemConversionForItem(who.ActiveObject, chest);
                     Utility.consolidateStacks(chest.items);
                     chest.clearNulls();
@@ -905,7 +965,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     int num = Math.Min(Math.Min(numberOfItemThatCanBeAddedToThisInventoryList, who.ActiveObject.Stack), itemConversionForItem.RequiredCount);
                     if (num == 0)
                     {
-                        if (buildingChestData.InvalidItemMessage != null)
+                        if (buildingChestData.InvalidCountMessage != null)
                         {
                             Game1.showRedMessage(TextParser.ParseText(buildingChestData.InvalidCountMessage));
                         }
