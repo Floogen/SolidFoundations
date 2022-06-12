@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using static StardewValley.Object;
 using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Models.ContentPack
@@ -187,6 +188,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return false;
         }
 
+        // TODO: Will need preserve the changes made (such as price changing and wine / jellies and other preserves)
         public void ProcessItemConversions(int minutesElapsed, bool isDayStart = false)
         {
             if (this.Model is null || this.Model.ItemConversions is null)
@@ -223,6 +225,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                 int num = 0;
                 int num2 = 0;
+                int preserveDroppedInId = -1;
                 Chest buildingChest = this.GetBuildingChest(itemConversion.SourceChest);
                 Chest buildingChest2 = this.GetBuildingChest(itemConversion.DestinationChest);
                 if (buildingChest == null)
@@ -242,6 +245,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         {
                             flag = true;
                             break;
+                        }
+                        else if (item4.HasContextTag("category_fruits") || item4.HasContextTag("category_vegetable") || item4.ParentSheetIndex == 812)
+                        {
+                            // Item is a fruit, vegetable or roe
+                            preserveDroppedInId = item4.ParentSheetIndex;
                         }
                     }
                     if (flag)
@@ -282,6 +290,28 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
                         if (num5 != 0 && Toolkit.CreateItemByID(additionalChopDrops.ItemID, num5, additionalChopDrops.Quality) is Item item && item is not null)
                         {
+                            if (item is Object obj)
+                            {
+                                obj.Price = additionalChopDrops.AddPrice + (int)(obj.Price * additionalChopDrops.MultiplyPrice);
+
+                                if (!string.IsNullOrEmpty(additionalChopDrops.PreserveType))
+                                {
+                                    obj.preserve.Value = (PreserveType)Enum.Parse(typeof(PreserveType), additionalChopDrops.PreserveType);
+                                }
+
+                                if (!string.IsNullOrEmpty(additionalChopDrops.PreserveID))
+                                {
+                                    if (additionalChopDrops.PreserveID == "DROP_IN" && preserveDroppedInId != -1)
+                                    {
+                                        obj.preservedParentSheetIndex.Value = preserveDroppedInId;
+                                    }
+                                    else if (int.TryParse(additionalChopDrops.PreserveID, out int parentId))
+                                    {
+                                        obj.preservedParentSheetIndex.Value = parentId;
+                                    }
+                                }
+                            }
+
                             Item item2 = buildingChest2.addItem(item);
                             if (item2 == null || item2.Stack != num5)
                             {

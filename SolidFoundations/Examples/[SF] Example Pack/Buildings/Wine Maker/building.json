@@ -1,0 +1,75 @@
+{
+  "Name": "Wine Maker",
+  "Description": "...",
+  "BuildCost": 2500,
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 4,
+    "Y": 2
+  },
+  "CollisionMap": "XXXO\nXXXX",
+
+  "ActionTiles": [
+    {
+      "Tile": {
+        "X": 1,
+        "Y": 1
+      },
+      "Action": "BuildingChest Input"
+    },
+    {
+      "Tile": {
+        "X": 3,
+        "Y": 1
+      },
+      "Action": "BuildingChest Output"
+    }
+  ],
+  "Chests": [
+    {
+      "Name": "Input",
+      "Type": "Load",
+      "Sound": "Ship",
+      "InvalidItemMessage": "The wine maker can't process this.",
+      "InvalidCountMessage": "You don't have the minimum required amount for this to be processed.",
+      "ChestFullMessage": "The wine maker is full.",
+      "DisplayTile": "-1, -1",
+      "DisplayHeight": 0.0
+    },
+    {
+      "Name": "Output",
+      "Type": "Collect",
+      "Sound": null,
+      "InvalidItemMessage": null,
+      "InvalidCountMessage": null,
+      "ChestFullMessage": null,
+      "DisplayTile": "2.9, 2",
+      "DisplayHeight": 1.5
+    }
+  ],
+  "ItemConversions": [
+    {
+      "RequiredTags": [
+        "category_fruits"
+      ],
+      "RequiredCount": 1,
+      "MaxDailyConversions": 10,
+      "MinutesPerConversion": 10,
+      "RefreshMaxDailyConversions": true,
+      "SourceChest": "Input",
+      "DestinationChest": "Output",
+      "ProducedItems": [
+        {
+          "ItemID": "348",
+          "MinCount": 1,
+          "MaxCount": 5,
+          "Chance": 1.0,
+          "PreserveType": "Wine",
+          "PreserveID": "DROP_IN",
+          "Condition": null
+        }
+      ]
+    }
+  ]
+}

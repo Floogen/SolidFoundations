@@ -20,7 +20,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public bool RefreshMaxDailyConversions;
         internal int? CachedMaxDailyConversions;
 
-
         public new List<ExtendedAdditionalChopDrops> ProducedItems;
     }
 }

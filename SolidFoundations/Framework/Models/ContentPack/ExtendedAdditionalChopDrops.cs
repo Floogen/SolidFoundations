@@ -14,5 +14,17 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         [ContentSerializer(Optional = true)]
         public int Quality;
+
+        [ContentSerializer(Optional = true)]
+        public string PreserveType;
+
+        [ContentSerializer(Optional = true)]
+        public string PreserveID;
+
+        [ContentSerializer(Optional = true)]
+        public int AddPrice;
+
+        [ContentSerializer(Optional = true)]
+        public float MultiplyPrice;
     }
 }
