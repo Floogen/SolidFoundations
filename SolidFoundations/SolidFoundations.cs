@@ -166,6 +166,26 @@ namespace SolidFoundations
             {
                 e.LoadFrom(() => buildingManager.GetIdToModels(), AssetLoadPriority.High);
             }
+            else if (e.NameWithoutLocale.IsEquivalentTo("Data/PaintData"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+                    foreach (var model in buildingManager.GetAllBuildingModels().Where(m => m.PaintMasks is not null))
+                    {
+                        string parsedMaskText = null;
+                        foreach (var mask in model.PaintMasks)
+                        {
+                            parsedMaskText += $"{mask.Name}/{mask.MinBrightness} {mask.MaxBrightness}/";
+                        }
+
+                        if (String.IsNullOrEmpty(parsedMaskText) is false)
+                        {
+                            data[model.ID] = parsedMaskText;
+                        }
+                    }
+                });
+            }
             else if (e.DataType == typeof(Texture2D))
             {
                 var asset = e.Name;
@@ -644,6 +664,16 @@ namespace SolidFoundations
 
                     // Add building's ID to texture tracker so we can quickly reference it for Content Patcher
                     buildingManager.AddTextureAsset(buildingModel.ID.ToLower(), buildingModel.Texture);
+
+                    // Load in the paint mask, if given
+                    if (File.Exists(Path.Combine(folder.FullName, "paint_mask.png")))
+                    {
+                        var paintMaskPath = Path.Combine(parentFolderName, folder.Name, "paint_mask.png");
+                        buildingModel.PaintMaskTexture = $"{buildingModel.ID}_BaseTexture_PaintMask";
+                        buildingManager.AddTextureAsset(buildingModel.PaintMaskTexture, contentPack.ModContent.GetInternalAssetName(paintMaskPath).Name);
+
+                        Monitor.Log($"Loaded the building {buildingModel.ID} PaintMask texture: {buildingModel.PaintMaskTexture} | {paintMaskPath}", LogLevel.Trace);
+                    }
 
                     Monitor.Log($"Loaded the building texture {buildingModel.Texture} | {texturePath}", LogLevel.Trace);
 

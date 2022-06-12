@@ -15,6 +15,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         internal string Owner { get; set; }
         internal string PackName { get; set; }
+        internal string PaintMaskTexture;
+
+        [ContentSerializer(Optional = true)]
+        public List<PaintMaskData> PaintMasks;
 
         [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingDrawLayer> DrawLayers;
@@ -25,17 +29,22 @@ namespace SolidFoundations.Framework.Models.ContentPack
         [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, SpecialAction> _specialActionTiles;
+
         [ContentSerializer(Optional = true)]
         public List<ExtendedBuildingActionTiles> EventTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, string> _eventTiles;
         protected Dictionary<Point, SpecialAction> _specialEventTiles;
+
         [ContentSerializer(Optional = true)]
         public List<Point> TunnelDoors = new List<Point>();
+
         [ContentSerializer(Optional = true)]
         public List<Point> AuxiliaryHumanDoors = new List<Point>();
 
         [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialAction { get; set; }
+
+        [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialEventAction { get; set; }
 
         public new string GetActionAtTile(int relative_x, int relative_y)

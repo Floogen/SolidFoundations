@@ -70,6 +70,24 @@
     }
   ],
 
+  "PaintMasks": [
+    {
+      "Name": "Building",
+      "MinBrightness": -15,
+      "MaxBrightness": 0
+    },
+    {
+      "Name": "Roof",
+      "MinBrightness": -10,
+      "MaxBrightness": 5
+    },
+    {
+      "Name": "Trim",
+      "MinBrightness": -10,
+      "MaxBrightness": 5
+    }
+  ],
+
   "IndoorMap": "Barn3",
   "IndoorMapType": "StardewValley.AnimalHouse",
   "HumanDoor": {
