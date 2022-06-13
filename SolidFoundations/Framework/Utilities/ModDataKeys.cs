@@ -12,6 +12,7 @@ namespace SolidFoundations.Framework.Utilities
         internal const string GENERIC_BLUEPRINT = "SolidFoundations.GenericBlueprint";
         internal const string GENERIC_BUILDING_ID = "SolidFoundations.GenericBuilding.Id";
         internal const string LOCATION_CUSTOM_BUILDINGS = "SolidFoundations.Location.CustomBuildings";
+        internal const string CUSTOM_CHEST_CAPACITY = "SolidFoundations.Chest.Capacity";
 
         // Messages
         internal const string MESSAGE_BUILDING_BUILT = "SolidFoundations.Messages.BuildingBuilt";

@@ -21,6 +21,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public List<PaintMaskData> PaintMasks;
 
         [ContentSerializer(Optional = true)]
+        public new List<ExtendedBuildingChest> Chests;
+
+        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingSkin> Skins = new List<ExtendedBuildingSkin>();
 
         [ContentSerializer(Optional = true)]

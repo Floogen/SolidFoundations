@@ -76,6 +76,9 @@ namespace SolidFoundations
                 new CarpenterMenuPatch(monitor, helper).Apply(harmony);
                 new PurchaseAnimalsMenuPatch(monitor, helper).Apply(harmony);
 
+                // Apply object patch
+                new ChestPatch(monitor, helper).Apply(harmony);
+
                 // Apply etc. patches
                 new QuestionEventPatch(monitor, helper).Apply(harmony);
             }
@@ -414,7 +417,7 @@ namespace SolidFoundations
                                 postFarmEventOvernightAction();
                             }
                             customBuilding.indoors.Value.postFarmEventOvernightActions.Clear();
-                        }                        
+                        }
 
                         // Clear any grass and other debris
                         var validIndexesForRemoval = new List<int>()

@@ -35,7 +35,8 @@
       "InvalidCountMessage": "You don't have the minimum required amount for this to be processed.",
       "ChestFullMessage": "The wine maker is full.",
       "DisplayTile": "-1, -1",
-      "DisplayHeight": 0.0
+      "DisplayHeight": 0.0,
+      "Capacity": 1
     },
     {
       "Name": "Output",

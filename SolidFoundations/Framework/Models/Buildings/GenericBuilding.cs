@@ -135,6 +135,18 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 this.updateInteriorWarps(base.indoors.Value);
             }
             this.LoadFromBuildingData(false);
+
+            // Set the building chests
+            if (this.Model is not null && this.Model.Chests is not null)
+            {
+                foreach (ExtendedBuildingChest chestData in this.Model.Chests)
+                {
+                    if (this.GetBuildingChest(chestData.Name) is Chest chest && chest is not null)
+                    {
+                        chest.modData[ModDataKeys.CUSTOM_CHEST_CAPACITY] = chestData.Capacity.ToString();
+                    }
+                }
+            }
         }
 
         public bool ValidateConditions(string condition, string[] modDataFlags = null)
@@ -1027,7 +1039,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     BuildingItemConversion itemConversionForItem = this.GetItemConversionForItem(who.ActiveObject, chest);
                     Utility.consolidateStacks(chest.items);
                     chest.clearNulls();
-                    int numberOfItemThatCanBeAddedToThisInventoryList = Toolkit.GetNumberOfItemThatCanBeAddedToThisInventoryList(who.ActiveObject, chest.items, 36);
+                    int numberOfItemThatCanBeAddedToThisInventoryList = Toolkit.GetNumberOfItemThatCanBeAddedToThisInventoryList(who.ActiveObject, chest.items, chest.GetActualCapacity());
                     if (who.ActiveObject.Stack > itemConversionForItem.RequiredCount && numberOfItemThatCanBeAddedToThisInventoryList < itemConversionForItem.RequiredCount)
                     {
                         Game1.showRedMessage(TextParser.ParseText(buildingChestData.ChestFullMessage));
@@ -1050,7 +1062,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         who.ActiveObject = @object;
                     }
                     one.Stack = num;
-                    Utility.addItemToThisInventoryList(one, chest.items, 36);
+                    if (Utility.addItemToThisInventoryList(one, chest.items, chest.GetActualCapacity()) is not null)
+                    {
+                        Game1.showRedMessage(TextParser.ParseText(buildingChestData.ChestFullMessage));
+                        return false;
+                    }
+
                     if (buildingChestData.Sound != null)
                     {
                         Game1.playSound(buildingChestData.Sound);
