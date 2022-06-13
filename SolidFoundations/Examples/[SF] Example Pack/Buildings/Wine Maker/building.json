@@ -60,8 +60,22 @@
         }
       ],
       "FilteredItemMessage": "The wine maker can't process anymore items."
+    },
+    {
+      "InputChest": "Input",
+      "RestrictedItems": [
+        {
+          "RequiredTags": [
+            "category_vegetable"
+          ],
+          "MaxAllowed": 40
+        }
+      ],
+      "FilteredItemMessage": "The wine maker can't process anymore items."
     }
   ],
+
+  "MaxConcurrentConversions": 1,
   "ItemConversions": [
     {
       "RequiredTags": [
@@ -80,6 +94,29 @@
           "MaxCount": 5,
           "Chance": 1.0,
           "PreserveType": "Wine",
+          "PreserveID": "DROP_IN",
+          "Condition": null
+        }
+      ]
+    },
+    {
+      "RequiredTags": [
+        "category_vegetable"
+      ],
+      "RequiredCount": 10,
+      "MaxDailyConversions": 40,
+      "MinutesPerConversion": 10,
+      "RefreshMaxDailyConversions": true,
+      "SourceChest": "Input",
+      "DestinationChest": "Output",
+      "ProducedItems": [
+        {
+          "ItemID": "350",
+          "MinCount": 1,
+          "MaxCount": 5,
+          "Chance": 1.0,
+          "MultiplyPrice": 2.0,
+          "PreserveType": "Juice",
           "PreserveID": "DROP_IN",
           "Condition": null
         }
