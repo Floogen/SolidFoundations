@@ -406,6 +406,16 @@ namespace SolidFoundations
                         // Trigger the missed DayUpdate
                         customBuilding.dayUpdate(Game1.dayOfMonth);
 
+                        // Trigger any missed postFarmEventOvernightAction
+                        if (customBuilding.indoors.Value is not null)
+                        {
+                            foreach (Action postFarmEventOvernightAction in customBuilding.indoors.Value.postFarmEventOvernightActions)
+                            {
+                                postFarmEventOvernightAction();
+                            }
+                            customBuilding.indoors.Value.postFarmEventOvernightActions.Clear();
+                        }                        
+
                         // Clear any grass and other debris
                         var validIndexesForRemoval = new List<int>()
                         {
