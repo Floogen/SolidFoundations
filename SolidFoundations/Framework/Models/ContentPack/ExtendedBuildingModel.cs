@@ -30,6 +30,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public new List<ExtendedBuildingItemConversion> ItemConversions;
 
         [ContentSerializer(Optional = true)]
+        public int MaxConcurrentConversions { get; set; } = -1;
+
+        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, SpecialAction> _specialActionTiles;
 

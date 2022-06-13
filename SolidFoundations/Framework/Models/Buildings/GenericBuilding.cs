@@ -197,8 +197,14 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 return;
             }
 
+            int processedConversions = 0;
             foreach (ExtendedBuildingItemConversion itemConversion in this.Model.ItemConversions)
             {
+                if (this.Model.MaxConcurrentConversions != -1 && processedConversions >= this.Model.MaxConcurrentConversions)
+                {
+                    break;
+                }
+
                 if (itemConversion.MinutesPerConversion > 0)
                 {
                     if (itemConversion.MinutesRemaining - minutesElapsed > 0 && isDayStart is false)
@@ -281,6 +287,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     continue;
                 }
+                processedConversions += 1;
+
                 int num4 = 0;
                 for (int i = 0; i < num; i++)
                 {
