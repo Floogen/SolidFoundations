@@ -25,6 +25,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         {
             public List<string> RequiredTags { get; set; }
             public int MaxAllowed { get; set; }
+            public bool RejectWhileProcessing { get; set; }
+            public string Condition { get; set; }
+            public string[] ModDataFlags { get; set; }
         }
     }
 }

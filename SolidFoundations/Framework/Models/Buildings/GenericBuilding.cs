@@ -923,6 +923,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     continue;
                 }
 
+                bool isFiltered = false;
                 foreach (RestrictedItem restriction in inputFilter.RestrictedItems)
                 {
                     if (restriction.RequiredTags.Any(t => inputItem.HasContextTag(t) is false))
@@ -930,25 +931,50 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         continue;
                     }
 
-                    int currentTagStackCount = 0;
-                    foreach (var chestItem in chest.items.Where(i => i is not null))
+                    if (restriction.RejectWhileProcessing && this.Model.ItemConversions is not null && this.Model.ItemConversions.Any(c => c.ShouldTrackTime))
                     {
-                        if (restriction.RequiredTags.Any(t => chestItem.HasContextTag(t) is false))
-                        {
-                            continue;
-                        }
+                        isFiltered = true;
+                        break;
+                    }
+                    else if (String.IsNullOrEmpty(restriction.Condition) is false && this.ValidateConditions(restriction.Condition, restriction.ModDataFlags))
+                    {
+                        isFiltered = true;
+                        break;
+                    }
+                    else if (restriction.ModDataFlags is not null && this.ValidateConditions(restriction.Condition, restriction.ModDataFlags))
+                    {
+                        isFiltered = true;
+                        break;
+                    }
 
-                        currentTagStackCount += chestItem.Stack;
-                        if (currentTagStackCount > restriction.MaxAllowed)
+                    if (restriction.MaxAllowed >= 0)
+                    {
+                        int currentTagStackCount = 0;
+                        foreach (var chestItem in chest.items.Where(i => i is not null))
                         {
-                            if (inputFilter.FilteredItemMessage != null)
+                            if (restriction.RequiredTags.Any(t => chestItem.HasContextTag(t) is false))
                             {
-                                Game1.showRedMessage(TextParser.ParseText(inputFilter.FilteredItemMessage));
+                                continue;
                             }
 
-                            return true;
+                            currentTagStackCount += chestItem.Stack;
+                            if (currentTagStackCount > restriction.MaxAllowed)
+                            {
+                                isFiltered = true;
+                                break;
+                            }
                         }
                     }
+                }
+
+                if (isFiltered)
+                {
+                    if (inputFilter.FilteredItemMessage != null)
+                    {
+                        Game1.showRedMessage(TextParser.ParseText(inputFilter.FilteredItemMessage));
+                    }
+
+                    return true;
                 }
             }
 

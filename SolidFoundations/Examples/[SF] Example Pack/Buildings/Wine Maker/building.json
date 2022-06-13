@@ -66,12 +66,25 @@
       "RestrictedItems": [
         {
           "RequiredTags": [
-            "category_vegetable"
+            "category_fruits"
           ],
-          "MaxAllowed": 40
+          "Condition": "!WEATHER Here SUN"
         }
       ],
-      "FilteredItemMessage": "The wine maker can't process anymore items."
+      "FilteredItemMessage": "The wine maker can't process fruits while it is raining!"
+    },
+    {
+      "InputChest": "Input",
+      "RestrictedItems": [
+        {
+          "RequiredTags": [
+            "category_vegetable"
+          ],
+          "MaxAllowed": 40,
+          "RejectWhileProcessing": true
+        }
+      ],
+      "FilteredItemMessage": "The wine maker is busy processing the previous batch of items."
     }
   ],
 
