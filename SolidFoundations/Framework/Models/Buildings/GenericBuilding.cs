@@ -207,12 +207,16 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                 if (itemConversion.MinutesPerConversion > 0)
                 {
-                    if (itemConversion.MinutesRemaining - minutesElapsed > 0 && isDayStart is false)
+                    if (itemConversion.MinutesRemaining is null)
+                    {
+                        itemConversion.MinutesRemaining = itemConversion.MinutesPerConversion - minutesElapsed;
+                        continue;
+                    }
+                    else if (itemConversion.MinutesRemaining - minutesElapsed > 0 && isDayStart is false)
                     {
                         itemConversion.MinutesRemaining -= minutesElapsed;
                         continue;
                     }
-                    itemConversion.MinutesRemaining = itemConversion.MinutesPerConversion;
                 }
                 else if (isDayStart is false)
                 {
@@ -287,7 +291,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     continue;
                 }
+
+                // Track the processed conversion and reset MinutesRemaining
                 processedConversions += 1;
+                itemConversion.MinutesRemaining = null;
 
                 int num4 = 0;
                 for (int i = 0; i < num; i++)
