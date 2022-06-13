@@ -307,7 +307,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         {
                             continue;
                         }
-                        int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500)).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
+                        int num5 = new Random((int)((long)Game1.uniqueIDForThisGame + (long)this.tileX.Value * 777L + (long)this.tileY.Value * 7L + Game1.stats.DaysPlayed + j * 500 + Game1.ticks + DateTime.Now.Ticks + (500 * processedConversions))).Next(additionalChopDrops.MinCount, additionalChopDrops.MaxCount + 1);
                         if (num5 != 0 && Toolkit.CreateItemByID(additionalChopDrops.ItemID, num5, additionalChopDrops.Quality) is Item item && item is not null)
                         {
                             if (item is Object obj)
