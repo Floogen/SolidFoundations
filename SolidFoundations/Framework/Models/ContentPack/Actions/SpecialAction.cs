@@ -168,7 +168,43 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (Warp is not null)
             {
-                Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Warp.FacingDirection == -1 ? who.FacingDirection : Warp.FacingDirection);
+                if (Warp.IsMagic)
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        who.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite(354, Game1.random.Next(25, 75), 6, 1, new Vector2(Game1.random.Next((int)who.Position.X - 256, (int)who.Position.X + 192), Game1.random.Next((int)who.Position.Y - 256, (int)who.Position.Y + 192)), flicker: false, (Game1.random.NextDouble() < 0.5) ? true : false));
+                    }
+                    Game1.displayFarmer = false;
+                    Game1.player.temporarilyInvincible = true;
+                    Game1.player.temporaryInvincibilityTimer = -2000;
+                    Game1.player.freezePause = 1000;
+                    Game1.flashAlpha = 1f;
+                    DelayedAction.fadeAfterDelay(delegate
+                    {
+                        Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Warp.FacingDirection == -1 ? who.FacingDirection : Warp.FacingDirection);
+                        Game1.fadeToBlackAlpha = 0.99f;
+                        Game1.screenGlow = false;
+                        Game1.player.temporarilyInvincible = false;
+                        Game1.player.temporaryInvincibilityTimer = 0;
+                        Game1.displayFarmer = true;
+                    }, 1000);
+                    new Rectangle(who.GetBoundingBox().X, who.GetBoundingBox().Y, 64, 64).Inflate(192, 192);
+                    int j = 0;
+                    for (int x = who.getTileX() + 8; x >= who.getTileX() - 8; x--)
+                    {
+                        who.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite(6, new Vector2(x, who.getTileY()) * 64f, Color.White, 8, flipped: false, 50f)
+                        {
+                            layerDepth = 1f,
+                            delayBeforeAnimationStart = j * 25,
+                            motion = new Vector2(-0.25f, 0f)
+                        });
+                        j++;
+                    }
+                }
+                else
+                {
+                    Game1.warpFarmer(Warp.Map, Warp.DestinationTile.X, Warp.DestinationTile.Y, Warp.FacingDirection == -1 ? who.FacingDirection : Warp.FacingDirection);
+                }
             }
             if (Broadcast is not null)
             {
