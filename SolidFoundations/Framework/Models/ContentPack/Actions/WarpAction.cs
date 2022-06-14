@@ -12,5 +12,6 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public string Map { get; set; }
         public Point DestinationTile { get; set; }
         public int FacingDirection { get; set; } = 1;
+        public bool IsMagic { get; set; }
     }
 }
