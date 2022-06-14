@@ -302,6 +302,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                 if (num == 0)
                 {
+                    itemConversion.ShouldTrackTime = false;
                     continue;
                 }
                 else
