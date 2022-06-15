@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SolidFoundations.Framework.External.Automate;
 using SolidFoundations.Framework.External.ContentPatcher;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
@@ -142,10 +141,6 @@ namespace SolidFoundations
             {
                 apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "IsBuildingHere", new IsBuildingHereToken());
                 apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "BuildingTexture", new BuildingTextureToken());
-            }
-            if (Helper.ModRegistry.IsLoaded("Pathoschild.Automate") && apiManager.HookIntoAutomate(Helper))
-            {
-                apiManager.GetAutomateApi().AddFactory(new BuildingFactory());
             }
             if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
             {

@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SolidFoundations.Framework.External.Automate
+namespace SolidFoundationsAutomate.Framework.External.Automate
 {
     internal class BuildingFactory : IAutomationFactory
     {

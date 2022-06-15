@@ -16,7 +16,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public int MinutesPerConversion = -1;
         internal int? MinutesRemaining;
 
-        internal bool ShouldTrackTime;
+        public bool ShouldTrackTime;
 
         [ContentSerializer(Optional = true)]
         public bool RefreshMaxDailyConversions;

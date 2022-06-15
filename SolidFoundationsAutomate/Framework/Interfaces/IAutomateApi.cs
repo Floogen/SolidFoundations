@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SolidFoundations.Framework.Interfaces
+namespace SolidFoundationsAutomate.Framework.Interfaces
 {
     public interface IAutomateApi
     {

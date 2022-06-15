@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SolidFoundations.Framework.External.Automate
+namespace SolidFoundationsAutomate.Framework.External.Automate
 {
     public class BuildingMachine : IMachine
     {
