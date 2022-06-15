@@ -913,7 +913,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
 
         // Preserve this custom implementation
-        public bool IsObjectFilteredForChest(Item inputItem, Chest chest)
+        public bool IsObjectFilteredForChest(Item inputItem, Chest chest, bool performSilentCheck = false)
         {
             if (this.Model == null || this.Model.InputFilters is null)
             {
@@ -981,7 +981,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                 if (isFiltered)
                 {
-                    if (inputFilter.FilteredItemMessage != null)
+                    if (performSilentCheck is false && inputFilter.FilteredItemMessage != null)
                     {
                         Game1.showRedMessage(TextParser.ParseText(inputFilter.FilteredItemMessage));
                     }
@@ -991,6 +991,64 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
 
             return false;
+        }
+
+        // Preserve this custom implementation
+        public int GetMaxAllowedInChest(Item inputItem, Chest chest)
+        {
+            if (inputItem == null)
+            {
+                return -1;
+            }
+            if (chest == null)
+            {
+                return inputItem.Stack;
+            }
+            if (this.Model == null || this.Model.InputFilters is null)
+            {
+                return inputItem.Stack;
+            }
+
+            foreach (InputFilter inputFilter in this.Model.InputFilters)
+            {
+                if (chest.Name != inputFilter.InputChest)
+                {
+                    continue;
+                }
+
+                foreach (RestrictedItem restriction in inputFilter.RestrictedItems)
+                {
+                    if (restriction.RequiredTags.Any(t => inputItem.HasContextTag(t) is false))
+                    {
+                        continue;
+                    }
+
+                    if (restriction.MaxAllowed >= 0 && inputItem.Stack > restriction.MaxAllowed)
+                    {
+                        int currentTagStackCount = 0;
+                        foreach (var chestItem in chest.items.Where(i => i is not null))
+                        {
+                            if (restriction.RequiredTags.Any(t => chestItem.HasContextTag(t) is false))
+                            {
+                                continue;
+                            }
+
+                            currentTagStackCount += chestItem.Stack;
+                            if (currentTagStackCount > restriction.MaxAllowed)
+                            {
+                                return restriction.MaxAllowed;
+                            }
+                        }
+
+                        if (currentTagStackCount + inputItem.Stack > restriction.MaxAllowed)
+                        {
+                            return restriction.MaxAllowed - currentTagStackCount;
+                        }
+                    }
+                }
+            }
+
+            return inputItem.Stack;
         }
 
         // TODO: When updated to SDV v1.6, this method (StardewValley.Buildings.Building.PerformBuildingChestAction) should be patched to utilize fixes

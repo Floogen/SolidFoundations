@@ -19,6 +19,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Reference Include="Automate">
+			<HintPath>E:\SteamLibrary\steamapps\common\Stardew Valley\Mods\SMAPI Mods\Automate\Automate.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Update="Framework\Assets\appearance_button.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

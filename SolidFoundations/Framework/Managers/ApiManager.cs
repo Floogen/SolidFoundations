@@ -14,6 +14,7 @@ namespace SolidFoundations.Framework.Managers
         private ISTFApi _shopTileFrameworkApi;
         private ISaveAnywhereApi _saveAnywhereApi;
         private IContentPatcherApi _contentPatcherApi;
+        private IAutomateApi _automateApi;
 
         public ApiManager(IMonitor monitor)
         {
@@ -37,6 +38,25 @@ namespace SolidFoundations.Framework.Managers
         public IContentPatcherApi GetContentPatcherApi()
         {
             return _contentPatcherApi;
+        }
+
+        internal bool HookIntoAutomate(IModHelper helper)
+        {
+            _automateApi = helper.ModRegistry.GetApi<IAutomateApi>("Pathoschild.Automate");
+
+            if (_automateApi is null)
+            {
+                _monitor.Log("Failed to hook into Pathoschild.Automate.", LogLevel.Error);
+                return false;
+            }
+
+            _monitor.Log("Successfully hooked into Pathoschild.Automate.", LogLevel.Debug);
+            return true;
+        }
+
+        public IAutomateApi GetAutomateApi()
+        {
+            return _automateApi;
         }
 
         internal bool HookIntoShopTileFramework(IModHelper helper)
