@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SolidFoundations.Framework.Models.ContentPack;
+﻿using SolidFoundations.Framework.Models.ContentPack;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;

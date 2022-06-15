@@ -142,7 +142,6 @@ namespace SolidFoundations
                 apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "IsBuildingHere", new IsBuildingHereToken());
                 apiManager.GetContentPatcherApi().RegisterToken(ModManifest, "BuildingTexture", new BuildingTextureToken());
             }
-
             if (Helper.ModRegistry.IsLoaded("Cherry.ShopTileFramework") && apiManager.HookIntoShopTileFramework(Helper))
             {
                 // Do nothing
