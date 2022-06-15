@@ -59,6 +59,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public List<ModifyMailFlagAction> ModifyMailFlags { get; set; }
         public PlaySoundAction PlaySound { get; set; }
         public ChestAction UseChest { get; set; }
+        public FadeAction Fade { get; set; }
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
@@ -118,6 +119,10 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 var dialogue = new SpecialActionDialogueBox(HandleSpecialTextTokens(DialogueWithChoices.Question), responses, (who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer));
                 Game1.activeClickableMenu = dialogue;
                 dialogue.SetUp();
+            }
+            if (Fade is not null)
+            {
+                Game1.globalFadeToBlack(afterFade: Fade.ActionAfterFade is null ? null : delegate { Fade.ActionAfterFade.Trigger(who, building, tile); }, fadeSpeed: Fade.Speed);
             }
             if (Message is not null)
             {
