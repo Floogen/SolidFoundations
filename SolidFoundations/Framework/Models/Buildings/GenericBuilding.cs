@@ -338,23 +338,24 @@ namespace SolidFoundations.Framework.Models.ContentPack
                                 if (!string.IsNullOrEmpty(additionalChopDrops.PreserveType))
                                 {
                                     obj.preserve.Value = (PreserveType)Enum.Parse(typeof(PreserveType), additionalChopDrops.PreserveType);
-                                }
 
-                                if (!string.IsNullOrEmpty(additionalChopDrops.PreserveID))
-                                {
-                                    if (additionalChopDrops.PreserveID == "DROP_IN" && preserveDroppedInId != -1)
+                                    if (!string.IsNullOrEmpty(additionalChopDrops.PreserveID))
                                     {
-                                        obj.preservedParentSheetIndex.Value = preserveDroppedInId;
-                                    }
-                                    else if (int.TryParse(additionalChopDrops.PreserveID, out int parentId))
-                                    {
-                                        obj.preservedParentSheetIndex.Value = parentId;
-                                    }
+                                        if (additionalChopDrops.PreserveID == "DROP_IN" && preserveDroppedInId != -1)
+                                        {
+                                            obj.preservedParentSheetIndex.Value = preserveDroppedInId;
+                                        }
+                                        else if (int.TryParse(additionalChopDrops.PreserveID, out int parentId))
+                                        {
+                                            obj.preservedParentSheetIndex.Value = parentId;
+                                        }
 
-                                    if (obj.preservedParentSheetIndex.Value != default(int) && Toolkit.CreateItemByID(obj.preservedParentSheetIndex.Value.ToString(), 1, 0) is Object preserveItem && preserveItem is not null)
-                                    {
-                                        obj.name = preserveItem.Name;
-                                        obj.Price = preserveItem.Price;
+                                        if (obj.preservedParentSheetIndex.Value != default(int) && Toolkit.CreateItemByID(obj.preservedParentSheetIndex.Value.ToString(), 1, 0) is Object preserveItem && preserveItem is not null)
+                                        {
+                                            var preserveType = obj.preserve.Value is PreserveType.AgedRoe ? "Aged Roe" : obj.preserve.Value.ToString();
+                                            obj.name = $"{preserveItem.Name} {preserveType}";
+                                            obj.Price = preserveItem.Price;
+                                        }
                                     }
                                 }
 
