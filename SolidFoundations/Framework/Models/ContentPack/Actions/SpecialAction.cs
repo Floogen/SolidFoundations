@@ -17,6 +17,25 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
 {
     public class SpecialAction
     {
+        public enum BuffType
+        {
+            Unknown = -1,
+            Farming = 0,
+            Fishing = 1,
+            Mining = 2,
+            Luck = 4,
+            Foraging = 5,
+            Stamina = 7,
+            MagneticRadius = 8,
+            Speed = 9,
+            Defense = 10,
+            Attack = 11,
+            Frozen = 19,
+            YobaBlessing = 21,
+            Nauseous = 25,
+            Darkness = 26
+        }
+
         public enum MessageType
         {
             Achievement,
@@ -60,6 +79,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public PlaySoundAction PlaySound { get; set; }
         public ChestAction UseChest { get; set; }
         public FadeAction Fade { get; set; }
+        public ModifyBuffAction ModifyBuff { get; set; }
 
         public void Trigger(Farmer who, GenericBuilding building, Point tile)
         {
@@ -155,6 +175,35 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                         InventoryManagement.ConsumeItemBasedOnQuantityAndQuality(who, item, quantity, ModifyInventory.Quality);
                     }
                 }
+            }
+            if (ModifyBuff is not null && ModifyBuff.GetBuffType() is not BuffType.Unknown)
+            {
+                int buffType = (int)ModifyBuff.GetBuffType();
+                var source = $"{building.Model.ID}_{ModifyBuff.Buff}_{ModifyBuff.Level}";
+
+                var buff = new Buff(null, ModifyBuff.DurationInMilliseconds, source, buffType) { which = buffType, displaySource = building.Model.Name };
+                if (buffType < buff.buffAttributes.Length)
+                {
+                    buff.buffAttributes[buffType] = ModifyBuff.Level;
+                }
+                buff.glow = ModifyBuff.Glow;
+
+                // Setting source to null while using getDescription
+                buff.source = null;
+                var description = buff.getDescription(buffType);
+                foreach (var subBuff in ModifyBuff.SubBuffs)
+                {
+                    int subBuffType = (int)subBuff.GetBuffType();
+                    if (subBuffType < buff.buffAttributes.Length)
+                    {
+                        buff.buffAttributes[subBuffType] = subBuff.Level;
+                        description += buff.getDescription(subBuffType);
+                    }
+                }
+                buff.description = description + ModifyBuff.Description;
+                buff.source = source;
+
+                Game1.buffsDisplay.addOtherBuff(buff);
             }
             if (OpenShop is not null)
             {
