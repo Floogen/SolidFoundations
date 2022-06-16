@@ -51,7 +51,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         public MessageAction Message { get; set; }
         public WarpAction Warp { get; set; }
         public QuestionResponseAction DialogueWithChoices { get; set; }
-        public ModifyInventory ModifyInventory { get; set; }
+        public ModifyInventoryAction ModifyInventory { get; set; }
         public OpenShopAction OpenShop { get; set; }
         public List<ModifyModDataAction> ModifyFlags { get; set; }
         public List<SpecialAction> ConditionalActions { get; set; }

@@ -8,7 +8,7 @@ using static SolidFoundations.Framework.Models.ContentPack.Actions.SpecialAction
 
 namespace SolidFoundations.Framework.Models.ContentPack.Actions
 {
-    public class ModifyInventory
+    public class ModifyInventoryAction
     {
         public string ItemId { get; set; }
         public int Quantity { get; set; }
