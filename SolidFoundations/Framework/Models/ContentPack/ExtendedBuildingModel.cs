@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
+using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,15 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         internal string Owner { get; set; }
         internal string PackName { get; set; }
-        internal string PaintMaskTexture;
+        internal string PaintMaskTexture { get; set; }
+        internal ITranslationHelper Translations { get; set; }
+
+        // Override the name and description so we can easily pass over translation
+        public new string Name { get { return GetTranslation(_name); } set { _name = value; } }
+        protected string _name;
+
+        public new string Description { get { return GetTranslation(_description); } set { _description = value; } }
+        protected string _description;
 
         [ContentSerializer(Optional = true)]
         public List<PaintMaskData> PaintMasks;
@@ -209,6 +218,16 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 value = DefaultSpecialEventAction;
             }
             return value;
+        }
+
+        public string GetTranslation(string text)
+        {
+            if (Translations is not null && Translations.GetTranslations().Any(t => t.Key == text))
+            {
+                return Translations.Get(text);
+            }
+
+            return text;
         }
     }
 }

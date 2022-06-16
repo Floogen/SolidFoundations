@@ -77,8 +77,8 @@ namespace SolidFoundations.Framework.Utilities.Backport
                     if (skin.Name != null)
                     {
                         this.skinIDs.Add(skin.ID);
-                        this.skinNames.Add(TextParser.ParseText(skin.Name));
-                        this.skinDescriptions.Add(TextParser.ParseText(skin.Description));
+                        this.skinNames.Add(TextParser.ParseText(building.Model.GetTranslation(skin.Name)));
+                        this.skinDescriptions.Add(TextParser.ParseText(building.Model.GetTranslation(skin.Description)));
                     }
                 }
             }

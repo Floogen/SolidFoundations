@@ -91,7 +91,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 var dialogues = new List<string>();
                 foreach (string line in Dialogue.Text)
                 {
-                    dialogues.Add(HandleSpecialTextTokens(line));
+                    dialogues.Add(HandleSpecialTextTokens(building.Model.GetTranslation(line)));
                 }
 
                 if (Dialogue.ActionAfterDialogue is not null)
@@ -110,13 +110,13 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
                 List<Response> responses = new List<Response>();
                 foreach (var response in DialogueWithChoices.Responses.Where(r => String.IsNullOrEmpty(r.Text) is false).OrderBy(r => DialogueWithChoices.ShuffleResponseOrder ? Game1.random.Next() : DialogueWithChoices.Responses.IndexOf(r)))
                 {
-                    responses.Add(new Response(DialogueWithChoices.Responses.IndexOf(response).ToString(), HandleSpecialTextTokens(response.Text)));
+                    responses.Add(new Response(DialogueWithChoices.Responses.IndexOf(response).ToString(), HandleSpecialTextTokens(building.Model.GetTranslation(response.Text))));
                 }
 
                 // Unable to use the vanilla method, as the afterQuestion gets cleared before the second instance of DialogueBox can call it (due to first instance closing)
                 //who.currentLocation.createQuestionDialogue(HandleSpecialTextTokens(DialogueWithChoices.Question), responses.ToArray(), new GameLocation.afterQuestionBehavior((who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer)));
 
-                var dialogue = new SpecialActionDialogueBox(HandleSpecialTextTokens(DialogueWithChoices.Question), responses, (who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer));
+                var dialogue = new SpecialActionDialogueBox(HandleSpecialTextTokens(building.Model.GetTranslation(DialogueWithChoices.Question)), responses, (who, whichAnswer) => DialogueResponsePicked(who, building, tile, whichAnswer));
                 Game1.activeClickableMenu = dialogue;
                 dialogue.SetUp();
             }
@@ -126,7 +126,7 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             }
             if (Message is not null)
             {
-                Game1.addHUDMessage(new HUDMessage(Message.Text, (int)Message.Icon + 1));
+                Game1.addHUDMessage(new HUDMessage(building.Model.GetTranslation(Message.Text), (int)Message.Icon + 1));
             }
             if (ModifyInventory is not null)
             {

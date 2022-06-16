@@ -985,7 +985,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     if (performSilentCheck is false && inputFilter.FilteredItemMessage != null)
                     {
-                        Game1.showRedMessage(TextParser.ParseText(inputFilter.FilteredItemMessage));
+                        Game1.showRedMessage(TextParser.ParseText(this.Model.GetTranslation(inputFilter.FilteredItemMessage)));
                     }
 
                     return true;
@@ -1088,7 +1088,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     {
                         if (buildingChestData.InvalidItemMessage != null)
                         {
-                            Game1.showRedMessage(TextParser.ParseText(buildingChestData.InvalidItemMessage));
+                            Game1.showRedMessage(TextParser.ParseText(this.Model.GetTranslation(buildingChestData.InvalidItemMessage)));
                         }
                         return false;
                     }
@@ -1102,7 +1102,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     int numberOfItemThatCanBeAddedToThisInventoryList = Toolkit.GetNumberOfItemThatCanBeAddedToThisInventoryList(who.ActiveObject, chest.items, chest.GetActualCapacity());
                     if (who.ActiveObject.Stack > itemConversionForItem.RequiredCount && numberOfItemThatCanBeAddedToThisInventoryList < itemConversionForItem.RequiredCount)
                     {
-                        Game1.showRedMessage(TextParser.ParseText(buildingChestData.ChestFullMessage));
+                        Game1.showRedMessage(TextParser.ParseText(this.Model.GetTranslation(buildingChestData.ChestFullMessage)));
                         return false;
                     }
                     int num = Math.Min(Math.Min(numberOfItemThatCanBeAddedToThisInventoryList, who.ActiveObject.Stack), itemConversionForItem.RequiredCount);
@@ -1110,7 +1110,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     {
                         if (buildingChestData.InvalidCountMessage != null)
                         {
-                            Game1.showRedMessage(TextParser.ParseText(buildingChestData.InvalidCountMessage));
+                            Game1.showRedMessage(TextParser.ParseText(this.Model.GetTranslation(buildingChestData.InvalidCountMessage)));
                         }
                         return false;
                     }
@@ -1124,7 +1124,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     one.Stack = num;
                     if (Utility.addItemToThisInventoryList(one, chest.items, chest.GetActualCapacity()) is not null)
                     {
-                        Game1.showRedMessage(TextParser.ParseText(buildingChestData.ChestFullMessage));
+                        Game1.showRedMessage(TextParser.ParseText(this.Model.GetTranslation(buildingChestData.ChestFullMessage)));
                         return false;
                     }
 

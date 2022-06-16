@@ -736,6 +736,12 @@ namespace SolidFoundations
                         buildingModel.HumanDoor = buildingModel.AuxiliaryHumanDoors.First();
                     }
 
+                    // Load in any provided translations
+                    if (contentPack.Translation is not null)
+                    {
+                        buildingModel.Translations = contentPack.Translation;
+                    }
+
                     // Track the model
                     buildingManager.AddBuilding(buildingModel);
 

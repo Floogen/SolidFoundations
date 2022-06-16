@@ -148,8 +148,8 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         var skin = genericBuilding.Model.Skins.FirstOrDefault(s => s.ID == genericBuilding.skinID.Value);
                         if (skin is not null)
                         {
-                            _helper.Reflection.GetField<string>(__instance, "buildingName").SetValue(skin.Name);
-                            _helper.Reflection.GetField<string>(__instance, "buildingDescription").SetValue(skin.Description);
+                            _helper.Reflection.GetField<string>(__instance, "buildingName").SetValue(genericBuilding.Model.GetTranslation(skin.Name));
+                            _helper.Reflection.GetField<string>(__instance, "buildingDescription").SetValue(genericBuilding.Model.GetTranslation(skin.Description));
                         }
                         else
                         {
