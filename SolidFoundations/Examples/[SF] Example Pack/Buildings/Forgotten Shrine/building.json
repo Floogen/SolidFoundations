@@ -1,6 +1,7 @@
 {
-  "Name": "Forgotten Shrine",
-  "Description": "???",
+  "Id": "PeacefulEnd.SolidFoundations.ExamplePack_ForgottenShrine",
+  "Name": "Building.Name.ForgottenShrine",
+  "Description": "Building.Description.ForgottenShrine",
   "DrawShadow": false,
   "FadeWhenBehind": false,
 
@@ -46,7 +47,7 @@
   "Builder": "Wizard",
   "DefaultSpecialAction": {
     "DialogueWithChoices": {
-      "Question": "What is your favorite color, @?",
+      "Question": "Dialogue.Questions.ForgottenShrine.FavoriteColor",
       "Responses": [
         {
           "Text": "Blue",
@@ -59,7 +60,7 @@
               }
             ],
             "Dialogue": {
-              "Text": [ "Right, off you go" ]
+              "Text": [ "Dialogue.Responses.ForgottenShrine.OffYouGo" ]
             }
           }
         },

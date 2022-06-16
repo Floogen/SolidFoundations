@@ -129,6 +129,7 @@
       "Target": "Data/BuildingsData",
       "Fields": {
         "PeacefulEnd.SolidFoundations.ExamplePack_Balloon": {
+          "Description": "Modified by Content Patcher.",
           "DefaultAction": "Dialogue This has been edited by Content Patcher. Neat!"
         }
       }

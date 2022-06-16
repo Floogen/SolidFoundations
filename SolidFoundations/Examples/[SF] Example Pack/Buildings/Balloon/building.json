@@ -1,6 +1,7 @@
 {
-  "Name": "Balloon",
-  "Description": "...",
+  "Id": "PeacefulEnd.SolidFoundations.ExamplePack_Balloon",
+  "Name": "Building.Name.Balloon",
+  "Description": "Building.Description.Balloon",
   "BuildCost": 2500,
   "DrawShadow": false,
 

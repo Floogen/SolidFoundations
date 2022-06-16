@@ -1,0 +1,13 @@
+﻿{
+  // Example usage of setting building names
+  "Building.Name.Balloon": "Balloon",
+  "Building.Name.ForgottenShrine": "Forgotten Shrine",
+
+  // Exampel usage of setting building description
+  "Building.Description.Balloon": "This is a balloon.",
+  "Building.Description.ForgottenShrine": "A long forgotten shrine.",
+
+  // Dialogues
+  "Dialogue.Questions.ForgottenShrine.FavoriteColor": "What is your favorite color, @?",
+  "Dialogue.Responses.ForgottenShrine.OffYouGo": "Right, off you go"
+}
