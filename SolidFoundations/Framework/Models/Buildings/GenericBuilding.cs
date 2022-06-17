@@ -1698,17 +1698,14 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawInBackground is true && ValidateConditions(l.Condition, l.ModDataFlags)))
+                    foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is true && ValidateConditions(l.Condition, l.ModDataFlags)))
                     {
                         if (drawLayer.OnlyDrawIfChestHasContents == null)
                         {
                             num2 = num - drawLayer.SortTileOffset * 64f;
                             num2 += 1f;
-                            if (drawLayer.DrawInBackground)
-                            {
-                                num2 = 0f;
-                            }
                             num2 /= 10000f;
+
                             Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
                             sourceRect = this.ApplySourceRectOffsets(sourceRect);
                             Texture2D texture2D = this.texture.Value;
@@ -1730,17 +1727,24 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 return;
             }
-            foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawInBackground is false && ValidateConditions(l.Condition, l.ModDataFlags)))
+            foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is false && ValidateConditions(l.Condition, l.ModDataFlags)))
             {
                 if (drawLayer.OnlyDrawIfChestHasContents == null)
                 {
                     num2 = num - drawLayer.SortTileOffset * 64f;
                     num2 += 1f;
+
+                    var actualLayer = num2;
                     if (drawLayer.DrawInBackground)
                     {
-                        num2 = 0f;
+                        actualLayer = 0f;
                     }
-                    num2 /= 10000f;
+                    else
+                    {
+                        num2 /= 10000f;
+                        actualLayer = num2;
+                    }
+
                     Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
                     sourceRect = this.ApplySourceRectOffsets(sourceRect);
                     Texture2D texture2D = this.texture.Value;
@@ -1748,7 +1752,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     {
                         texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
                     }
-                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
+                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, actualLayer);
                 }
             }
         }
