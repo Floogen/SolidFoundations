@@ -26,5 +26,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         [ContentSerializer(Optional = true)]
         public float MultiplyPrice { get; set; } = 1f;
+
+        [ContentSerializer(Optional = true)]
+        public string[] ModDataFlags { get; set; }
     }
 }

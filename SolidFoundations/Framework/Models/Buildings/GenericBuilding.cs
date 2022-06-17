@@ -327,7 +327,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     for (int j = 0; j < itemConversion.ProducedItems.Count; j++)
                     {
                         ExtendedAdditionalChopDrops additionalChopDrops = itemConversion.ProducedItems[j];
-                        if (!GameStateQuery.CheckConditions(additionalChopDrops.Condition))
+                        if (ValidateConditions(additionalChopDrops.Condition, additionalChopDrops.ModDataFlags) is false)
                         {
                             continue;
                         }
