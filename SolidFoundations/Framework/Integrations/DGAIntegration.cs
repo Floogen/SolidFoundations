@@ -56,4 +56,15 @@ internal static class DGAIntegration
     /// Null otherwise.
     /// </summary>
     internal static Func<object, string?>? GetDGAFullID => getDGAFullID.Value;
+
+    private static Lazy<Type[]> getSpacecoreTypes = new(() =>
+    {
+        Type? spacecore = AccessTools.TypeByName("SpaceCore.SpaceCore");
+        FieldInfo fieldInfo = AccessTools.Field(spacecore, "ModTypes");
+        if (fieldInfo == null)
+            return Type.EmptyTypes;
+        return (fieldInfo.GetValue(null) as List<Type>)?.ToArray() ?? Type.EmptyTypes;
+    });
+
+    internal static Type[] SpacecoreTypes => getSpacecoreTypes.Value;
 }

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.External.ContentPatcher;
+using SolidFoundations.Framework.Integrations;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
@@ -318,7 +319,7 @@ namespace SolidFoundations
                 }
 
                 // Save the custom building objects externally, at the player's save file location
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), DGAIntegration.SpacecoreTypes);
                 using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
                 {
                     xmlSerializer.Serialize(writer, allExistingCustomBuildings);
@@ -360,7 +361,7 @@ namespace SolidFoundations
 
             // Get the externally saved custom building objects
             var externallySavedCustomBuildings = new List<GenericBuilding>();
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), DGAIntegration.SpacecoreTypes);
             using (StreamReader textReader = new StreamReader(customBuildingsExternalSavePath))
             {
                 externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(textReader);
