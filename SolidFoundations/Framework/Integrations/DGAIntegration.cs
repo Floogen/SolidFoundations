@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -35,10 +36,19 @@ internal static class DGAIntegration
         var obj = Expression.Parameter(typeof(object));
         var isinst = Expression.TypeIs(obj, dgaSObject);
 
-        MethodInfo idGetter = dgaSObject.GetProperty("FullId")?.GetGetMethod() ?? throw new InvalidOperationException("DGA SObject's FullId not found....");
+        var loc = Expression.Parameter(typeof(string), "ret");
 
-        var branch = Expression.IfThenElse(isinst, Expression.Call(obj, idGetter), Expression.Constant(null));
-        return Expression.Lambda<Func<object, string?>>(branch, obj).Compile();
+        MethodInfo idGetter = dgaSObject.GetProperty("FullId")?.GetGetMethod() ?? throw new InvalidOperationException("DGA SObject's FullId not found....");
+        var casted = Expression.TypeAs(obj, dgaSObject);
+        var assign = Expression.Assign(loc, Expression.Call(casted, idGetter));
+        var returnnull = Expression.Assign(loc, Expression.Constant(null, typeof(string)));
+
+        var branch = Expression.IfThenElse(isinst, assign, returnnull);
+        List<ParameterExpression> param = new();
+        param.Add(loc);
+
+        var block = Expression.Block(typeof(string), param, branch, loc);
+        return Expression.Lambda<Func<object, string?>>(block, obj).Compile();
     });
 
     /// <summary>

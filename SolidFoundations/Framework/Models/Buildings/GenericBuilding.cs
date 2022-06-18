@@ -351,7 +351,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                                         if (additionalChopDrops.PreserveID == "DROP_IN" && preserveDroppedInId != -1)
                                         {
                                             obj.preservedParentSheetIndex.Value = preserveDroppedInId;
-                                            if (DGAfullID is not null)
+                                            if (!string.IsNullOrWhiteSpace(DGAfullID))
                                             {
                                                 obj.modData[DGAIntegration.DGAModataKey] = DGAfullID;
                                             }
