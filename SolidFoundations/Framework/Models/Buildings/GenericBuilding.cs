@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
+using SolidFoundations.Framework.Integrations;
 using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
@@ -251,6 +252,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 int num = 0;
                 int num2 = 0;
                 int preserveDroppedInId = -1;
+                string DGAfullID = null;
                 Chest buildingChest = this.GetBuildingChest(itemConversion.SourceChest);
                 Chest buildingChest2 = this.GetBuildingChest(itemConversion.DestinationChest);
                 if (buildingChest == null)
@@ -275,6 +277,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         {
                             // Item is a fruit, vegetable or roe
                             preserveDroppedInId = item4.ParentSheetIndex;
+                            if (DGAIntegration.IsDGASObject?.Invoke(item4) == true)
+                            {
+                                DGAfullID = DGAIntegration.GetDGAFullID?.Invoke(item4);
+                            }
                         }
                     }
                     if (flag)
@@ -338,13 +344,17 @@ namespace SolidFoundations.Framework.Models.ContentPack
                             {
                                 if (!string.IsNullOrEmpty(additionalChopDrops.PreserveType))
                                 {
-                                    obj.preserve.Value = (PreserveType)Enum.Parse(typeof(PreserveType), additionalChopDrops.PreserveType);
+                                    obj.preserve.Value = Enum.Parse<PreserveType>(additionalChopDrops.PreserveType);
 
                                     if (!string.IsNullOrEmpty(additionalChopDrops.PreserveID))
                                     {
                                         if (additionalChopDrops.PreserveID == "DROP_IN" && preserveDroppedInId != -1)
                                         {
                                             obj.preservedParentSheetIndex.Value = preserveDroppedInId;
+                                            if (DGAfullID is not null)
+                                            {
+                                                obj.modData[DGAIntegration.DGAModataKey] = DGAfullID;
+                                            }
                                         }
                                         else if (int.TryParse(additionalChopDrops.PreserveID, out int parentId))
                                         {
