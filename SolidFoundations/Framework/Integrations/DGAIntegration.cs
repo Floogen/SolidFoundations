@@ -35,14 +35,9 @@ internal static class DGAIntegration
         var obj = Expression.Parameter(typeof(object));
         var isinst = Expression.TypeIs(obj, dgaSObject);
 
-        var loc = Expression.Parameter(typeof(string), "fullID");
+        MethodInfo idGetter = dgaSObject.GetProperty("FullId")?.GetGetMethod() ?? throw new InvalidOperationException("DGA SObject's FullId not found....");
 
-        var returnnull = Expression.Assign(loc, Expression.Constant(null));
-
-        MethodInfo idGetter = dgaSObject.GetProperty("FullId").GetGetMethod() ?? throw new InvalidOperationException("DGA SObject's FullId not found....");
-        var getID = Expression.Assign(loc, Expression.Call(obj, idGetter));
-
-        var branch = Expression.IfThenElse(isinst, getID, returnnull);
+        var branch = Expression.IfThenElse(isinst, Expression.Call(obj, idGetter), Expression.Constant(null));
         return Expression.Lambda<Func<object, string?>>(branch, obj).Compile();
     });
 
