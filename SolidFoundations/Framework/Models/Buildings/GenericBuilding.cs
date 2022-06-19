@@ -182,6 +182,24 @@ namespace SolidFoundations.Framework.Models.ContentPack
             return false;
         }
 
+        public bool ValidateLayer(ExtendedBuildingDrawLayer layer)
+        {
+            if (ValidateConditions(layer.Condition, layer.ModDataFlags) is false)
+            {
+                return false;
+            }
+            if (layer.OnlyDrawIfChestHasContents != null)
+            {
+                Chest buildingChest = this.GetBuildingChest(layer.OnlyDrawIfChestHasContents);
+                if (buildingChest == null || buildingChest.isEmpty())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool IsAuxiliaryTile(Vector2 tileLocation)
         {
             if (this.Model is null || this.Model.AuxiliaryHumanDoors.Count == 0)
@@ -1558,15 +1576,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             if (this.Model is not null && this.Model.DrawLayers is not null)
             {
-                foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is true && ValidateConditions(d.Condition, d.ModDataFlags)))
+                foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is true))
                 {
-                    if (drawLayer.OnlyDrawIfChestHasContents != null)
+                    if (ValidateLayer(drawLayer) is false)
                     {
-                        Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
-                        if (buildingChest == null || buildingChest.isEmpty())
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
                     Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
@@ -1585,7 +1599,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     num2 += 0.00001f;
                 }
             }
-            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.ModDataFlags)) is false)
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Count(l => l is not null && l.HideBaseTexture && ValidateLayer(l)) == 0)
             {
                 b.Draw(this.texture.Value, Game1.GlobalToLocal(Game1.viewport, vector + vector2), this.getSourceRect(), this.color.Value * this.alpha.Value, 0f, vector3, 4f, SpriteEffects.None, num2);
             }
@@ -1616,20 +1630,17 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is false && ValidateConditions(d.Condition, d.ModDataFlags)))
+                    foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is false))
                     {
                         if (drawLayer.DrawInBackground)
                         {
                             continue;
                         }
-                        if (drawLayer.OnlyDrawIfChestHasContents != null)
+                        if (ValidateLayer(drawLayer) is false)
                         {
-                            Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
-                            if (buildingChest == null || buildingChest.isEmpty())
-                            {
-                                continue;
-                            }
+                            continue;
                         }
+
                         num2 = num - drawLayer.SortTileOffset * 64f;
                         num2 += 1f;
                         num2 /= 10000f;
@@ -1707,15 +1718,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
                 if (this.Model.DrawLayers != null)
                 {
-                    foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is true && ValidateConditions(l.Condition, l.ModDataFlags)))
+                    foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is true))
                     {
-                        if (drawLayer.OnlyDrawIfChestHasContents != null)
+                        if (ValidateLayer(drawLayer) is false)
                         {
-                            Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
-                            if (buildingChest == null || buildingChest.isEmpty())
-                            {
-                                continue;
-                            }
+                            continue;
                         }
 
                         num2 = num - drawLayer.SortTileOffset * 64f;
@@ -1734,7 +1741,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 }
             }
 
-            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Any(l => l is not null && l.HideBaseTexture && ValidateConditions(l.Condition, l.ModDataFlags)) is false)
+            if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Count(l => l is not null && l.HideBaseTexture && ValidateLayer(l)) == 0)
             {
                 b.Draw(this.texture.Value, new Vector2(x, y), buildingRectangle, this.color, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
             }
@@ -1742,15 +1749,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 return;
             }
-            foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is false && ValidateConditions(l.Condition, l.ModDataFlags)))
+            foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is false))
             {
-                if (drawLayer.OnlyDrawIfChestHasContents != null)
+                if (ValidateLayer(drawLayer) is false)
                 {
-                    Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
-                    if (buildingChest == null || buildingChest.isEmpty())
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 num2 = num - drawLayer.SortTileOffset * 64f;
