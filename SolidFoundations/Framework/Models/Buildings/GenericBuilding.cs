@@ -1560,6 +1560,15 @@ namespace SolidFoundations.Framework.Models.ContentPack
             {
                 foreach (ExtendedBuildingDrawLayer drawLayer in this.Model.DrawLayers.Where(d => d.DrawBehindBase is true && ValidateConditions(d.Condition, d.ModDataFlags)))
                 {
+                    if (drawLayer.OnlyDrawIfChestHasContents != null)
+                    {
+                        Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
+                        if (buildingChest == null || buildingChest.isEmpty())
+                        {
+                            continue;
+                        }
+                    }
+
                     Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
                     sourceRect = this.ApplySourceRectOffsets(sourceRect);
                     vector2 = Vector2.Zero;
@@ -1700,21 +1709,27 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is true && ValidateConditions(l.Condition, l.ModDataFlags)))
                     {
-                        if (drawLayer.OnlyDrawIfChestHasContents == null)
+                        if (drawLayer.OnlyDrawIfChestHasContents != null)
                         {
-                            num2 = num - drawLayer.SortTileOffset * 64f;
-                            num2 += 1f;
-                            num2 /= 10000f;
-
-                            Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
-                            sourceRect = this.ApplySourceRectOffsets(sourceRect);
-                            Texture2D texture2D = this.texture.Value;
-                            if (drawLayer.Texture != null)
+                            Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
+                            if (buildingChest == null || buildingChest.isEmpty())
                             {
-                                texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                                continue;
                             }
-                            b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
                         }
+
+                        num2 = num - drawLayer.SortTileOffset * 64f;
+                        num2 += 1f;
+                        num2 /= 10000f;
+
+                        Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
+                        sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                        Texture2D texture2D = this.texture.Value;
+                        if (drawLayer.Texture != null)
+                        {
+                            texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                        }
+                        b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
                     }
                 }
             }
@@ -1729,31 +1744,37 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
             foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is false && ValidateConditions(l.Condition, l.ModDataFlags)))
             {
-                if (drawLayer.OnlyDrawIfChestHasContents == null)
+                if (drawLayer.OnlyDrawIfChestHasContents != null)
                 {
-                    num2 = num - drawLayer.SortTileOffset * 64f;
-                    num2 += 1f;
-
-                    var actualLayer = num2;
-                    if (drawLayer.DrawInBackground)
+                    Chest buildingChest = this.GetBuildingChest(drawLayer.OnlyDrawIfChestHasContents);
+                    if (buildingChest == null || buildingChest.isEmpty())
                     {
-                        actualLayer = 0f;
+                        continue;
                     }
-                    else
-                    {
-                        num2 /= 10000f;
-                        actualLayer = num2;
-                    }
-
-                    Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
-                    sourceRect = this.ApplySourceRectOffsets(sourceRect);
-                    Texture2D texture2D = this.texture.Value;
-                    if (drawLayer.Texture != null)
-                    {
-                        texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
-                    }
-                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, actualLayer);
                 }
+
+                num2 = num - drawLayer.SortTileOffset * 64f;
+                num2 += 1f;
+
+                var actualLayer = num2;
+                if (drawLayer.DrawInBackground)
+                {
+                    actualLayer = 0f;
+                }
+                else
+                {
+                    num2 /= 10000f;
+                    actualLayer = num2;
+                }
+
+                Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
+                sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                Texture2D texture2D = this.texture.Value;
+                if (drawLayer.Texture != null)
+                {
+                    texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                }
+                b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, actualLayer);
             }
         }
 
