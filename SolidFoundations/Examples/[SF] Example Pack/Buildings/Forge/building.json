@@ -17,7 +17,7 @@
         "X": 0,
         "Y": 0
       },
-      "DrawInBackground": true,
+      "DrawBehindBase": true,
       "SortTileOffset": 0,
       "FrameCount": 10,
       "FramesPerRow": 1,
