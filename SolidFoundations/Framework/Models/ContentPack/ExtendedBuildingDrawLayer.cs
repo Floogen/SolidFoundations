@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
 using SolidFoundations.Framework.Utilities.Backport;
+using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         private int _cachedTime;
         private int _elapsedTime;
         private int _currentSequenceIndex;
+        private Random _random;
 
         public Rectangle GetSourceRect(int time, GenericBuilding building)
         {
@@ -37,12 +39,18 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 return base.GetSourceRect();
             }
 
+            if (_random is null)
+            {
+                _random = new Random(Game1.dayOfMonth * 321 + building.tileX.Value * building.tileY.Value + building.tilesWide.Value * building.tilesHigh.Value);
+            }
+
             var sequence = Sequences[_currentSequenceIndex];
-            if (_elapsedTime > sequence.Duration)
+            if (_elapsedTime > sequence.GetDuration())
             {
                 _elapsedTime = 0;
                 _currentSequenceIndex = GetNextValidFrame(building, _currentSequenceIndex);
                 sequence = Sequences[_currentSequenceIndex];
+                sequence.RefreshDuration(_random);
 
                 // Execute any ModifyFlags
                 if (sequence.ModifyFlags is not null)
