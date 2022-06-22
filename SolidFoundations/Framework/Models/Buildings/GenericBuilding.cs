@@ -689,7 +689,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 {
                     if (this.Model.IndoorMapType != null)
                     {
-                        type = Type.GetType($"{this.Model.IndoorMapType},Stardew Valley");
+                        type = Type.GetType($"{this.Model.IndoorMapType},{this.Model.IndoorMapTypeAssembly}");
                     }
                 }
                 catch (Exception)
