@@ -410,13 +410,46 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
         {
             if (playSound.IsValid())
             {
-                if (playSound.Pitch == -1)
+                if (Game1.soundBank == null)
                 {
-                    Game1.player.currentLocation.playSound(playSound.Sound);
+                    return;
                 }
-                else
+
+                int actualPitch = 1200;
+                if (playSound.Pitch != -1)
                 {
-                    Game1.player.currentLocation.playSoundPitched(playSound.Sound, playSound.Pitch + playSound.GetPitchRandomized());
+                    actualPitch = playSound.Pitch + playSound.GetPitchRandomized();
+                }
+
+                try
+                {
+                    ICue cue = Game1.soundBank.GetCue(playSound.Sound);
+                    cue.SetVariable("Pitch", actualPitch);
+
+                    var actualVolume = playSound.Volume;
+                    if (playSound.AmbientSettings is not null && playSound.AmbientSettings.MaxDistance > 0)
+                    {
+                        float distance = Vector2.Distance(new Vector2(building.tileX.Value + playSound.AmbientSettings.Source.X, building.tileY.Value + playSound.AmbientSettings.Source.Y) * 64f, Game1.player.getStandingPosition());
+                        actualVolume = Math.Min(1f, 1f - distance / playSound.AmbientSettings.MaxDistance) * playSound.Volume * Math.Min(Game1.ambientPlayerVolume, Game1.options.ambientVolumeLevel);
+                    }
+                    cue.Volume = actualVolume;
+
+                    cue.Play();
+                    try
+                    {
+                        if (!cue.IsPitchBeingControlledByRPC)
+                        {
+                            cue.Pitch = Utility.Lerp(-1f, 1f, actualPitch / 2400f);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        SolidFoundations.monitor.LogOnce($"Failed to play ({playSound.Sound}) given for {building.Id}: {ex}", StardewModdingAPI.LogLevel.Warn);
+                    }
+                }
+                catch (Exception ex2)
+                {
+                    SolidFoundations.monitor.LogOnce($"Failed to play ({playSound.Sound}) given for {building.Id}: {ex2}", StardewModdingAPI.LogLevel.Warn);
                 }
             }
             else

@@ -79,6 +79,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         [ContentSerializer(Optional = true)]
         public List<InputFilter> InputFilters;
 
+        [ContentSerializer(Optional = true)]
+        public string IndoorMapTypeAssembly { get; set; } = "Stardew Valley";
+
         public new string GetActionAtTile(int relative_x, int relative_y)
         {
             Point key = new Point(relative_x, relative_y);
