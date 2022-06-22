@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using xTile;
 using xTile.Tiles;
@@ -414,15 +415,24 @@ namespace SolidFoundations
             }
             var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
 
+            // Get all known types for serialization
+            Type[] knownTypes = Type.EmptyTypes;
+            try
+            {
+                knownTypes = buildingManager.GetAllBuildingModels().Where(model => String.IsNullOrEmpty(model.IndoorMapType) is false && model.IndoorMapTypeAssembly.Equals("Stardew Valley", StringComparison.OrdinalIgnoreCase) is false).Select(model => Type.GetType($"{model.IndoorMapType},{model.IndoorMapTypeAssembly}")).ToArray();
+                knownTypes = knownTypes.Concat(DGAIntegration.SpacecoreTypes).ToArray();
+            }
+            catch (Exception ex)
+            {
+                Monitor.Log($"Failed to get known types, some buildings may fail to load: {ex}", LogLevel.Trace);
+            }
+
             var externallySavedCustomBuildings = new List<GenericBuilding>();
             try
             {
-                // Get all known types for serialization
-                var knownTypes = buildingManager.GetAllBuildingModels().Where(model => String.IsNullOrEmpty(model.IndoorMapType) is false && model.IndoorMapTypeAssembly.Equals("Stardew Valley", StringComparison.OrdinalIgnoreCase) is false).Select(model => Type.GetType($"{model.IndoorMapType},{model.IndoorMapTypeAssembly}")).ToArray();
-                knownTypes = knownTypes.Concat(DGAIntegration.SpacecoreTypes).ToArray();
-
                 // Get the externally saved custom building objects
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
+
                 using (StreamReader textReader = new StreamReader(customBuildingsExternalSavePath))
                 {
                     externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(textReader);
@@ -430,10 +440,29 @@ namespace SolidFoundations
             }
             catch (Exception ex)
             {
-                Monitor.Log("Failed to load the cached custom buildings: No custom buildings will be loaded!", LogLevel.Warn);
-                Monitor.Log($"Failed to load the cached custom buildings: {ex}", LogLevel.Trace);
+                try
+                {
+                    Monitor.Log($"Failed initial loading of custom buildings: {ex}", LogLevel.Trace);
+                    Monitor.Log($"Attempting to remove SpaceCore-related items from the cached buildings...", LogLevel.Trace);
 
-                return;
+                    // Load the XML and remove any nodes with the xsi:type of "Mods_..."
+                    XDocument doc = XDocument.Load(customBuildingsExternalSavePath);
+                    var invalidNodes = doc.Descendants().Where(n => n.Attributes().FirstOrDefault(y => y.Name.LocalName == "type") is var nodeType && nodeType is not null && nodeType.Value.Contains("Mods_", StringComparison.OrdinalIgnoreCase)).Select(n => n).ToList();
+                    invalidNodes.ForEach(x => x.Remove());
+
+                    // Attempt the secondary deserialization
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
+                    externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(doc.CreateReader());
+
+                    Monitor.Log($"Cleanup of the cached buildings was successful!", LogLevel.Trace);
+                }
+                catch (Exception secondaryEx)
+                {
+                    Monitor.Log("Failed to load the cached custom buildings: No custom buildings will be loaded!", LogLevel.Warn);
+                    Monitor.Log($"Failed to load the cached custom buildings: {secondaryEx}", LogLevel.Trace);
+
+                    return;
+                }
             }
 
             // Process each buildable location and restore any installed custom buildings
