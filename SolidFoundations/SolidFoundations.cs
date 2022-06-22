@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Xml.Serialization;
 using xTile;
@@ -325,8 +326,11 @@ namespace SolidFoundations
                     buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(archivedBuildingsData);
                 }
 
+                // Get all known types for serialization
+                var knownTypes = allExistingCustomBuildings.Where(b => b is not null && b.Model is not null && String.IsNullOrEmpty(b.Model.IndoorMapType) is false && b.Model.IndoorMapTypeAssembly.Equals("Stardew Valley", StringComparison.OrdinalIgnoreCase) is false).Select(b => Type.GetType($"{b.Model.IndoorMapType},{b.Model.IndoorMapTypeAssembly}")).ToArray();
+
                 // Do precheck to see if any buildings can't be serialized and if so, skip them with a warning
-                XmlSerializer filterSerializer = new XmlSerializer(typeof(GenericBuilding));
+                XmlSerializer filterSerializer = new XmlSerializer(typeof(GenericBuilding), knownTypes);
                 foreach (var building in allExistingCustomBuildings.ToList())
                 {
                     using (MemoryStream outStream = new MemoryStream())
@@ -348,7 +352,7 @@ namespace SolidFoundations
                 }
 
                 // Save the custom building objects externally, at the player's save file location
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
                 using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
                 {
                     xmlSerializer.Serialize(writer, allExistingCustomBuildings);
@@ -357,7 +361,7 @@ namespace SolidFoundations
             catch (Exception ex)
             {
                 Monitor.Log("Failed to cache the custom buildings: Any changes made in the last game day will be lost to allow for saving!", LogLevel.Warn);
-                Monitor.Log($"Failure to cache the custom buildings: {ex}", LogLevel.Trace);
+                Monitor.Log($"Failed to cache the custom buildings: {ex}", LogLevel.Trace);
 
                 foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null))
                 {
@@ -408,12 +412,25 @@ namespace SolidFoundations
             }
             var customBuildingsExternalSavePath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations", "buildings.json");
 
-            // Get the externally saved custom building objects
             var externallySavedCustomBuildings = new List<GenericBuilding>();
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
-            using (StreamReader textReader = new StreamReader(customBuildingsExternalSavePath))
+            try
             {
-                externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(textReader);
+                // Get all known types for serialization
+                var knownTypes = buildingManager.GetAllBuildingModels().Where(model => String.IsNullOrEmpty(model.IndoorMapType) is false && model.IndoorMapTypeAssembly.Equals("Stardew Valley", StringComparison.OrdinalIgnoreCase) is false).Select(model => Type.GetType($"{model.IndoorMapType},{model.IndoorMapTypeAssembly}")).ToArray();
+
+                // Get the externally saved custom building objects
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
+                using (StreamReader textReader = new StreamReader(customBuildingsExternalSavePath))
+                {
+                    externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(textReader);
+                }
+            }
+            catch (Exception ex)
+            {
+                Monitor.Log("Failed to load the cached custom buildings: No custom buildings will be loaded!", LogLevel.Warn);
+                Monitor.Log($"Failed to load the cached custom buildings: {ex}", LogLevel.Trace);
+
+                return;
             }
 
             // Process each buildable location and restore any installed custom buildings
