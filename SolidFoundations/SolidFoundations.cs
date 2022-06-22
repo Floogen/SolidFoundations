@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.External.ContentPatcher;
+using SolidFoundations.Framework.Integrations;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
@@ -328,6 +329,7 @@ namespace SolidFoundations
 
                 // Get all known types for serialization
                 var knownTypes = allExistingCustomBuildings.Where(b => b is not null && b.Model is not null && String.IsNullOrEmpty(b.Model.IndoorMapType) is false && b.Model.IndoorMapTypeAssembly.Equals("Stardew Valley", StringComparison.OrdinalIgnoreCase) is false).Select(b => Type.GetType($"{b.Model.IndoorMapType},{b.Model.IndoorMapTypeAssembly}")).ToArray();
+                knownTypes = knownTypes.Concat(DGAIntegration.SpacecoreTypes).ToArray();
 
                 // Do precheck to see if any buildings can't be serialized and if so, skip them with a warning
                 XmlSerializer filterSerializer = new XmlSerializer(typeof(GenericBuilding), knownTypes);
@@ -417,6 +419,7 @@ namespace SolidFoundations
             {
                 // Get all known types for serialization
                 var knownTypes = buildingManager.GetAllBuildingModels().Where(model => String.IsNullOrEmpty(model.IndoorMapType) is false && model.IndoorMapTypeAssembly.Equals("Stardew Valley", StringComparison.OrdinalIgnoreCase) is false).Select(model => Type.GetType($"{model.IndoorMapType},{model.IndoorMapTypeAssembly}")).ToArray();
+                knownTypes = knownTypes.Concat(DGAIntegration.SpacecoreTypes).ToArray();
 
                 // Get the externally saved custom building objects
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
