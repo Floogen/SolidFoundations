@@ -270,7 +270,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 int num = 0;
                 int num2 = 0;
                 int preserveDroppedInId = -1;
-                string DGAfullID = null;
+                string DGAFullId = null;
                 Chest buildingChest = this.GetBuildingChest(itemConversion.SourceChest);
                 Chest buildingChest2 = this.GetBuildingChest(itemConversion.DestinationChest);
                 if (buildingChest == null)
@@ -297,7 +297,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                             preserveDroppedInId = item4.ParentSheetIndex;
                             if (DGAIntegration.IsDGASObject?.Invoke(item4) == true)
                             {
-                                DGAfullID = DGAIntegration.GetDGAFullID?.Invoke(item4);
+                                DGAFullId = DGAIntegration.GetDGAFullID?.Invoke(item4);
                             }
                         }
                     }
@@ -369,9 +369,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
                                         if (additionalChopDrops.PreserveID == "DROP_IN" && preserveDroppedInId != -1)
                                         {
                                             obj.preservedParentSheetIndex.Value = preserveDroppedInId;
-                                            if (!string.IsNullOrWhiteSpace(DGAfullID))
+                                            if (!string.IsNullOrWhiteSpace(DGAFullId))
                                             {
-                                                obj.modData[DGAIntegration.DGAModataKey] = DGAfullID;
+                                                obj.modData[DGAIntegration.DGAModataKey] = DGAFullId;
                                             }
                                         }
                                         else if (int.TryParse(additionalChopDrops.PreserveID, out int parentId))
