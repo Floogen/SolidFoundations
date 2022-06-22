@@ -279,11 +279,19 @@ namespace SolidFoundations
             {
                 return;
             }
+            var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations");
+
+            // Cache any old building.json, in case we need to restore
+            string cachedBuildingPath = null;
+            if (String.IsNullOrEmpty(Constants.CurrentSavePath) is false && File.Exists(Path.Combine(externalSaveFolderPath, "buildings.json")))
+            {
+                cachedBuildingPath = Path.Combine(externalSaveFolderPath, "buildings_old.json");
+                File.Move(Path.Combine(externalSaveFolderPath, "buildings.json"), cachedBuildingPath, true);
+            }
 
             try
             {
                 // Create the SolidFoundations folder near the save file, if one doesn't exist
-                var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations");
                 if (!Directory.Exists(externalSaveFolderPath))
                 {
                     Directory.CreateDirectory(externalSaveFolderPath);
@@ -317,6 +325,28 @@ namespace SolidFoundations
                     buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS] = JsonSerializer.Serialize(archivedBuildingsData);
                 }
 
+                // Do precheck to see if any buildings can't be serialized and if so, skip them with a warning
+                XmlSerializer filterSerializer = new XmlSerializer(typeof(GenericBuilding));
+                foreach (var building in allExistingCustomBuildings.ToList())
+                {
+                    using (MemoryStream outStream = new MemoryStream())
+                    {
+                        try
+                        {
+                            filterSerializer.Serialize(outStream, building);
+                        }
+                        catch (Exception ex)
+                        {
+                            Monitor.Log($"Failed to save the building {building.Id} at {building.LocationName}: Removing it to allow for saving!", LogLevel.Warn);
+                            Monitor.Log($"Failed to save the building {building.Id} at {building.LocationName}: {ex}", LogLevel.Trace);
+
+                            allExistingCustomBuildings.Remove(building);
+                        }
+
+                        outStream.Flush();
+                    }
+                }
+
                 // Save the custom building objects externally, at the player's save file location
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>));
                 using (StreamWriter writer = new StreamWriter(Path.Combine(externalSaveFolderPath, "buildings.json")))
@@ -326,7 +356,7 @@ namespace SolidFoundations
             }
             catch (Exception ex)
             {
-                Monitor.Log("Failed to cache the custom buildings: Any changes made in the last game day will be lost to allow saving!", LogLevel.Warn);
+                Monitor.Log("Failed to cache the custom buildings: Any changes made in the last game day will be lost to allow for saving!", LogLevel.Warn);
                 Monitor.Log($"Failure to cache the custom buildings: {ex}", LogLevel.Trace);
 
                 foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null))
@@ -343,6 +373,26 @@ namespace SolidFoundations
                             var buildingName = customBuilding is null || customBuilding.Model is null ? "Unknown" : customBuilding.Model.Name;
                             Monitor.Log($"Failed to delete the custom building {buildingName}: Saving may fail!", LogLevel.Warn);
                             Monitor.Log($"Failed to delete the custom building {buildingName}: {subEx}", LogLevel.Trace);
+                        }
+                    }
+                }
+
+                if (String.IsNullOrEmpty(cachedBuildingPath) is false)
+                {
+                    Monitor.Log($"Attempting to restore old buildings cache...", LogLevel.Trace);
+                    try
+                    {
+                        File.Copy(cachedBuildingPath, Path.Combine(externalSaveFolderPath, "buildings.json"), true);
+                        Monitor.Log($"Restored old buildings cache!", LogLevel.Trace);
+                    }
+                    catch (Exception restoreEx)
+                    {
+                        Monitor.Log("Failed to restore buildings.json backup, no custom buildings will be loaded.", LogLevel.Error);
+                        Monitor.Log($"Failed to restore buildings.json backup: {restoreEx}", LogLevel.Trace);
+
+                        if (File.Exists(Path.Combine(externalSaveFolderPath, "buildings.json")))
+                        {
+                            File.Delete(Path.Combine(externalSaveFolderPath, "buildings.json"));
                         }
                     }
                 }
