@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 #nullable enable
 
-namespace SolidFoundations.Framework.Integrations;
+namespace SolidFoundations.Framework.External.SpaceCore;
 internal static class DGAIntegration
 {
     internal const string DGAModataKey = "spacechase0.DynamicGameAssets/preserved-parent-ID";

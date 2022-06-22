@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
-using SolidFoundations.Framework.Integrations;
+using SolidFoundations.Framework.External.SpaceCore;
 using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;

@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.External.ContentPatcher;
-using SolidFoundations.Framework.Integrations;
+using SolidFoundations.Framework.External.SpaceCore;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
