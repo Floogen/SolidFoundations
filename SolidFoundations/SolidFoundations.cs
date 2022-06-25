@@ -278,7 +278,7 @@ namespace SolidFoundations
 
         private void SafelyCacheCustomBuildings()
         {
-            if (!Game1.IsMasterGame)
+            if (!Game1.IsMasterGame || String.IsNullOrEmpty(Constants.CurrentSavePath))
             {
                 return;
             }
