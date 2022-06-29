@@ -1,0 +1,10 @@
+{
+  "Name": "Simple Greenhouse",
+  "Description": "...",
+  "DrawShadow": false,
+
+  "Size": {
+    "X": 7,
+    "Y": 6
+  }
+}
