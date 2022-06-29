@@ -1692,6 +1692,26 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
+        private void AdjustForLargeBuildings(Rectangle sourceRect, ref float adjustedScale, ref Vector2 adjustedOrigin, ref int windowYOffset, ref int windowHeightOffset)
+        {
+            if (sourceRect.Height + sourceRect.Width > 300)
+            {
+                adjustedScale = 2f;
+                adjustedOrigin = new Vector2(-(this.tilesWide.Value * adjustedScale * 4), -(this.tilesHigh.Value * adjustedScale * 4));
+            }
+            else if (sourceRect.Height + sourceRect.Width > 250)
+            {
+                adjustedScale = 3f;
+                adjustedOrigin = new Vector2(-(this.tilesWide.Value * adjustedScale), -(this.tilesWide.Value * adjustedScale));
+            }
+
+            if (sourceRect.Height * adjustedScale > 514)
+            {
+                windowHeightOffset = (int)(sourceRect.Height * adjustedScale) - 514;
+                windowYOffset = (int)((windowHeightOffset) * adjustedScale);
+            }
+        }
+
         // TODO: When updated to SDV v1.6, this method should be deleted in favor of using the native StardewValley.Buildings.Building.drawInMenu
         public override void drawInMenu(SpriteBatch b, int x, int y)
         {
@@ -1700,6 +1720,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 x += (int)(this.Model.DrawOffset.X * 4f);
                 y += (int)(this.Model.DrawOffset.Y * 4f);
             }
+
             float num = (int)this.tilesHigh.Value * 64;
             float num2 = num;
             if (this.Model != null)
@@ -1713,83 +1734,75 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
 
             var adjustedScale = 4f;
-            var adjustedOffset = new Vector2(0f, 0f);
+            var adjustedOrigin = new Vector2(0f, 0f);
+            var windowYOffset = 0;
+            var windowHeightOffset = 0;
+
             var buildingRectangle = this.getSourceRect();
-            if (this.Model != null)
+            AdjustForLargeBuildings(buildingRectangle, ref adjustedScale, ref adjustedOrigin, ref windowYOffset, ref windowHeightOffset);
+
+            if (this.Model != null && this.Model.DrawLayers != null)
             {
-                if (buildingRectangle.Height + buildingRectangle.Width > 300)
+                foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is true))
                 {
-                    adjustedScale = 2f;
-                    adjustedOffset = new Vector2(-(this.tilesWide.Value * adjustedScale * 4), -(this.tilesHigh.Value * adjustedScale * 4));
-                }
-                else if (buildingRectangle.Height + buildingRectangle.Width > 250)
-                {
-                    adjustedScale = 3f;
-                    adjustedOffset = new Vector2(-(this.tilesWide.Value * adjustedScale), -(this.tilesHigh.Value * adjustedScale));
-                }
-
-                if (this.Model.DrawLayers != null)
-                {
-                    foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is true))
+                    if (ValidateLayer(drawLayer) is false)
                     {
-                        if (ValidateLayer(drawLayer) is false)
-                        {
-                            continue;
-                        }
-
-                        num2 = num - drawLayer.SortTileOffset * 64f;
-                        num2 += 1f;
-                        num2 /= 10000f;
-
-                        Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
-                        sourceRect = this.ApplySourceRectOffsets(sourceRect);
-                        Texture2D texture2D = this.texture.Value;
-                        if (drawLayer.Texture != null)
-                        {
-                            texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
-                        }
-                        b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
+                        continue;
                     }
+
+                    num2 = num - drawLayer.SortTileOffset * 64f;
+                    num2 += 1f;
+                    num2 /= 10000f;
+
+                    Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
+                    sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                    Texture2D texture2D = this.texture.Value;
+                    if (drawLayer.Texture != null)
+                    {
+                        texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                    }
+                    b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOrigin, adjustedScale, SpriteEffects.None, num2);
                 }
             }
 
             if (this.Model is null || this.Model.DrawLayers is null || this.Model.DrawLayers.Count(l => l is not null && l.HideBaseTexture && ValidateLayer(l)) == 0)
             {
-                b.Draw(this.texture.Value, new Vector2(x, y), buildingRectangle, this.color, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, num2);
+                b.Draw(this.texture.Value, new Vector2(x, y + windowYOffset), new Rectangle(buildingRectangle.X, buildingRectangle.Y + windowHeightOffset, buildingRectangle.Width, buildingRectangle.Height - windowHeightOffset), this.color, 0f, adjustedOrigin, adjustedScale, SpriteEffects.None, num2);
             }
-            if (this.Model == null || this.Model.DrawLayers == null)
+            if (this.Model != null && this.Model.DrawLayers != null)
             {
-                return;
-            }
-            foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is false))
-            {
-                if (ValidateLayer(drawLayer) is false)
+                foreach (var drawLayer in this.Model.DrawLayers.Where(l => l.DrawBehindBase is false))
                 {
-                    continue;
-                }
+                    if (ValidateLayer(drawLayer) is false)
+                    {
+                        continue;
+                    }
 
-                num2 = num - drawLayer.SortTileOffset * 64f;
-                num2 += 1f;
+                    num2 = num - drawLayer.SortTileOffset * 64f;
+                    num2 += 1f;
 
-                var actualLayer = num2;
-                if (drawLayer.DrawInBackground)
-                {
-                    actualLayer = 0f;
-                }
-                else
-                {
-                    num2 /= 10000f;
-                    actualLayer = num2;
-                }
+                    var actualLayer = num2;
+                    if (drawLayer.DrawInBackground)
+                    {
+                        actualLayer = 0f;
+                    }
+                    else
+                    {
+                        num2 /= 10000f;
+                        actualLayer = num2;
+                    }
 
-                Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
-                sourceRect = this.ApplySourceRectOffsets(sourceRect);
-                Texture2D texture2D = this.texture.Value;
-                if (drawLayer.Texture != null)
-                {
-                    texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                    Microsoft.Xna.Framework.Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds, this);
+                    sourceRect = this.ApplySourceRectOffsets(sourceRect);
+                    Texture2D texture2D = this.texture.Value;
+                    if (drawLayer.Texture != null)
+                    {
+                        texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                    }
+
+                    AdjustForLargeBuildings(sourceRect, ref adjustedScale, ref adjustedOrigin, ref windowYOffset, ref windowHeightOffset);
+                    b.Draw(texture2D, new Vector2(x, y + windowYOffset) + drawLayer.DrawPosition * adjustedScale, new Rectangle(sourceRect.X, sourceRect.Y + windowHeightOffset, sourceRect.Width, sourceRect.Height - windowHeightOffset), Color.White, 0f, adjustedOrigin, adjustedScale, SpriteEffects.None, actualLayer);
                 }
-                b.Draw(texture2D, new Vector2(x, y) + drawLayer.DrawPosition * adjustedScale, sourceRect, Color.White, 0f, adjustedOffset, adjustedScale, SpriteEffects.None, actualLayer);
             }
         }
 
