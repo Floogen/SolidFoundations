@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Models.ContentPack;
+using SolidFoundations.Framework.Utilities;
 using SolidFoundations.Framework.Utilities.Backport;
 using StardewModdingAPI;
 using StardewValley;
@@ -43,8 +44,10 @@ namespace SolidFoundations.Framework.Patches.Buildings
         {
             if (___whichQuestion == 2)
             {
+                var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
+
                 FarmAnimal farmAnimal = null;
-                foreach (GenericBuilding building in Game1.getFarm().buildings.Where(b => b is GenericBuilding))
+                foreach (GenericBuilding building in targetLocation.buildings.Where(b => b is GenericBuilding))
                 {
                     if (building is null)
                     {

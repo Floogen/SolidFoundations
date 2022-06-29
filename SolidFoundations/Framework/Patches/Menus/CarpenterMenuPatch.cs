@@ -119,7 +119,8 @@ namespace SolidFoundations.Framework.Patches.Buildings
         {
             if (___onFarm && ___upgrading)
             {
-                GenericBuilding buildingAt = Game1.getFarm().getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64)) as GenericBuilding;
+                var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
+                GenericBuilding buildingAt = targetLocation.getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64)) as GenericBuilding;
                 if (buildingAt != null && __instance.CurrentBlueprint.name != null && buildingAt.buildingType.Equals(__instance.CurrentBlueprint.nameOfBuildingToUpgrade))
                 {
                     buildingAt.upgradeName.Value = __instance.CurrentBlueprint.name;
@@ -169,8 +170,8 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return true;
             }
 
-            // TODO: Replace Game1.getFarm() with flexible location, to enable building on the island farm
-            __result = GameLocationPatch.AttemptToBuildStructure(Game1.getFarm(), __instance.CurrentBlueprint, ___currentBuilding);
+            var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
+            __result = GameLocationPatch.AttemptToBuildStructure(targetLocation, __instance.CurrentBlueprint, ___currentBuilding);
 
             return false;
         }
@@ -183,12 +184,13 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 builder = "Wizard";
             }
 
+            var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
             foreach (var building in SolidFoundations.buildingManager.GetAllBuildingModels().Where(b => GameStateQuery.CheckConditions(b.BuildCondition) is true))
             {
                 if (String.IsNullOrEmpty(building.Builder) || building.Builder.Equals(builder, StringComparison.OrdinalIgnoreCase))
                 {
                     bool flag = false;
-                    if (building.BuildingToUpgrade != null && Game1.getFarm().getNumberBuildingsConstructed(building.BuildingToUpgrade) == 0 && Game1.getFarm().getNumberBuildingsConstructed(building.BuildingToUpgrade.Replace(" ", null)) == 0)
+                    if (building.BuildingToUpgrade != null && targetLocation.getNumberBuildingsConstructed(building.BuildingToUpgrade) == 0 && targetLocation.getNumberBuildingsConstructed(building.BuildingToUpgrade.Replace(" ", null)) == 0)
                     {
                         flag = true;
                     }

@@ -1480,7 +1480,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             if (interior is not null && this.Model is not null)
             {
-                var targetName = this.buildingLocation.Value is null ? Game1.getFarm().Name : this.buildingLocation.Value.Name;
+                var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
+                var targetName = this.buildingLocation.Value is null ? targetLocation.Name : this.buildingLocation.Value.Name;
                 var baseX = Model.HumanDoor.X;
                 var baseY = Model.HumanDoor.Y;
 
@@ -1508,12 +1509,13 @@ namespace SolidFoundations.Framework.Models.ContentPack
         // Preserve this override when updated to SDV v1.6, but call the base dayUpdate method if ExtendedBuildingModel
         public override void dayUpdate(int dayOfMonth)
         {
+            var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
             if ((int)this.daysUntilUpgrade.Value - 1 <= 0 && !Utility.isFestivalDay(dayOfMonth, Game1.currentSeason))
             {
                 this.daysUntilUpgrade.Value--;
                 if ((int)this.daysUntilUpgrade.Value <= 0)
                 {
-                    Game1.getFarm().buildings.Remove(this);
+                    targetLocation.buildings.Remove(this);
                     string upgradeName = this.upgradeName.Value;
 
                     if (SolidFoundations.buildingManager.GetSpecificBuildingModel(upgradeName) is ExtendedBuildingModel model && model is not null)
@@ -1536,7 +1538,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                         }
                     }
 
-                    Game1.getFarm().buildings.Add(this);
+                    targetLocation.buildings.Add(this);
                 }
             }
             base.dayUpdate(dayOfMonth);
