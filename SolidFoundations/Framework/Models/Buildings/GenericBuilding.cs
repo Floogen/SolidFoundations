@@ -1481,7 +1481,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
             if (interior is not null && this.Model is not null)
             {
                 var targetLocation = FlexibleLocationFinder.GetBuildableLocationByName("Farm");
-                var targetName = this.buildingLocation.Value is null ? targetLocation.Name : this.buildingLocation.Value.Name;
+                var targetName = this.buildingLocation.Value is null ? targetLocation.NameOrUniqueName : this.buildingLocation.Value.NameOrUniqueName;
                 var baseX = Model.HumanDoor.X;
                 var baseY = Model.HumanDoor.Y;
 
