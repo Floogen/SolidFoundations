@@ -305,9 +305,19 @@ namespace SolidFoundations
                     Directory.CreateDirectory(externalSaveFolderPath);
                 }
 
+                // Remove any custom areas
+                var allCustomBuildings = buildingManager.GetAllActiveBuildings();
+                foreach (var customBuilding in allCustomBuildings)
+                {
+                    if (customBuilding.indoors.Value is not null && Game1.locations.Contains(customBuilding.indoors.Value))
+                    {
+                        Game1.locations.Remove(customBuilding.indoors.Value);
+                        Game1._locationLookup.Remove(customBuilding.indoors.Value.NameOrUniqueName);
+                    }
+                }
+
                 // Process each buildable location and archive the relevant data
                 var existingBuildingsToCache = new List<GenericBuilding>();
-                var allCustomBuildings = buildingManager.GetAllActiveBuildings();
                 foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null))
                 {
                     var archivedBuildingsData = new List<ArchivedBuildingData>();
@@ -481,7 +491,7 @@ namespace SolidFoundations
             }
 
             // Process each buildable location and restore any installed custom buildings
-            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation && l.modData.ContainsKey(ModDataKeys.LOCATION_CUSTOM_BUILDINGS)))
+            foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation && l.modData.ContainsKey(ModDataKeys.LOCATION_CUSTOM_BUILDINGS)).ToList())
             {
                 // Get the archived custom building data for this location
                 var archivedBuildingsData = JsonSerializer.Deserialize<List<ArchivedBuildingData>>(buildableLocation.modData[ModDataKeys.LOCATION_CUSTOM_BUILDINGS]);
@@ -521,6 +531,16 @@ namespace SolidFoundations
                 // Trigger the missed DayUpdate
                 buildableGameLocation.DayUpdate(Game1.dayOfMonth);
 
+                int overnightMinutesElapsed = Utility.CalculateMinutesUntilMorning(Game1.timeOfDay);
+                foreach (var building in buildableGameLocation.buildings)
+                {
+                    if (building.indoors.Value is not null)
+                    {
+                        building.indoors.Value.DayUpdate(Game1.dayOfMonth);
+                        building.indoors.Value.passTimeForObjects(overnightMinutesElapsed);
+                    }
+                }
+
                 // Trigger any missed postFarmEventOvernightAction
                 foreach (Action postFarmEventOvernightAction in buildableGameLocation.postFarmEventOvernightActions)
                 {
@@ -538,6 +558,7 @@ namespace SolidFoundations
                 if (customBuilding.indoors.Value is not null)
                 {
                     interior = customBuilding.indoors.Value;
+                    Game1.locations.Add(interior);
                 }
 
                 // Update the building's model
