@@ -17,6 +17,8 @@ using StardewValley.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using xTile.Dimensions;
@@ -37,56 +39,77 @@ namespace SolidFoundations.Framework.Patches.Core
 
         internal void Apply(Harmony harmony)
         {
-            harmony.Patch(AccessTools.Method(_object, "UpdateLocations", new[] { typeof(GameTime) }), postfix: new HarmonyMethod(GetType(), nameof(UpdateLocationsPostfix)));
+            harmony.Patch(AccessTools.Method(_object, "UpdateLocations", new[] { typeof(GameTime) }), transpiler: new HarmonyMethod(typeof(GamePatch), nameof(UpdateLocationsTranspiler)));
         }
+
+        private static IEnumerable<CodeInstruction> UpdateLocationsTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            try
+            {
+                object loopOperand = null;
+
+                bool foundMultiplayerFix = false;
+                bool foundGeneralFix = false;
+
+                var list = instructions.ToList();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].opcode == OpCodes.Br_S)
+                    {
+                        loopOperand = list[i].operand;
+                        continue;
+                    }
+
+                    if (foundMultiplayerFix is false && list[i].opcode == OpCodes.Ldloc_3 && list[i + 1].opcode == OpCodes.Ldfld && (list[i + 1].operand as FieldInfo).Name == "indoors")
+                    {
+                        var startingPoint = i;
+                        list.Insert(startingPoint, new CodeInstruction(OpCodes.Ldloc_3));
+                        list.Insert(startingPoint + 1, new CodeInstruction(OpCodes.Isinst, typeof(GenericBuilding)));
+                        list.Insert(startingPoint + 2, new CodeInstruction(OpCodes.Brfalse_S, loopOperand));
+
+                        foundMultiplayerFix = true;
+                        continue;
+                    }
+                    else if (foundGeneralFix is false && list[i].opcode == OpCodes.Stloc_S)
+                    {
+                        if (list[i - 1].opcode == OpCodes.Callvirt && (list[i - 1].operand as MethodInfo).Name == "get_Value" && list[i - 2].opcode == OpCodes.Ldfld && (list[i - 2].operand as FieldInfo).Name == "indoors")
+                        {
+                            var startingPoint = i + 1;
+                            list.Insert(startingPoint, new CodeInstruction(OpCodes.Ldarg_1));
+                            list.Insert(startingPoint + 1, new CodeInstruction(OpCodes.Ldloc_S, list[i].operand));
+                            list.Insert(startingPoint + 2, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GamePatch), nameof(SkipBuildingForUpdateCheck), new[] { typeof(GameTime), typeof(GameLocation) })));
+                            list.Insert(startingPoint + 3, new CodeInstruction(OpCodes.Brfalse_S, loopOperand));
+
+                            foundGeneralFix = true;
+                            continue;
+                        }
+                    }
+                }
+                _monitor.Log($"Transpiler for Game1.UpdateLocations results: foundMultiplayerFix -> {foundMultiplayerFix} | foundGeneralFix -> {foundGeneralFix}", LogLevel.Debug);
+
+                return list;
+            }
+            catch (Exception e)
+            {
+                _monitor.Log($"There was an issue modifying the instructions for Game1.UpdateLocations: {e}", LogLevel.Error);
+                return instructions;
+            }
+        }
+
 
         // TODO: Remove this once this framework has been updated for SDV v1.6
-        internal static void UpdateLocationsPostfix(Game1 __instance, GameTime time)
+        private static bool SkipBuildingForUpdateCheck(GameTime time, GameLocation interior)
         {
-            if (Game1.menuUp && !Game1.IsMultiplayer)
+            if (interior is not null && Game1.locations.Contains(interior) is false)
             {
-                return;
-            }
-
-            foreach (GameLocation location in Game1.locations)
-            {
-                if (location is not BuildableGameLocation buildableGameLocation)
+                if (interior.farmers.Any())
                 {
-                    continue;
+                    interior.UpdateWhenCurrentLocation(time);
                 }
-
-                foreach (Building building2 in buildableGameLocation.buildings)
-                {
-                    GameLocation interior = building2.indoors.Value;
-                    if (interior != null && Game1.locations.Contains(interior) is false)
-                    {
-                        RecursivelyHandleSubBuildableLocations(time, interior);
-                    }
-                }
-            }
-        }
-
-        private static void RecursivelyHandleSubBuildableLocations(GameTime time, GameLocation gameLocation)
-        {
-            if (gameLocation is null || gameLocation is not BuildableGameLocation buildableGameLocation)
-            {
-                return;
+                interior.updateEvenIfFarmerIsntHere(time);
             }
 
-            foreach (Building building in buildableGameLocation.buildings)
-            {
-                GameLocation interior = building.indoors.Value;
-                if (interior is not null && Game1.locations.Contains(interior) is false)
-                {
-                    if (interior.farmers.Any())
-                    {
-                        interior.UpdateWhenCurrentLocation(time);
-                    }
-                    interior.updateEvenIfFarmerIsntHere(time);
-
-                    RecursivelyHandleSubBuildableLocations(time, interior);
-                }
-            }
+            return false;
         }
     }
 }
