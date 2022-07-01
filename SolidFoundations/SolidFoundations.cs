@@ -307,7 +307,7 @@ namespace SolidFoundations
 
                 // Process each buildable location and archive the relevant data
                 var existingBuildingsToCache = new List<GenericBuilding>();
-                var allCustomBuildings = Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null).SelectMany(l => (l as BuildableGameLocation).buildings.Where(b => b is GenericBuilding).Select(b => b as GenericBuilding));
+                var allCustomBuildings = buildingManager.GetAllActiveBuildings();
                 foreach (BuildableGameLocation buildableLocation in Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null))
                 {
                     var archivedBuildingsData = new List<ArchivedBuildingData>();
@@ -515,20 +515,18 @@ namespace SolidFoundations
                 }
             }
 
-            var allCustomBuildings = Game1.locations.Where(l => l is BuildableGameLocation buildableLocation && buildableLocation is not null && buildableLocation.buildings is not null).SelectMany(l => (l as BuildableGameLocation).buildings.Where(b => b is GenericBuilding).Select(b => b as GenericBuilding));
+            var allCustomBuildings = buildingManager.GetAllActiveBuildings();
             foreach (BuildableGameLocation buildableGameLocation in allCustomBuildings.Where(b => b.indoors.Value is BuildableGameLocation buildableGameLocation && buildableGameLocation is not null).Select(b => b.indoors.Value).Distinct())
             {
-                buildableGameLocation.DayUpdate(Game1.dayOfMonth);
                 // Trigger the missed DayUpdate
-                Monitor.Log($"{buildableGameLocation.NameOrUniqueName} | {buildableGameLocation.buildings.Count}", LogLevel.Debug);
+                buildableGameLocation.DayUpdate(Game1.dayOfMonth);
 
                 // Trigger any missed postFarmEventOvernightAction
-
                 foreach (Action postFarmEventOvernightAction in buildableGameLocation.postFarmEventOvernightActions)
                 {
-                    //postFarmEventOvernightAction();
+                    postFarmEventOvernightAction();
                 }
-                //customBuilding.indoors.Value.postFarmEventOvernightActions.Clear();
+                buildableGameLocation.postFarmEventOvernightActions.Clear();
             }
         }
 
@@ -554,10 +552,24 @@ namespace SolidFoundations
                 // Establish any buildings within this building
                 if (interior is BuildableGameLocation subBuildableLocation && subBuildableLocation is not null && subBuildableLocation.buildings is not null)
                 {
-                    foreach (GenericBuilding subCustomBuilding in subBuildableLocation.buildings.Where(b => b is GenericBuilding).ToList())
+                    foreach (var subBuilding in subBuildableLocation.buildings.ToList())
                     {
-                        subBuildableLocation.buildings.Remove(subCustomBuilding);
-                        SetupCustomBuildingForLocation(subBuildableLocation, subCustomBuilding);
+                        if (subBuilding is GenericBuilding subCustomBuilding)
+                        {
+                            subBuildableLocation.buildings.Remove(subCustomBuilding);
+                            SetupCustomBuildingForLocation(subBuildableLocation, subCustomBuilding);
+                            continue;
+                        }
+
+                        // Handle vanilla buildings
+                        subBuilding.load();
+                        if (subBuilding.indoors.Value is not null && subBuilding.indoors.Value.warps is not null)
+                        {
+                            foreach (Warp warp in subBuilding.indoors.Value.warps)
+                            {
+                                warp.TargetName = subBuildableLocation.NameOrUniqueName;
+                            }
+                        }
                     }
                 }
 

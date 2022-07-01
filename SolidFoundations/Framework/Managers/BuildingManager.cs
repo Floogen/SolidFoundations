@@ -1,5 +1,7 @@
 ﻿using SolidFoundations.Framework.Models.ContentPack;
 using StardewModdingAPI;
+using StardewValley;
+using StardewValley.Locations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,6 +122,43 @@ namespace SolidFoundations.Framework.Managers
         public bool DoesBuildingModelExist(string buildingId)
         {
             return String.IsNullOrEmpty(buildingId) is false && _idToModels.ContainsKey(buildingId);
+        }
+
+        // TODO: After SDV v1.6, revise GetAllActiveBuildings to handle all buildings, instead of just SF buildings
+        public List<GenericBuilding> GetAllActiveBuildings(BuildableGameLocation buildableGameLocation)
+        {
+            var activeBuildings = new List<GenericBuilding>();
+            foreach (var building in buildableGameLocation.buildings)
+            {
+                if (building is not GenericBuilding genericBuilding || genericBuilding is null)
+                {
+                    continue;
+                }
+                activeBuildings.Add(genericBuilding);
+
+                if (genericBuilding.indoors.Value is not null && genericBuilding.indoors.Value is BuildableGameLocation subBuildableGameLocation)
+                {
+                    activeBuildings.AddRange(GetAllActiveBuildings(subBuildableGameLocation));
+                }
+            }
+
+            return activeBuildings;
+        }
+
+        public List<GenericBuilding> GetAllActiveBuildings()
+        {
+            var activeBuildings = new List<GenericBuilding>();
+            foreach (var location in Game1.locations)
+            {
+                if (location is not BuildableGameLocation buildableGameLocation || buildableGameLocation.buildings is null)
+                {
+                    continue;
+                }
+
+                activeBuildings.AddRange(GetAllActiveBuildings(buildableGameLocation));
+            }
+
+            return activeBuildings;
         }
     }
 }
