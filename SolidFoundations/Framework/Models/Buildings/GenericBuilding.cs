@@ -1572,6 +1572,23 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
             // Update building item conversions
             this.ProcessItemConversions(timeElapsed, false);
+
+            // Handle any sub-buildings
+            if (this.indoors.Value is BuildableGameLocation buildableGameLocation && buildableGameLocation is not null)
+            {
+                foreach (var building in buildableGameLocation.buildings)
+                {
+                    building.performTenMinuteAction(timeElapsed);
+                    if (building.indoors.Value != null && !Game1.locations.Contains(building.indoors.Value) && timeElapsed >= 10)
+                    {
+                        building.indoors.Value.performTenMinuteUpdate(Game1.timeOfDay);
+                        if (timeElapsed > 10)
+                        {
+                            building.indoors.Value.passTimeForObjects(timeElapsed - 10);
+                        }
+                    }
+                }
+            }
         }
 
         // Preserve this override when updated to SDV v1.6, but call the base draw method if ExtendedBuildingModel.
