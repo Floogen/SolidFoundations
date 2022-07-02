@@ -558,7 +558,11 @@ namespace SolidFoundations
                 if (customBuilding.indoors.Value is not null)
                 {
                     interior = customBuilding.indoors.Value;
-                    Game1.locations.Add(interior);
+
+                    if (Game1.locations.Contains(interior) is false && buildableLocation is not Farm)
+                    {
+                        Game1.locations.Add(interior);
+                    }
                 }
 
                 // Update the building's model
