@@ -44,6 +44,17 @@ namespace SolidFoundations.Framework.Managers
             _idToModels[model.ID] = model;
         }
 
+        public bool UpdateModel(ExtendedBuildingModel model)
+        {
+            if (model is null || DoesBuildingModelExist(model.ID) is false)
+            {
+                return false;
+            }
+            _idToModels[model.ID] = model;
+
+            return true;
+        }
+
         public void AddMapAsset(string assetPath, string pathToMap)
         {
             if (String.IsNullOrEmpty(assetPath) || String.IsNullOrEmpty(pathToMap))
