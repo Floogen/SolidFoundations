@@ -105,6 +105,7 @@ namespace SolidFoundations
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.GameLoop.DayEnding += OnDayEnding;
+            helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
 
             helper.Events.World.BuildingListChanged += OnBuildingListChanged;
         }
@@ -124,6 +125,12 @@ namespace SolidFoundations
             {
                 RefreshCustomBuilding(e.Location, building, true);
             }
+        }
+
+        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
+        {
+            // Load any owned content packs
+            LoadContentPacks();
         }
 
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
