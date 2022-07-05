@@ -555,6 +555,12 @@ namespace SolidFoundations
                 }
                 buildableGameLocation.postFarmEventOvernightActions.Clear();
             }
+
+            // Called missed Farm updates
+            foreach (GenericBuilding building in Game1.getFarm().buildings.Where(b => b is GenericBuilding))
+            {
+                building.dayUpdate(Game1.dayOfMonth);
+            }
         }
 
         private bool SetupCustomBuildingForLocation(BuildableGameLocation buildableLocation, GenericBuilding customBuilding)
