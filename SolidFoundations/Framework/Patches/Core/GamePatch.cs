@@ -85,7 +85,7 @@ namespace SolidFoundations.Framework.Patches.Core
                         }
                     }
                 }
-                _monitor.Log($"Transpiler for Game1.UpdateLocations results: foundMultiplayerFix -> {foundMultiplayerFix} | foundGeneralFix -> {foundGeneralFix}", LogLevel.Debug);
+                _monitor.Log($"Transpiler for Game1.UpdateLocations results: foundMultiplayerFix -> {foundMultiplayerFix} | foundGeneralFix -> {foundGeneralFix}", LogLevel.Trace);
 
                 return list;
             }
