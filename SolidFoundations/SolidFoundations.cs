@@ -533,27 +533,20 @@ namespace SolidFoundations
             }
 
             var allCustomBuildings = buildingManager.GetAllActiveBuildings();
-            foreach (BuildableGameLocation buildableGameLocation in allCustomBuildings.Where(b => b.indoors.Value is BuildableGameLocation buildableGameLocation && buildableGameLocation is not null).Select(b => b.indoors.Value).Distinct())
+            foreach (GameLocation gameLocation in allCustomBuildings.Where(b => b.indoors.Value is GameLocation gameLocation && gameLocation is not null).Select(b => b.indoors.Value).Distinct())
             {
-                // Trigger the missed DayUpdate
-                buildableGameLocation.DayUpdate(Game1.dayOfMonth);
-
                 int overnightMinutesElapsed = Utility.CalculateMinutesUntilMorning(Game1.timeOfDay);
-                foreach (var building in buildableGameLocation.buildings)
-                {
-                    if (building.indoors.Value is not null)
-                    {
-                        building.indoors.Value.DayUpdate(Game1.dayOfMonth);
-                        building.indoors.Value.passTimeForObjects(overnightMinutesElapsed);
-                    }
-                }
+
+                // Trigger the missed DayUpdate
+                gameLocation.DayUpdate(Game1.dayOfMonth);
+                gameLocation.passTimeForObjects(overnightMinutesElapsed);
 
                 // Trigger any missed postFarmEventOvernightAction
-                foreach (Action postFarmEventOvernightAction in buildableGameLocation.postFarmEventOvernightActions)
+                foreach (Action postFarmEventOvernightAction in gameLocation.postFarmEventOvernightActions)
                 {
                     postFarmEventOvernightAction();
                 }
-                buildableGameLocation.postFarmEventOvernightActions.Clear();
+                gameLocation.postFarmEventOvernightActions.Clear();
             }
 
             // Called missed Farm updates
