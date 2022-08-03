@@ -47,11 +47,6 @@
       "PaintMasks": [
         {
           "Name": "Flare"
-        },
-        {
-          "Name": "Stakes",
-          "MinBrightness": -10,
-          "MaxBrightness": 5
         }
       ]
     }
@@ -59,11 +54,6 @@
   "PaintMasks": [
     {
       "Name": "Flare"
-    },
-    {
-      "Name": "Stakes",
-      "MinBrightness": -10,
-      "MaxBrightness": 5
     }
   ],
 

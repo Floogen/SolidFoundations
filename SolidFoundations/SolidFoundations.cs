@@ -79,6 +79,7 @@ namespace SolidFoundations
                 // Apply menu patches
                 new CarpenterMenuPatch(monitor, helper).Apply(harmony);
                 new PurchaseAnimalsMenuPatch(monitor, helper).Apply(harmony);
+                new BuildingPaintMenuPatch(monitor, helper).Apply(harmony);
 
                 // Apply object patch
                 new ChestPatch(monitor, helper).Apply(harmony);
@@ -145,6 +146,9 @@ namespace SolidFoundations
         [EventPriority(EventPriority.High + 1)]
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
+            // Load the buildings into the backported BuildingsData
+            _ = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>("Data/BuildingsData");
+
             LoadCachedCustomBuildings();
             api.OnAfterBuildingRestoration(new EventArgs());
         }
@@ -682,9 +686,6 @@ namespace SolidFoundations
                     Monitor.Log($"Failed to load the content pack {contentPack.Manifest.UniqueID}: {ex}", LogLevel.Warn);
                 }
             }
-
-            // Load the buildings into the backported BuildingsData
-            _ = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>("Data/BuildingsData");
         }
 
         private void LoadInteriors(IContentPack contentPack)
