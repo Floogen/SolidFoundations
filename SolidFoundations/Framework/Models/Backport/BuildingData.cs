@@ -84,6 +84,9 @@ namespace SolidFoundations.Framework.Models.Backport
         [ContentSerializer(Optional = true)]
         public string BuildingToUpgrade;
 
+        [ContentSerializer(Optional = true)]
+        public bool MagicalConstruction;
+
         public List<string> ValidBuildLocations;
 
         [ContentSerializer(Optional = true)]

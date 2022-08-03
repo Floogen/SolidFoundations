@@ -675,11 +675,11 @@ namespace SolidFoundations
 
                     // Load interiors
                     Monitor.Log($"Loading interiors from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
-                    LoadInteriors(contentPack);
+                    LoadInteriors(contentPack, silent);
 
                     // Load the buildings
                     Monitor.Log($"Loading buildings from pack: {contentPack.Manifest.Name}", LogLevel.Trace);
-                    LoadBuildings(contentPack);
+                    LoadBuildings(contentPack, silent);
                 }
                 catch (Exception ex)
                 {
@@ -688,7 +688,7 @@ namespace SolidFoundations
             }
         }
 
-        private void LoadInteriors(IContentPack contentPack)
+        private void LoadInteriors(IContentPack contentPack, bool silent)
         {
             try
             {
@@ -760,7 +760,7 @@ namespace SolidFoundations
             }
         }
 
-        private void LoadBuildings(IContentPack contentPack)
+        private void LoadBuildings(IContentPack contentPack, bool silent)
         {
             try
             {
@@ -934,6 +934,9 @@ namespace SolidFoundations
                         buildingModel.Translations = contentPack.Translation;
                     }
 
+                    // Check for any compatibility issues
+                    HandleCompatibilityIssues(buildingModel, silent);
+
                     // Track the model
                     buildingManager.AddBuilding(buildingModel);
 
@@ -945,6 +948,20 @@ namespace SolidFoundations
             catch (Exception ex)
             {
                 Monitor.Log($"Error loading buildings from content pack {contentPack.Manifest.Name}: {ex}", LogLevel.Error);
+            }
+        }
+
+        private void HandleCompatibilityIssues(ExtendedBuildingModel model, bool silent)
+        {
+            if (model is null)
+            {
+                return;
+            }
+            if (model.MagicalConstruction is null && model.Builder.Equals("Wizard", StringComparison.OrdinalIgnoreCase))
+            {
+                Monitor.Log($"{model.ID} is using the Builder value \"Wizard\" but has not set \"MagicalConstruction\". Solid Foundations will infer \"MagicalConstruction\" as true, but for forward compatibility this should be set manually.", silent ? LogLevel.Trace : LogLevel.Warn);
+
+                model.MagicalConstruction = true;
             }
         }
 
