@@ -957,9 +957,17 @@ namespace SolidFoundations
             {
                 return;
             }
+
+            if (model.Builder.Equals("Carpenter", StringComparison.OrdinalIgnoreCase))
+            {
+                Monitor.Log($"{model.ID} is using the outdated value \"Carpenter\" for the \"Builder\" property. Solid Foundations will handle this, though the value should be changed to \"Robin\" for forward compatibility.", silent ? LogLevel.Trace : LogLevel.Warn);
+
+                model.Builder = "Robin";
+            }
+
             if (model.MagicalConstruction is null && model.Builder.Equals("Wizard", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using the Builder value \"Wizard\" but has not set \"MagicalConstruction\". Solid Foundations will infer \"MagicalConstruction\" as true, but for forward compatibility this should be set manually.", silent ? LogLevel.Trace : LogLevel.Warn);
+                Monitor.Log($"{model.ID} is using the value \"Wizard\" for the \"Builder\" property, but has not declared the \"MagicalConstruction\" property. Solid Foundations will infer \"MagicalConstruction\" as true, though for forward compatibility this should be set manually.", silent ? LogLevel.Trace : LogLevel.Warn);
 
                 model.MagicalConstruction = true;
             }

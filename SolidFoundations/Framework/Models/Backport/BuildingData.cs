@@ -67,7 +67,7 @@ namespace SolidFoundations.Framework.Models.Backport
         public string BuildingType;
 
         [ContentSerializer(Optional = true)]
-        public string Builder = "Carpenter";
+        public string Builder = "Robin";
 
         [ContentSerializer(Optional = true)]
         public string BuildCondition;

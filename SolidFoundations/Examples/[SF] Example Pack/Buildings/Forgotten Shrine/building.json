@@ -45,6 +45,7 @@
   ],
 
   "Builder": "Wizard",
+  "MagicalConstruction": true,
   "DefaultSpecialAction": {
     "DialogueWithChoices": {
       "Question": "Dialogue.Questions.ForgottenShrine.FavoriteColor",
