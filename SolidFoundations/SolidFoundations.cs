@@ -210,8 +210,13 @@ namespace SolidFoundations
                     }
 
                     // Add any building skin masks
-                    foreach (var skin in models.Where(m => m.Skins is not null && m.Skins.Any(s => s.PaintMasks is not null)).SelectMany(m => m.Skins))
+                    foreach (var skin in models.Where(m => m.Skins is not null).SelectMany(m => m.Skins))
                     {
+                        if (skin.PaintMasks is null)
+                        {
+                            continue;
+                        }
+
                         string parsedMaskText = null;
                         foreach (var mask in skin.PaintMasks)
                         {

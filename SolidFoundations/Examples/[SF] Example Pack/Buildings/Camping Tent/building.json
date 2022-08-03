@@ -15,11 +15,6 @@
       "PaintMasks": [
         {
           "Name": "Flare"
-        },
-        {
-          "Name": "Stakes",
-          "MinBrightness": -10,
-          "MaxBrightness": 5
         }
       ]
     },
@@ -27,17 +22,7 @@
       "ID": "Leather",
       "Name": "Leather Camping Tent",
       "Description": "...",
-      "Texture": "skin_2",
-      "PaintMasks": [
-        {
-          "Name": "Flare"
-        },
-        {
-          "Name": "Stakes",
-          "MinBrightness": -10,
-          "MaxBrightness": 5
-        }
-      ]
+      "Texture": "skin_2"
     },
     {
       "ID": "Monster",
@@ -47,6 +32,11 @@
       "PaintMasks": [
         {
           "Name": "Flare"
+        },
+        {
+          "Name": "Stakes",
+          "MinBrightness": -10,
+          "MaxBrightness": 5
         }
       ]
     }
