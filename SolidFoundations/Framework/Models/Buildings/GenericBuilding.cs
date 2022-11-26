@@ -707,6 +707,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     type = typeof(GameLocation);
                 }
 
+                // Verify that the type isn't null, otherwise use the default value
+                if (type is null)
+                {
+                    type = typeof(GameLocation);
+                }
+
                 try
                 {
                     gameLocation = (GameLocation)Activator.CreateInstance(type, "Maps\\" + this.Model.IndoorMap, this.buildingType.Value);
