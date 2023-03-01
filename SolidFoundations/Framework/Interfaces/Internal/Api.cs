@@ -1,9 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
+using SolidFoundations.Framework.Patches.Buildings;
 using SolidFoundations.Framework.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Locations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,9 +33,12 @@ namespace SolidFoundations.Framework.Interfaces.Internal
         public void AddBuildingFlags(Building building, List<string> flags, bool isTemporary = true);
         public void RemoveBuildingFlags(Building building, List<string> flags);
         public bool DoesBuildingHaveFlag(Building building, string flag);
+        public KeyValuePair<bool, string> PlaceBuilding(string modelIdCaseSensitive, BuildableGameLocation location, Vector2 tileLocation);
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(Building building);
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(string modelId);
         public bool UpdateModel(ExtendedBuildingModel buildingModel);
+        public KeyValuePair<bool, string> GetBuildingTexturePath(string modelIdCaseInsensitive);
+        public KeyValuePair<bool, Texture2D> GetBuildingTexture(string modelIdCaseSensitive);
 
         /*
          * Example usage (modifies the "Crumbling Mineshaft" model from the Mystical Buildings SF pack)
@@ -105,6 +111,26 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             return building.modData.Keys.Any(k => k.Equals(flagKey, StringComparison.OrdinalIgnoreCase));
         }
 
+        public KeyValuePair<bool, string> PlaceBuilding(string modelIdCaseSensitive, BuildableGameLocation location, Vector2 tileLocation)
+        {
+            if (String.IsNullOrEmpty(modelIdCaseSensitive) || SolidFoundations.buildingManager.DoesBuildingModelExist(modelIdCaseSensitive) is false)
+            {
+                return new KeyValuePair<bool, string>(false, $"No match for model {modelIdCaseSensitive}");
+            }
+            else if (location is null)
+            {
+                return new KeyValuePair<bool, string>(false, "BuildableGameLocation is null!");
+            }
+
+            var blueprint = new BluePrint(modelIdCaseSensitive);
+            if (GameLocationPatch.AttemptToBuildStructure(location, blueprint, null, tileLocation, skipFarmerCheck: true) is false)
+            {
+                return new KeyValuePair<bool, string>(false, "Failed to place structure, see log for details.");
+            }
+
+            return new KeyValuePair<bool, string>(true, $"Succesfully placed {modelIdCaseSensitive} at {location.Name} on tile {tileLocation}!");
+        }
+
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(Building building)
         {
             if (building is null || building is not GenericBuilding genericBuilding)
@@ -133,6 +159,32 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             }
 
             return SolidFoundations.buildingManager.UpdateModel(buildingModel);
+        }
+
+        public KeyValuePair<bool, string> GetBuildingTexturePath(string modelIdCaseInsensitive)
+        {
+            if (String.IsNullOrEmpty(modelIdCaseInsensitive) || SolidFoundations.buildingManager.DoesBuildingModelExist(modelIdCaseInsensitive) is false)
+            {
+                return new KeyValuePair<bool, string>(false, null);
+            }
+
+            return new KeyValuePair<bool, string>(true, SolidFoundations.buildingManager.GetTextureAsset(modelIdCaseInsensitive.ToLower()));
+        }
+
+        public KeyValuePair<bool, Texture2D> GetBuildingTexture(string modelIdCaseSensitive)
+        {
+            if (String.IsNullOrEmpty(modelIdCaseSensitive) || SolidFoundations.buildingManager.DoesBuildingModelExist(modelIdCaseSensitive) is false)
+            {
+                return new KeyValuePair<bool, Texture2D>(false, null);
+            }
+
+            var attemptToGetTexturePath = GetBuildingTexturePath(modelIdCaseSensitive);
+            if (attemptToGetTexturePath.Key is false)
+            {
+                return new KeyValuePair<bool, Texture2D>(false, null);
+            }
+
+            return new KeyValuePair<bool, Texture2D>(true, Game1.content.Load<Texture2D>(attemptToGetTexturePath.Value));
         }
     }
 }

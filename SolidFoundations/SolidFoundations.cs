@@ -15,6 +15,7 @@ using SolidFoundations.Framework.Utilities.Backport;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 using System;
@@ -98,6 +99,7 @@ namespace SolidFoundations
 
             // Add in the debug commands
             helper.ConsoleCommands.Add("sf_reload", "Reloads all Solid Foundations content packs.\n\nUsage: sf_reload", delegate { this.LoadContentPacks(); this.RefreshAllCustomBuildings(); });
+            helper.ConsoleCommands.Add("sf_place_building", "Adds a building in the current location at given tile.\n\nUsage: sf_place_building MODEL_ID TILE_X TILE_Y", this.PlaceBuildingAtTile);
 
             // Hook into the required events
             helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
@@ -1023,6 +1025,23 @@ namespace SolidFoundations
                 Monitor.Log($"Failed to refresh {building.Id} | {building.textureName()} from {location.NameOrUniqueName}!", LogLevel.Warn);
                 Monitor.Log($"Failed to refresh {building.Id} | {building.textureName()} from {location.NameOrUniqueName}: {ex}", LogLevel.Trace);
             }
+        }
+
+        private void PlaceBuildingAtTile(string command, string[] args)
+        {
+            if (args.Length < 3)
+            {
+                Monitor.Log($"Missing required arguments: X Y", LogLevel.Warn);
+                return;
+            }
+
+            var targetTile = Game1.player.getTileLocation();
+            if (args.Length > 2 && Int32.TryParse(args[1], out int xTile) && Int32.TryParse(args[2], out int yTile))
+            {
+                targetTile = new Vector2(xTile, yTile);
+            }
+
+            monitor.Log(api.PlaceBuilding(args[0], Game1.getFarm(), targetTile).Value.ToString(), LogLevel.Debug);
         }
     }
 }

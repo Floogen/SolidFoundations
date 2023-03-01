@@ -108,10 +108,14 @@ namespace SolidFoundations.Framework.Patches.Buildings
             return true;
         }
 
-        internal static bool AttemptToBuildStructure(BuildableGameLocation farm, BluePrint blueprint, Building currentBuilding)
+        internal static bool AttemptToBuildStructure(BuildableGameLocation farm, BluePrint blueprint, Building currentBuilding, Vector2? tileLocation = null, bool skipFarmerCheck = false)
         {
-            Vector2 tileLocation = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
-            if (!CanBuildHere(farm, blueprint, tileLocation))
+            if (tileLocation is null)
+            {
+                tileLocation = new Vector2((Game1.viewport.X + Game1.getOldMouseX(ui_scale: false)) / 64, (Game1.viewport.Y + Game1.getOldMouseY(ui_scale: false)) / 64);
+            }
+
+            if (!CanBuildHere(farm, blueprint, tileLocation.Value, skipFarmerCheck: skipFarmerCheck))
             {
                 return false;
             }
@@ -122,7 +126,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return false;
             }
 
-            var customBuilding = new GenericBuilding(buildingModel, blueprint, tileLocation) { LocationName = farm.NameOrUniqueName };
+            var customBuilding = new GenericBuilding(buildingModel, blueprint, tileLocation.Value) { LocationName = farm.NameOrUniqueName };
             customBuilding.buildingLocation.Value = farm;
             customBuilding.owner.Value = Game1.player.UniqueMultiplayerID;
             if (currentBuilding is GenericBuilding genericBuilding)
@@ -131,7 +135,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 customBuilding.resetTexture();
             }
 
-            string finalCheckResult = customBuilding.isThereAnythingtoPreventConstruction(farm, tileLocation);
+            string finalCheckResult = customBuilding.isThereAnythingtoPreventConstruction(farm, tileLocation.Value);
             if (finalCheckResult != null)
             {
                 Game1.addHUDMessage(new HUDMessage(finalCheckResult, Color.Red, 3500f));
@@ -141,7 +145,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             {
                 for (int x = 0; x < blueprint.tilesWidth; x++)
                 {
-                    Vector2 currentGlobalTilePosition = new Vector2(tileLocation.X + (float)x, tileLocation.Y + (float)y);
+                    Vector2 currentGlobalTilePosition = new Vector2(tileLocation.Value.X + (float)x, tileLocation.Value.Y + (float)y);
                     farm.terrainFeatures.Remove(currentGlobalTilePosition);
                 }
             }
@@ -157,7 +161,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
         }
 
 
-        public static bool CanBuildHere(BuildableGameLocation farm, BluePrint blueprint, Vector2 tileLocation)
+        public static bool CanBuildHere(BuildableGameLocation farm, BluePrint blueprint, Vector2 tileLocation, bool skipFarmerCheck = false)
         {
             for (int y5 = 0; y5 < blueprint.tilesHeight; y5++)
             {
@@ -177,7 +181,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 for (int x3 = 0; x3 < blueprint.tilesWidth; x3++)
                 {
                     Vector2 currentGlobalTilePosition2 = new Vector2(tileLocation.X + (float)x3, tileLocation.Y + (float)y3);
-                    if (!farm.isBuildable(currentGlobalTilePosition2))
+                    if (skipFarmerCheck is false && !farm.isBuildable(currentGlobalTilePosition2))
                     {
                         return false;
                     }
@@ -195,7 +199,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 int x4 = additionalPlacementTile2.X;
                 int y2 = additionalPlacementTile2.Y;
                 Vector2 currentGlobalTilePosition3 = new Vector2(tileLocation.X + (float)x4, tileLocation.Y + (float)y2);
-                if (!farm.isBuildable(currentGlobalTilePosition3))
+                if (skipFarmerCheck is false && !farm.isBuildable(currentGlobalTilePosition3))
                 {
                     return false;
                 }
