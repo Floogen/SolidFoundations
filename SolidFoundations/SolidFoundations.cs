@@ -134,6 +134,9 @@ namespace SolidFoundations
         {
             // Load any owned content packs
             LoadContentPacks();
+
+            // Invalidate the BuildingsData cache to reapply any patches
+            modHelper.GameContent.InvalidateCache("Data/BuildingsData");
         }
 
         // TODO: When using SDV v1.6, delete this event hook (will preserve modData flag removal)
