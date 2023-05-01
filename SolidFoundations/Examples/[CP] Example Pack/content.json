@@ -210,7 +210,7 @@
               "Name": "Unused - Patched via Content Patcher",
               "Description": "...",
               "Texture": "unused_skin"
-            },
+            }
           ]
         }
       }
@@ -225,6 +225,32 @@
         "Y": 0,
         "Width": 288,
         "Height": 176
+      },
+      "Update": "OnTimeChange"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/BuildingsData",
+      "Fields": {
+        "PeacefulEnd.SolidFoundations.ExamplePack_StreetLamp": {
+          "DrawLayers": [
+            {
+              "SourceRect": "16 0 16 16",
+              "DrawPosition": "0, 0",
+              "DrawInBackground": false,
+              "SortTileOffset": 0,
+              "Sequences": [
+                {
+                  "Frame": 0,
+                  "Duration": 100
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "When": {
+        "Time": "{{Range: 1800, 2600}}"
       },
       "Update": "OnTimeChange"
     }
