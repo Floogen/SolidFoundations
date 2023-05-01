@@ -32,6 +32,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public string Id { get { return base.modData.ContainsKey(ModDataKeys.GENERIC_BUILDING_ID) ? base.modData[ModDataKeys.GENERIC_BUILDING_ID] : String.Empty; } set { base.modData[ModDataKeys.GENERIC_BUILDING_ID] = value; } }
         public string LocationName { get; set; }
 
+        private List<LightSource> LightSources { get; set; } = new List<LightSource>();
+
         // Start of backported properties
         // TODO: When updated to SDV v1.6, this property should be deleted in favor of using the native StardewValley.Buildings.Building.buildingLocation
         [XmlIgnore]
@@ -138,7 +140,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
             this.LoadFromBuildingData(false);
 
             // Set the building chests
-            if (this.Model is not null && this.Model.Chests is not null)
+            if (this.Model is null)
+            {
+                return;
+            }
+
+            if (this.Model.Chests is not null)
             {
                 foreach (ExtendedBuildingChest chestData in this.Model.Chests)
                 {
@@ -148,6 +155,53 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     }
                 }
             }
+
+            // Activate any lights
+            ResetLights();
+        }
+
+        private void ResetLights()
+        {
+            if (this.Model.Lights is not null && this.buildingLocation.Value is not null && this.buildingLocation.Value.sharedLights is not null)
+            {
+                var startingTile = new Point(this.tileX.Value, this.tileY.Value);
+                var gameLocation = this.buildingLocation.Value;
+
+                // Clear any old associated lightsources
+                if (LightSources.Count > 0)
+                {
+                    foreach (var lightSource in LightSources)
+                    {
+                        if (gameLocation.hasLightSource(lightSource.Identifier))
+                        {
+                            gameLocation.removeLightSource(lightSource.Identifier);
+                        }
+                    }
+                }
+
+                // Add the required lights
+                LightSources = new List<LightSource>();
+                foreach (var lightModel in this.Model.Lights)
+                {
+                    var lightTilePosition = lightModel.Tile + startingTile;
+                    int lightIdentifier = GetLightSourceIdentifier(lightTilePosition, lightModel.TileOffsetInPixels);
+                    if (gameLocation.hasLightSource(lightIdentifier))
+                    {
+                        gameLocation.removeLightSource(lightIdentifier);
+                    }
+
+                    var lightPosition = new Vector2((lightTilePosition.X * 64f) + lightModel.TileOffsetInPixels.X, (lightTilePosition.Y * 64f) + lightModel.TileOffsetInPixels.Y);
+                    var lightSource = new LightSource(lightModel.GetTextureSource(), lightPosition, lightModel.GetRadius(), lightModel.GetColor(), lightIdentifier, LightSource.LightContext.None);
+
+                    gameLocation.sharedLights[lightIdentifier] = lightSource;
+                    this.LightSources.Add(lightSource);
+                }
+            }
+        }
+
+        private int GetLightSourceIdentifier(Point tile, Point offset)
+        {
+            return (tile.X * 5000 + offset.X) + (offset.X * 6000 + offset.Y);
         }
 
         public bool ValidateConditions(string condition, string[] modDataFlags = null)
@@ -459,6 +513,31 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public virtual bool OnUseHumanDoor(Farmer who)
         {
             return true;
+        }
+
+        // Preserve this override (required to manage LightSources) when updating to SDV v1.6
+        public override void performActionOnDemolition(GameLocation location)
+        {
+            if (LightSources.Count > 0)
+            {
+                foreach (var lightSource in LightSources)
+                {
+                    if (location.hasLightSource(lightSource.Identifier))
+                    {
+                        location.removeLightSource(lightSource.Identifier);
+                    }
+                }
+            }
+
+            base.performActionOnDemolition(location);
+        }
+
+        // Preserve this override (required to manage LightSources) when updating to SDV v1.6
+        public override void OnEndMove()
+        {
+            ResetLights();
+
+            base.OnEndMove();
         }
 
         // Preserve this override (IsAuxiliaryTile) when updated to SDV v1.6, but call the base doAction method if ExtendedBuildingModel.
@@ -2125,8 +2204,41 @@ namespace SolidFoundations.Framework.Models.ContentPack
             // TODO: When updated to SDV v1.6, this line should be replaced with base.Update(time)
             UpdateBackport(time);
 
+            if (this.Model is null)
+            {
+                return;
+            }
+
+            // Handle lights
+            if (this.Model.Lights is not null && buildingLocation.Value is not null && this.buildingLocation.Value.sharedLights is not null)
+            {
+                var startingTile = new Point(this.tileX.Value, this.tileY.Value);
+                var gameLocation = this.buildingLocation.Value;
+
+                // Add the required lights
+                foreach (var lightModel in this.Model.Lights)
+                {
+                    lightModel.ElapsedMilliseconds += time.ElapsedGameTime.Milliseconds;
+                    if (lightModel.ElapsedMilliseconds < lightModel.GetUpdateInterval())
+                    {
+                        continue;
+                    }
+                    lightModel.GetUpdateInterval(recalculateValue: true);
+                    lightModel.ElapsedMilliseconds = 0f;
+
+                    var lightTilePosition = lightModel.Tile + startingTile;
+                    int lightIdentifier = GetLightSourceIdentifier(lightTilePosition, lightModel.TileOffsetInPixels);
+                    if (gameLocation.hasLightSource(lightIdentifier) is false)
+                    {
+                        continue;
+                    }
+
+                    gameLocation.sharedLights[lightIdentifier].radius.Value = lightModel.GetRadius();
+                }
+            }
+
             // Catch touch actions
-            if (this.Model != null && buildingLocation.Value != null)
+            if (buildingLocation.Value != null)
             {
                 Vector2 playerStandingPosition = new Vector2(Game1.player.getStandingX() / 64, Game1.player.getStandingY() / 64);
                 if (buildingLocation.Value.lastTouchActionLocation.Equals(Vector2.Zero))

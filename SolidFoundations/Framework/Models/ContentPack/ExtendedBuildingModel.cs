@@ -27,6 +27,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         protected string _description;
 
         [ContentSerializer(Optional = true)]
+        public List<Light> Lights;
+
+        [ContentSerializer(Optional = true)]
         public List<PaintMaskData> PaintMasks;
 
         [ContentSerializer(Optional = true)]
