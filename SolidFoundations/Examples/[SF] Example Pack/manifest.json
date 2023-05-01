@@ -1,13 +1,13 @@
 ﻿{
   "Name": "[SF] Example Pack",
   "Author": "PeacefulEnd",
-  "Version": "1.9.2",
+  "Version": "1.14.0",
   "Description": "A set of example buildings for the Solid Foundations framework.",
   "UniqueID": "PeacefulEnd.SolidFoundations.ExamplePack",
   "UpdateKeys": [],
   "Dependencies": [],
   "ContentPackFor": {
     "UniqueID": "PeacefulEnd.SolidFoundations",
-    "MinimumVersion": "1.9.2"
+    "MinimumVersion": "1.14.0"
   }
 }
