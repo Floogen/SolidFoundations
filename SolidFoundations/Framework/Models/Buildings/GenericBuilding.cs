@@ -201,7 +201,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         private int GetLightSourceIdentifier(Point tile, Point offset)
         {
-            return (tile.X * 5000 + offset.X) + (offset.X * 6000 + offset.Y);
+            return ((tile.X + offset.X) * 5000 * offset.X) + ((tile.Y + offset.Y) * 6000 * offset.Y);
         }
 
         public bool ValidateConditions(string condition, string[] modDataFlags = null)
