@@ -184,7 +184,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 foreach (var lightModel in this.Model.Lights)
                 {
                     var lightTilePosition = lightModel.Tile + startingTile;
-                    int lightIdentifier = GetLightSourceIdentifier(lightTilePosition, lightModel.TileOffsetInPixels);
+                    int lightIdentifier = GetLightSourceIdentifier(startingTile, LightSources.Count);
                     if (gameLocation.hasLightSource(lightIdentifier))
                     {
                         gameLocation.removeLightSource(lightIdentifier);
@@ -199,9 +199,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
             }
         }
 
-        private int GetLightSourceIdentifier(Point tile, Point offset)
+        private int GetLightSourceIdentifier(Point tile, int count)
         {
-            return ((tile.X + offset.X) * 5000 * offset.X) + ((tile.Y + offset.Y) * 6000 * offset.Y);
+            var baseId = (tile.X * 5000) + (tile.Y * 6000);
+            return baseId + count + 1;
         }
 
         public bool ValidateConditions(string condition, string[] modDataFlags = null)
@@ -2216,8 +2217,11 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 var gameLocation = this.buildingLocation.Value;
 
                 // Add the required lights
+                int lightCount = 0;
                 foreach (var lightModel in this.Model.Lights)
                 {
+                    lightCount++;
+
                     lightModel.ElapsedMilliseconds += time.ElapsedGameTime.Milliseconds;
                     if (lightModel.ElapsedMilliseconds < lightModel.GetUpdateInterval())
                     {
@@ -2227,7 +2231,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                     lightModel.ElapsedMilliseconds = 0f;
 
                     var lightTilePosition = lightModel.Tile + startingTile;
-                    int lightIdentifier = GetLightSourceIdentifier(lightTilePosition, lightModel.TileOffsetInPixels);
+                    int lightIdentifier = GetLightSourceIdentifier(startingTile, lightCount);
                     if (gameLocation.hasLightSource(lightIdentifier) is false)
                     {
                         continue;
