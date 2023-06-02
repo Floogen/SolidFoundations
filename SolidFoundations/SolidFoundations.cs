@@ -178,6 +178,10 @@ namespace SolidFoundations
                 saveAnywhereApi.BeforeSave += delegate { SafelyCacheCustomBuildings(); };
                 saveAnywhereApi.AfterLoad += delegate { LoadCachedCustomBuildings(); };
             }
+            if (Helper.ModRegistry.IsLoaded("spacechase0.JsonAssets") && apiManager.HookIntoJsonAssets(Helper))
+            {
+                // Do nothing
+            }
 
             // Load any owned content packs
             LoadContentPacks();
