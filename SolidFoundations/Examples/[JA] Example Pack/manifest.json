@@ -1,0 +1,17 @@
+﻿{
+  "Name": "Json Assets Examples For Solid Foundations",
+  "Author": "PeacefulEnd",
+  "Version": "1.0.0",
+  "Description": "Tests for using Json Assets to modify Solid Foundations packs.",
+  "UniqueID": "PeacefulEnd.JsonAssetsForSolidFoundations",
+  "UpdateKeys": [ "Nexus:???" ],
+  "ContentPackFor": {
+    "UniqueID": "spacechase0.JsonAssets"
+  },
+  "Dependencies": [
+    {
+      "UniqueID": "PeacefulEnd.SolidFoundations",
+      "IsRequired": true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "Name": "ExampleAuthor.Objects.TestObject",
+  "Description": "...",
+  "Category": "Cooking",
+  "Edibility": 5,
+  "Price": 1,
+  "IsColored": false,
+  "Recipe": null,
+  "NameLocalization": {
+    "en": "Test Object"
+  }
+}
