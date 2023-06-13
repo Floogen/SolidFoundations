@@ -1048,7 +1048,7 @@ namespace SolidFoundations
                 targetTile = new Vector2(xTile, yTile);
             }
 
-            monitor.Log(api.PlaceBuilding(args[0], Game1.getFarm(), targetTile).Value.ToString(), LogLevel.Debug);
+            monitor.Log(api.ConstructBuildingImmediately(args[0], Game1.getFarm(), targetTile).Value.ToString(), LogLevel.Debug);
         }
     }
 }
