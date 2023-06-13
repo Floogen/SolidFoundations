@@ -245,7 +245,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
                 return false;
             }
 
-            if (this.skinID.Value is not null && layer.SkinFilter is not null && layer.SkinFilter.Any(id => this.skinID.Value.Equals(id, StringComparison.OrdinalIgnoreCase)) is false)
+            if (this.skinID.Value is not null && layer.SkinFilter is not null && layer.SkinFilter.Any(id => this.skinID.Value.Equals("Base_Texture", StringComparison.OrdinalIgnoreCase) || this.skinID.Value.Equals(id, StringComparison.OrdinalIgnoreCase)) is false)
             {
                 return false;
             }
