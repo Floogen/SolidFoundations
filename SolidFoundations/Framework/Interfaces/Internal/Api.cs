@@ -27,14 +27,18 @@ namespace SolidFoundations.Framework.Interfaces.Internal
         }
 
         event EventHandler<BroadcastEventArgs> BroadcastSpecialActionTriggered;
-        event EventHandler BeforeBuildingSerialization; // TODO: Mark this obsolete with SDV v1.6
-        event EventHandler AfterBuildingRestoration; // TODO: Mark this obsolete with SDV v1.6
+
+        [Obsolete("No longer used as of Stardew Valley v1.6")]
+        event EventHandler BeforeBuildingSerialization;
+
+        [Obsolete("No longer used as of Stardew Valley v1.6")]
+        event EventHandler AfterBuildingRestoration;
 
         public void AddBuildingFlags(Building building, List<string> flags, bool isTemporary = true);
         public void RemoveBuildingFlags(Building building, List<string> flags);
         public bool DoesBuildingHaveFlag(Building building, string flag);
-        public KeyValuePair<bool, string> PlaceBuilding(string modelIdCaseSensitive, BuildableGameLocation location, Vector2 tileLocation);
-        public KeyValuePair<bool, string> ConstructBuildingImmediately(string modelIdCaseSensitive, BuildableGameLocation location, Vector2 tileLocation);
+        public KeyValuePair<bool, string> PlaceBuilding(string modelIdCaseSensitive, GameLocation location, Vector2 tileLocation);
+        public KeyValuePair<bool, string> ConstructBuildingImmediately(string modelIdCaseSensitive, GameLocation location, Vector2 tileLocation);
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(Building building);
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(string modelId);
         public bool UpdateModel(ExtendedBuildingModel buildingModel);
@@ -70,24 +74,6 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             }
         }
 
-        internal void OnBeforeBuildingSerialization(EventArgs e)
-        {
-            EventHandler handler = BeforeBuildingSerialization;
-            if (handler is not null)
-            {
-                handler(this, e);
-            }
-        }
-
-        internal void OnAfterBuildingRestoration(EventArgs e)
-        {
-            EventHandler handler = AfterBuildingRestoration;
-            if (handler is not null)
-            {
-                handler(this, e);
-            }
-        }
-
         public void AddBuildingFlags(Building building, List<string> flags, bool isTemporary = true)
         {
             foreach (var flag in flags)
@@ -112,19 +98,18 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             return building.modData.Keys.Any(k => k.Equals(flagKey, StringComparison.OrdinalIgnoreCase));
         }
 
-        public KeyValuePair<bool, string> PlaceBuilding(string modelIdCaseSensitive, BuildableGameLocation location, Vector2 tileLocation)
+        public KeyValuePair<bool, string> PlaceBuilding(string modelIdCaseSensitive, GameLocation location, Vector2 tileLocation)
         {
-            if (String.IsNullOrEmpty(modelIdCaseSensitive) || SolidFoundations.buildingManager.DoesBuildingModelExist(modelIdCaseSensitive) is false)
+            if (String.IsNullOrEmpty(modelIdCaseSensitive) || Game1.buildingData.ContainsKey(modelIdCaseSensitive) is false)
             {
                 return new KeyValuePair<bool, string>(false, $"No match for model {modelIdCaseSensitive}");
             }
             else if (location is null)
             {
-                return new KeyValuePair<bool, string>(false, "BuildableGameLocation is null!");
+                return new KeyValuePair<bool, string>(false, "GameLocation is null!");
             }
-
-            var blueprint = new BluePrint(modelIdCaseSensitive);
-            if (GameLocationPatch.AttemptToBuildStructure(location, blueprint, null, tileLocation, skipFarmerCheck: true) is false)
+            
+            if (location.buildStructure(modelIdCaseSensitive, tileLocation, Game1.player, out Building _, skipSafetyChecks: true) is false)
             {
                 return new KeyValuePair<bool, string>(false, "Failed to place structure, see log for details.");
             }
@@ -132,20 +117,18 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             return new KeyValuePair<bool, string>(true, $"Succesfully placed {modelIdCaseSensitive} at {location.Name} on tile {tileLocation}!");
         }
 
-        public KeyValuePair<bool, string> ConstructBuildingImmediately(string modelIdCaseSensitive, BuildableGameLocation location, Vector2 tileLocation)
+        public KeyValuePair<bool, string> ConstructBuildingImmediately(string modelIdCaseSensitive, GameLocation location, Vector2 tileLocation)
         {
-            if (String.IsNullOrEmpty(modelIdCaseSensitive) || SolidFoundations.buildingManager.DoesBuildingModelExist(modelIdCaseSensitive) is false)
+            if (String.IsNullOrEmpty(modelIdCaseSensitive) || Game1.buildingData.ContainsKey(modelIdCaseSensitive) is false)
             {
                 return new KeyValuePair<bool, string>(false, $"No match for model {modelIdCaseSensitive}");
             }
             else if (location is null)
             {
-                return new KeyValuePair<bool, string>(false, "BuildableGameLocation is null!");
+                return new KeyValuePair<bool, string>(false, "GameLocation is null!");
             }
 
-            var blueprint = new BluePrint(modelIdCaseSensitive);
-            blueprint.daysToConstruct = 0;
-            if (GameLocationPatch.AttemptToBuildStructure(location, blueprint, null, tileLocation, skipFarmerCheck: true) is false)
+            if (location.buildStructure(modelIdCaseSensitive, tileLocation, Game1.player, out Building _, skipSafetyChecks: true, magicalConstruction: true) is false)
             {
                 return new KeyValuePair<bool, string>(false, "Failed to construct structure, see log for details.");
             }
@@ -155,12 +138,12 @@ namespace SolidFoundations.Framework.Interfaces.Internal
 
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(Building building)
         {
-            if (building is null || building is not GenericBuilding genericBuilding)
+            if (building is null || SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
             {
                 return new KeyValuePair<bool, ExtendedBuildingModel>(false, null);
             }
 
-            return new KeyValuePair<bool, ExtendedBuildingModel>(true, genericBuilding.Model);
+            return new KeyValuePair<bool, ExtendedBuildingModel>(true, SolidFoundations.buildingManager.GetSpecificBuildingModel(building.buildingType.Value));
         }
 
         public KeyValuePair<bool, ExtendedBuildingModel> GetBuildingModel(string modelIdCaseSensitive)

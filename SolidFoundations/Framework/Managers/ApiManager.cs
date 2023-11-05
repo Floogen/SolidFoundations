@@ -77,24 +77,5 @@ namespace SolidFoundations.Framework.Managers
         {
             return _saveAnywhereApi;
         }
-
-        internal bool HookIntoJsonAssets(IModHelper helper)
-        {
-            _jsonAssetsApi = helper.ModRegistry.GetApi<IJsonAssetsApi>("spacechase0.JsonAssets");
-
-            if (_jsonAssetsApi is null)
-            {
-                _monitor.Log("Failed to hook into spacechase0.JsonAssets.", LogLevel.Error);
-                return false;
-            }
-
-            _monitor.Log("Successfully hooked into spacechase0.JsonAssets.", LogLevel.Debug);
-            return true;
-        }
-
-        public IJsonAssetsApi GetJsonAssetsApi()
-        {
-            return _jsonAssetsApi;
-        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
+using StardewValley.GameData.Buildings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +12,14 @@ namespace SolidFoundations.Framework.Models.ContentPack
 {
     public class ExtendedBuildingItemConversion : BuildingItemConversion
     {
-        [ContentSerializer(Optional = true)]
         public int MinutesPerConversion = -1;
         internal int? MinutesRemaining;
 
-        public bool ShouldTrackTime;
+        internal bool ShouldTrackTime { get { return MinutesPerConversion >= 0; } }
 
-        [ContentSerializer(Optional = true)]
+        [Obsolete("No longer used. Use MinutesPerConversion instead.")]
         public bool RefreshMaxDailyConversions;
-        internal int? CachedMaxDailyConversions;
 
-        public new List<ExtendedAdditionalChopDrops> ProducedItems;
+        public new List<ExtendedGenericSpawnItemDataWithCondition> ProducedItems;
     }
 }

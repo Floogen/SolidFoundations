@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using SolidFoundations.Framework.Models.Backport;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
 using StardewModdingAPI;
+using StardewValley.GameData.Buildings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +11,15 @@ using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {
-    // TODO: When using SDV v1.6, this class should inherit StardewValley.GameData.BuildingData
     public class ExtendedBuildingModel : BuildingData
     {
+        public string ID;
         internal string Owner { get; set; }
         internal string PackName { get; set; }
         internal string PaintMaskTexture { get; set; }
         internal ITranslationHelper Translations { get; set; }
 
+        // TODO: Evalulate whether or not the Name / Description overrides are needed
         // Override the name and description so we can easily pass over translation
         public new string Name { get { return GetTranslation(_name); } set { _name = value; } }
         protected string _name;
@@ -85,7 +86,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
         [ContentSerializer(Optional = true)]
         public string IndoorMapTypeAssembly { get; set; } = "Stardew Valley";
 
-        [ContentSerializer(Optional = true)]
+        // Required for alert to check for missing MagicalConstruction value 
         public new bool? MagicalConstruction;
 
         public new string GetActionAtTile(int relative_x, int relative_y)
