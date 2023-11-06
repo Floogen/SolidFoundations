@@ -245,13 +245,19 @@ namespace SolidFoundations
             var idToModels = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
 
             // Correct the DrawLayers.Texture and Skins.Texture ids
-            foreach (ExtendedBuildingModel model in idToModels.Values)
+            foreach (BuildingData model in idToModels.Values)
             {
+                var actualModel = model as ExtendedBuildingModel;
+                if (actualModel is null)
+                {
+                    continue;
+                }
+
                 if (model.DrawLayers is not null)
                 {
                     foreach (var layer in model.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
                     {
-                        var spriteAsset = $"{model.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
+                        var spriteAsset = $"{actualModel.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
                         if (buildingManager.GetTextureAsset(spriteAsset) is not null)
                         {
                             layer.Texture = spriteAsset;
@@ -263,7 +269,7 @@ namespace SolidFoundations
                 {
                     foreach (var skin in model.Skins.Where(t => String.IsNullOrEmpty(t.Texture) is false))
                     {
-                        var skinAsset = $"{model.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.Texture)}";
+                        var skinAsset = $"{actualModel.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.Texture)}";
                         if (buildingManager.GetTextureAsset(skinAsset) is not null)
                         {
                             skin.Texture = skinAsset;
@@ -607,12 +613,30 @@ namespace SolidFoundations
                     var modelPath = Path.Combine(parentFolderName, folder.Name, "building.json");
 
                     // Parse the model and assign it the content pack's owner
-                    ExtendedBuildingModel buildingModel = contentPack.ReadJsonFile<ExtendedBuildingModel>(modelPath);
+                    ExtendedBuildingModel buildingModel = null;
+                    try
+                    {
+                        buildingModel = contentPack.ReadJsonFile<ExtendedBuildingModel>(modelPath);
+                    }
+                    catch (Newtonsoft.Json.JsonReaderException)
+                    {
+                        // TODO: Add to compatibility alerts that the pack is using string-based Rectangles
+                        Monitor.Log($"Attempting to resolve ExtendedBuildingModel read issue by handling string-based Rectangles for {modelPath}", LogLevel.Trace);
+
+                        // Attempt to handle string-based Rectangle classes (SourceRect / AnimalDoor)
+                        buildingModel = contentPack.ReadJsonFile<OldExtendedBuildingModel>(modelPath);
+                    }
 
                     // Verify the required Name property is set
                     if (String.IsNullOrEmpty(buildingModel.Name))
                     {
                         Monitor.Log($"Unable to add building from content pack {contentPack.Manifest.Name}: Missing the Name property", LogLevel.Warn);
+                        continue;
+                    }
+
+                    if (buildingModel is null)
+                    {
+                        Monitor.Log($"Unable to add building from {modelPath}: The model is invalid", LogLevel.Warn);
                         continue;
                     }
 

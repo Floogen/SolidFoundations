@@ -368,6 +368,11 @@ namespace SolidFoundations.Framework.Patches.Buildings
         
         private static bool ValidateConditionsForDrawLayer(Building building, ExtendedBuildingDrawLayer layer)
         {
+            if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
+            {
+                return true;
+            }
+
             return building.ValidateConditions(layer.Condition, layer.ModDataFlags);
         }
 
