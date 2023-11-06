@@ -17,6 +17,13 @@ namespace SolidFoundations.Framework.Models.ContentPack.Compatibility
         public new string SourceRect { set { base.SourceRect = Toolkit.GetRectangleFromString(value); } }
         public new string AnimalDoor { set { base.AnimalDoor = Toolkit.GetRectangleFromString(value); } }
 
-        public new List<OldExtendedBuildingDrawLayer> DrawLayers;
+        public new List<OldExtendedBuildingDrawLayer> DrawLayers { 
+            set {
+                var layers = value;
+                layers.ForEach(l => (l as ExtendedBuildingDrawLayer).SourceRect = Toolkit.GetRectangleFromString(l.SourceRect));
+
+                base.DrawLayers = layers.ToList<ExtendedBuildingDrawLayer>(); 
+            } 
+        }
     }
 }

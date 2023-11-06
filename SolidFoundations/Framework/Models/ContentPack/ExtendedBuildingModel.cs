@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
+using SolidFoundations.Framework.Utilities;
 using StardewModdingAPI;
 using StardewValley.GameData.Buildings;
 using System;
@@ -40,7 +41,19 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public new List<ExtendedBuildingSkin> Skins = new List<ExtendedBuildingSkin>();
 
         [ContentSerializer(Optional = true)]
-        public new List<ExtendedBuildingDrawLayer> DrawLayers;
+        public new List<ExtendedBuildingDrawLayer> DrawLayers
+        {
+            set
+            {
+                _drawLayers = value;
+                base.DrawLayers = _drawLayers.ToList<BuildingDrawLayer>();
+            }
+            get
+            {
+                return _drawLayers;
+            }
+        }
+        private List<ExtendedBuildingDrawLayer> _drawLayers;
 
         [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingItemConversion> ItemConversions;
