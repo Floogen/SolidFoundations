@@ -9,6 +9,7 @@ using SolidFoundations.Framework.Managers;
 using SolidFoundations.Framework.Models.Buildings;
 using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
+using SolidFoundations.Framework.Models.ContentPack.Compatibility;
 using SolidFoundations.Framework.Patches.Buildings;
 using SolidFoundations.Framework.Utilities;
 using StardewModdingAPI;
@@ -119,7 +120,7 @@ namespace SolidFoundations
             LoadContentPacks();
 
             // Invalidate the BuildingsData cache to reapply any patches
-            //modHelper.GameContent.InvalidateCache("Data/BuildingsData");
+            //modHelper.GameContent.InvalidateCache("Data/Buildings");
         }
 
         // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
@@ -158,7 +159,7 @@ namespace SolidFoundations
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/BuildingsData"))
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
             {
                 e.Edit(asset =>
                 {
@@ -235,14 +236,14 @@ namespace SolidFoundations
 
         private void OnAssetInvalidated(object sender, AssetsInvalidatedEventArgs e)
         {
-            var asset = e.NamesWithoutLocale.FirstOrDefault(a => a.IsEquivalentTo("Data/BuildingsData"));
+            var asset = e.NamesWithoutLocale.FirstOrDefault(a => a.IsEquivalentTo("Data/Buildings"));
             if (asset is null)
             {
                 return;
             }
 
             // Force load the changes
-            var idToModels = Helper.GameContent.Load<Dictionary<string, ExtendedBuildingModel>>(asset);
+            var idToModels = Helper.GameContent.Load<Dictionary<string, BuildingData>>(asset);
 
             // Correct the DrawLayers.Texture and Skins.Texture ids
             foreach (BuildingData model in idToModels.Values)
