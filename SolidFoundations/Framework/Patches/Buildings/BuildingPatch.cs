@@ -21,7 +21,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
-using xTile.Dimensions;
 using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Patches.Buildings
@@ -150,7 +149,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         if (tileAction != null)
                         {
                             tileAction = TokenParser.ParseText(tileAction);
-                            if (who.currentLocation.performAction(tileAction, who, new Location((int)tileLocation.X, (int)tileLocation.Y)))
+                            if (who.currentLocation.performAction(tileAction, who, new xTile.Dimensions.Location((int)tileLocation.X, (int)tileLocation.Y)))
                             {
                                 __result = true;
                                 return false;
@@ -373,16 +372,50 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return true;
             }
 
-            return building.ValidateConditions(layer.Condition, layer.ModDataFlags);
+            return building.ValidateLayer(layer) is false;
+        }
+        
+        private static Rectangle GetExtendedDrawLayerSourceRectangle(ExtendedBuildingDrawLayer layer, int time, Building building)
+        {
+            if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
+            {
+                return layer.GetSourceRect(time);
+            }
+            
+            return layer.GetSourceRect(time, building);
+        }
+
+        private static Rectangle GetBuildingSourceRect(Building building)
+        {
+            Rectangle rectangle = building.getSourceRect();
+            if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
+            {
+                return rectangle;
+            }
+
+            var extendedModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(building.buildingType.Value);
+            if (extendedModel.DrawLayers is not null && extendedModel.DrawLayers.Any(l => l.HideBaseTexture && building.ValidateLayer(l)))
+            {
+                rectangle = new Rectangle(1, 1, 5, 5);
+            }
+
+            return rectangle;
         }
 
         private static IEnumerable<CodeInstruction> DrawTranspiler(IEnumerable<CodeInstruction> instructions)
         {
+            int MAIN_SOURCE_RECT_INDEX = 5;
+            int DRAW_LAYER_SOURCE_RECT_INDEX = 18;
+
             try
             {
-                int insertIndex = -1;
+                int conditionInsertIndex = -1;
                 object drawLayer = null;
                 object continueLabel = null;
+
+                int sourceRectangleInsertIndex = -1;
+
+                int drawMainSourceRectIndex = -1;
 
                 // Get the indices to insert at
                 var lines = instructions.ToList();
@@ -393,21 +426,44 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         drawLayer = lines[i - 2].operand;
                         continueLabel = lines[i].operand;
 
-                        insertIndex = i;
-                        continue;
+                        conditionInsertIndex = i;
+                        break;
                     }
                 }
 
-                if (insertIndex == -1)
+                lines.Insert(conditionInsertIndex + 1, new CodeInstruction(OpCodes.Ldarg_0));
+                lines.Insert(conditionInsertIndex + 2, new CodeInstruction(OpCodes.Ldloc, drawLayer));
+                lines.Insert(conditionInsertIndex + 3, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(ValidateConditionsForDrawLayer))));
+                lines.Insert(conditionInsertIndex + 4, new CodeInstruction(OpCodes.Brtrue_S, continueLabel));
+
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    throw new Exception("Unable to find insert position.");
+                    if (sourceRectangleInsertIndex == -1 && lines[i + 1].opcode == OpCodes.Stloc_S && lines[i + 1].operand.ToString().Contains(DRAW_LAYER_SOURCE_RECT_INDEX.ToString(), StringComparison.OrdinalIgnoreCase) && lines[i].operand.ToString().Contains("GetSourceRect", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sourceRectangleInsertIndex = i;
+                        break;
+                    }
                 }
 
-                // Insert the changes at the specified indices
-                lines.Insert(insertIndex + 1, new CodeInstruction(OpCodes.Ldarg_0));
-                lines.Insert(insertIndex + 2, new CodeInstruction(OpCodes.Ldloc, drawLayer));
-                lines.Insert(insertIndex + 3, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(ValidateConditionsForDrawLayer))));
-                lines.Insert(insertIndex + 4, new CodeInstruction(OpCodes.Brtrue_S, continueLabel));
+                lines[sourceRectangleInsertIndex] = new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(GetExtendedDrawLayerSourceRectangle)));
+                lines.Insert(sourceRectangleInsertIndex, new CodeInstruction(OpCodes.Ldarg_0));
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    if (drawMainSourceRectIndex == -1 && lines[i + 1].opcode == OpCodes.Newobj && lines[i].opcode == OpCodes.Ldloc_S && lines[i].operand.ToString().Contains(MAIN_SOURCE_RECT_INDEX.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        drawMainSourceRectIndex = i;
+                    }
+                }
+
+                lines[drawMainSourceRectIndex] = new CodeInstruction(OpCodes.Ldarg_0);
+                lines.Insert(drawMainSourceRectIndex + 1, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(GetBuildingSourceRect))));
+
+                // Validate the changes
+                if (conditionInsertIndex == -1 || sourceRectangleInsertIndex == -1 || drawMainSourceRectIndex == -1)
+                {
+                    throw new Exception("Unable to find insert positions.");
+                }
 
                 return lines;
             }
@@ -462,11 +518,18 @@ namespace SolidFoundations.Framework.Patches.Buildings
         
         private static IEnumerable<CodeInstruction> DrawMenuTranspiler(IEnumerable<CodeInstruction> instructions)
         {
+            int MAIN_SOURCE_RECT_INDEX = 3; // Unused: Using OpCodes.Ldloc_3 instead
+            int DRAW_LAYER_SOURCE_RECT_INDEX = 6;
+
             try
             {
-                int insertIndex = -1;
+                int conditionInsertIndex = -1;
                 object drawLayer = null;
                 object continueLabel = null;
+
+                int sourceRectangleInsertIndex = -1;
+
+                int drawMainSourceRectIndex = -1;
 
                 // Get the indices to insert at
                 var lines = instructions.ToList();
@@ -477,21 +540,44 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         drawLayer = lines[i - 2].operand;
                         continueLabel = lines[i].operand;
 
-                        insertIndex = i;
-                        continue;
+                        conditionInsertIndex = i;
+                        break;
                     }
                 }
 
-                if (insertIndex == -1)
+                lines.Insert(conditionInsertIndex + 1, new CodeInstruction(OpCodes.Ldarg_0));
+                lines.Insert(conditionInsertIndex + 2, new CodeInstruction(OpCodes.Ldloc, drawLayer));
+                lines.Insert(conditionInsertIndex + 3, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(ValidateConditionsForDrawLayer))));
+                lines.Insert(conditionInsertIndex + 4, new CodeInstruction(OpCodes.Brtrue_S, continueLabel));
+
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    throw new Exception("Unable to find insert position.");
+                    if (sourceRectangleInsertIndex == -1 && lines[i + 1].opcode == OpCodes.Stloc_S && lines[i + 1].operand.ToString().Contains(DRAW_LAYER_SOURCE_RECT_INDEX.ToString(), StringComparison.OrdinalIgnoreCase) && lines[i].operand.ToString().Contains("GetSourceRect", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sourceRectangleInsertIndex = i;
+                        break;
+                    }
                 }
 
-                // Insert the changes at the specified indices
-                lines.Insert(insertIndex + 1, new CodeInstruction(OpCodes.Ldarg_0));
-                lines.Insert(insertIndex + 2, new CodeInstruction(OpCodes.Ldloc, drawLayer));
-                lines.Insert(insertIndex + 3, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(ValidateConditionsForDrawLayer))));
-                lines.Insert(insertIndex + 4, new CodeInstruction(OpCodes.Brtrue_S, continueLabel));
+                lines[sourceRectangleInsertIndex] = new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(GetExtendedDrawLayerSourceRectangle)));
+                lines.Insert(sourceRectangleInsertIndex, new CodeInstruction(OpCodes.Ldarg_0));
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    if (drawMainSourceRectIndex == -1 && lines[i + 1].opcode == OpCodes.Newobj && lines[i].opcode == OpCodes.Ldloc_3)
+                    {
+                        drawMainSourceRectIndex = i;
+                    }
+                }
+
+                lines[drawMainSourceRectIndex] = new CodeInstruction(OpCodes.Ldarg_0);
+                lines.Insert(drawMainSourceRectIndex + 1, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(GetBuildingSourceRect))));
+
+                // Validate the changes
+                if (conditionInsertIndex == -1 || sourceRectangleInsertIndex == -1 || drawMainSourceRectIndex == -1)
+                {
+                    throw new Exception("Unable to find insert positions.");
+                }
 
                 return lines;
             }

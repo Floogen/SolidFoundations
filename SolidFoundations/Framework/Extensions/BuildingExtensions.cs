@@ -53,6 +53,30 @@ namespace SolidFoundations.Framework.Extensions
             return false;
         }
 
+        public static bool ValidateLayer(this Building building, ExtendedBuildingDrawLayer layer)
+        {
+            if (building.ValidateConditions(layer.Condition, layer.ModDataFlags) is false)
+            {
+                return false;
+            }
+
+            if (building.skinId.Value is not null && layer.SkinFilter is not null && layer.SkinFilter.Any(id => building.skinId.Value.Equals("Base_Texture", StringComparison.OrdinalIgnoreCase) || building.skinId.Value.Equals(id, StringComparison.OrdinalIgnoreCase)) is false)
+            {
+                return false;
+            }
+
+            if (layer.OnlyDrawIfChestHasContents != null)
+            {
+                Chest buildingChest = building.GetBuildingChest(layer.OnlyDrawIfChestHasContents);
+                if (buildingChest == null || buildingChest.isEmpty())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static void RefreshModel(this Building building, ExtendedBuildingModel model)
         {
             building.LoadFromBuildingData(model);
