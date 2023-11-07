@@ -114,7 +114,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         public SpecialAction DefaultSpecialEventAction { get; set; }
 
-        public List<InputFilter> InputFilters;
+        public List<InputFilter> InputFilters = new List<InputFilter>();
 
         public string IndoorMapTypeAssembly { get; set; } = "Stardew Valley";
 
