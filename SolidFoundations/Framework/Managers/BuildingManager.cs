@@ -43,6 +43,8 @@ namespace SolidFoundations.Framework.Managers
         public void AddBuilding(ExtendedBuildingModel model)
         {
             _idToModels[model.ID] = model;
+
+            Game1.buildingData[model.ID] = model;
         }
 
         public bool UpdateModel(ExtendedBuildingModel model)
