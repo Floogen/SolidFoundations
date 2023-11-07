@@ -11,6 +11,7 @@ using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
 using SolidFoundations.Framework.Models.ContentPack.Compatibility;
 using SolidFoundations.Framework.Patches.Buildings;
+using SolidFoundations.Framework.Patches.GameData;
 using SolidFoundations.Framework.Utilities;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -67,6 +68,9 @@ namespace SolidFoundations
 
                 // Apply building patches
                 new BuildingPatch(monitor, helper).Apply(harmony);
+
+                // Apply GameData patches
+                new BuildingDataPatch(monitor, helper).Apply(harmony);
 
                 // Apply object patch
                 new ChestPatch(monitor, helper).Apply(harmony);
