@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Xml.Linq;
 
 namespace SolidFoundations.Framework.Patches.Buildings
 {
@@ -124,6 +125,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
                         if (who.ActiveObject is not null && extendedModel.LoadChestTiles is not null && extendedModel.GetLoadChestActionAtTile(actualTile.X, actualTile.Y) is var loadChestName && String.IsNullOrEmpty(loadChestName) is false)
                         {
+                            _monitor.Log($"{__instance.IsValidObjectForChest(who.ActiveObject, __instance.GetBuildingChest(loadChestName))}", LogLevel.Warn);
                             __instance.PerformBuildingChestAction(loadChestName, who);
 
                             __result = true;
@@ -203,7 +205,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         private static void IsValidObjectForChestPostfix(Building __instance, Item item, Chest chest, ref bool __result)
         {
-            if (__result is true && __instance.IsValidObjectForChest(item, chest))
+            if (__result is true && __instance.IsObjectFilteredForChest(item, chest))
             {
                 __result = true;
             }
