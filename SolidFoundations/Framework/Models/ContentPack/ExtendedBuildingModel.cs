@@ -31,7 +31,19 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public new List<ExtendedBuildingChest> Chests;
 
         [ContentSerializer(Optional = true)]
-        public new List<ExtendedBuildingSkin> Skins = new List<ExtendedBuildingSkin>();
+        public new List<ExtendedBuildingSkin> Skins
+        {
+            set
+            {
+                _skins = value;
+                base.Skins = _skins.ToList<BuildingSkin>();
+            }
+            get
+            {
+                return _skins;
+            }
+        }
+        private List<ExtendedBuildingSkin> _skins;
 
         [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingDrawLayer> DrawLayers

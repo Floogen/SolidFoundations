@@ -11,6 +11,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
 {
     public class ExtendedBuildingSkin : BuildingSkin
     {
+        public string ID { get { return base.Id; } set { base.Id = value; } }
+
         [ContentSerializer(Optional = true)]
         public List<PaintMaskData> PaintMasks;
 
