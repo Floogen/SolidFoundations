@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json.Linq;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
 using StardewModdingAPI;
 using StardewValley.GameData.Buildings;
@@ -19,7 +20,19 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         public List<PaintMaskData> PaintMasks;
 
-        public new List<ExtendedBuildingChest> Chests;
+        public new List<ExtendedBuildingChest> Chests
+        {
+            set
+            {
+                _chests = value;
+                base.Chests = _chests.ToList<BuildingChest>();
+            }
+            get
+            {
+                return _chests;
+            }
+        }
+        private List<ExtendedBuildingChest> _chests = new List<ExtendedBuildingChest>();
 
         public new List<ExtendedBuildingSkin> Skins
         {
@@ -49,19 +62,44 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
         private List<ExtendedBuildingDrawLayer> _drawLayers;
 
-        public new List<ExtendedBuildingItemConversion> ItemConversions;
+        public new List<ExtendedBuildingItemConversion> ItemConversions
+        {
+            set
+            {
+                _itemConversions = value;
+                base.ItemConversions = _itemConversions.ToList<BuildingItemConversion>();
+            }
+            get
+            {
+                return _itemConversions;
+            }
+        }
+        private List<ExtendedBuildingItemConversion> _itemConversions;
 
         public int MaxConcurrentConversions { get; set; } = -1;
 
         public bool DisableAutomate { get; set; }
 
-        public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
+        public new List<ExtendedBuildingActionTiles> ActionTiles
+        {
+            set
+            {
+                _extendedActionTiles = value;
+                base.ActionTiles = _extendedActionTiles.ToList<BuildingActionTile>();
+            }
+            get
+            {
+                return _extendedActionTiles;
+            }
+        }
+        private List<ExtendedBuildingActionTiles> _extendedActionTiles = new List<ExtendedBuildingActionTiles>();
+
         protected Dictionary<Point, SpecialAction> _specialActionTiles;
 
-        public List<ChestActionTile> LoadChestTiles;
+        public List<ChestActionTile> LoadChestTiles = new List<ChestActionTile>();
         protected Dictionary<Point, string> _loadChestTiles;
 
-        public List<ChestActionTile> CollectChestTiles;
+        public List<ChestActionTile> CollectChestTiles = new List<ChestActionTile>();
         protected Dictionary<Point, string> _collectChestTiles;
 
         public List<ExtendedBuildingActionTiles> EventTiles = new List<ExtendedBuildingActionTiles>();
