@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Xml.Linq;
 
 namespace SolidFoundations.Framework.Patches.Buildings
 {
@@ -40,6 +39,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             harmony.Patch(AccessTools.Method(_object, nameof(Building.Update), new[] { typeof(GameTime) }), postfix: new HarmonyMethod(GetType(), nameof(UpdatePostfix)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.performTenMinuteAction), new[] { typeof(int) }), postfix: new HarmonyMethod(GetType(), nameof(PerformTenMinuteActionPostfix)));
 
+            harmony.Patch(AccessTools.Method(_object, nameof(Building.PerformBuildingChestAction), new[] { typeof(string), typeof(Farmer) }), transpiler: new HarmonyMethod(GetType(), nameof(PerformBuildingChestActionTranspiler)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.draw), new[] { typeof(SpriteBatch) }), transpiler: new HarmonyMethod(GetType(), nameof(DrawTranspiler)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.drawBackground), new[] { typeof(SpriteBatch) }), transpiler: new HarmonyMethod(GetType(), nameof(DrawBackgroundTranspiler)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.drawInMenu), new[] { typeof(SpriteBatch), typeof(int), typeof(int) }), transpiler: new HarmonyMethod(GetType(), nameof(DrawMenuTranspiler)));
@@ -394,6 +394,61 @@ namespace SolidFoundations.Framework.Patches.Buildings
             }
 
             return rectangle;
+        }
+
+        private static int GetMaxItemsToTakeFromStack(BuildingItemConversion conversion, int currentAmount)
+        {
+            if (conversion is ExtendedBuildingItemConversion extendedConversion && extendedConversion is not null)
+            {
+                currentAmount = extendedConversion.TakeOnlyRequiredFromStack ? extendedConversion.RequiredCount : currentAmount;
+            }
+
+            return currentAmount;
+        }
+
+        private static IEnumerable<CodeInstruction> PerformBuildingChestActionTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            int CONVERSION_INDEX = 3; // Unused: Using OpCodes.Ldloc_3 instead
+            int ACCEPT_AMOUNT_INDEX = 5;
+
+            try
+            {
+                int acceptAmountInsertIndex = -1;
+
+                // Get the indices to insert at
+                var lines = instructions.ToList();
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    if (lines[i].opcode == OpCodes.Stloc_S && lines[i].operand.ToString().Contains(ACCEPT_AMOUNT_INDEX.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        acceptAmountInsertIndex = i;
+                        break;
+                    }
+                }
+
+                lines.Insert(acceptAmountInsertIndex + 1, new CodeInstruction(OpCodes.Ldloc_3));
+                lines.Insert(acceptAmountInsertIndex + 2, new CodeInstruction(OpCodes.Ldloc_S, ACCEPT_AMOUNT_INDEX));
+                lines.Insert(acceptAmountInsertIndex + 3, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(GetMaxItemsToTakeFromStack))));
+                lines.Insert(acceptAmountInsertIndex + 4, new CodeInstruction(OpCodes.Stloc_S, ACCEPT_AMOUNT_INDEX));
+
+                foreach (var line in lines)
+                {
+                    _monitor.Log(line.ToString(), LogLevel.Warn);
+                }
+
+                // Validate the changes
+                if (acceptAmountInsertIndex == -1)
+                {
+                    throw new Exception("Unable to find insert position.");
+                }
+
+                return lines;
+            }
+            catch (Exception e)
+            {
+                _monitor.Log($"There was an issue modifying the instructions for StardewValley.Buildings.Building.PerformBuildingChestAction: {e}", LogLevel.Error);
+                return instructions;
+            }
         }
 
         private static IEnumerable<CodeInstruction> DrawTranspiler(IEnumerable<CodeInstruction> instructions)

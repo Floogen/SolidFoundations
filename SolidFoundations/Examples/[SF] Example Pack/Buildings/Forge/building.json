@@ -130,6 +130,7 @@
       "MaxDailyConversions": 10,
       "MinutesPerConversion": 20,
       "RefreshMaxDailyConversions": true,
+      "TakeOnlyRequiredFromStack": true,
       "SourceChest": "Input",
       "DestinationChest": "Output",
       "ProducedItems": [
