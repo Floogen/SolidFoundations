@@ -39,7 +39,6 @@ namespace SolidFoundations
 
         // Managers
         internal static ApiManager apiManager;
-        internal static AssetManager assetManager;
         internal static BuildingManager buildingManager;
 
         public override void Entry(IModHelper helper)
@@ -59,7 +58,6 @@ namespace SolidFoundations
 
             // Set up the managers
             apiManager = new ApiManager(monitor);
-            assetManager = new AssetManager(monitor, helper);
             buildingManager = new BuildingManager(monitor, helper);
 
             // Load our Harmony patches
