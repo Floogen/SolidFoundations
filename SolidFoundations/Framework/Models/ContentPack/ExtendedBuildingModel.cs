@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {
@@ -19,14 +20,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
         internal string PackName { get; set; }
         internal string PaintMaskTexture { get; set; }
         internal ITranslationHelper Translations { get; set; }
-
-        // TODO: Evalulate whether or not the Name / Description overrides are needed
-        // Override the name and description so we can easily pass over translation
-        public new string Name { get { return GetTranslation(_name); } set { _name = value; } }
-        protected string _name;
-
-        public new string Description { get { return GetTranslation(_description); } set { _description = value; } }
-        protected string _description;
 
         [ContentSerializer(Optional = true)]
         public List<Light> Lights;

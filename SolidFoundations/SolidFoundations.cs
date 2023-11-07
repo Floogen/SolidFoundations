@@ -769,6 +769,9 @@ namespace SolidFoundations
                     if (contentPack.Translation is not null)
                     {
                         buildingModel.Translations = contentPack.Translation;
+
+                        buildingModel.Name = buildingModel.GetTranslation(buildingModel.Name);
+                        buildingModel.Description = buildingModel.GetTranslation(buildingModel.Description);
                     }
 
                     // Check for any compatibility issues
@@ -801,8 +804,7 @@ namespace SolidFoundations
 
                 model.Builder = "Robin";
             }
-
-            if (model.MagicalConstruction is null && string.Equals(model.Builder, "Wizard", StringComparison.OrdinalIgnoreCase))
+            else if (model.MagicalConstruction is null && string.Equals(model.Builder, "Wizard", StringComparison.OrdinalIgnoreCase))
             {
                 Monitor.Log($"{model.ID} is using the value \"Wizard\" for the \"Builder\" property, but has not declared the \"MagicalConstruction\" property. Solid Foundations will infer \"MagicalConstruction\" as true, though for forward compatibility this should be set manually.", silent ? LogLevel.Trace : LogLevel.Warn);
 
