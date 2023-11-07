@@ -1,25 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Netcode;
-using SolidFoundations.Framework.External.SpaceCore;
 using SolidFoundations.Framework.Utilities;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
-using StardewValley.Locations;
-using StardewValley.Menus;
 using StardewValley.Network;
 using StardewValley.Objects;
-using StardewValley.TerrainFeatures;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
-using static SolidFoundations.Framework.Models.ContentPack.InputFilter;
-using static StardewValley.Object;
-using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {

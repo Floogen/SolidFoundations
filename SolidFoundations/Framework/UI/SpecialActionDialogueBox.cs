@@ -1,14 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Menus;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static StardewValley.GameLocation;
 
 namespace SolidFoundations.Framework.UI

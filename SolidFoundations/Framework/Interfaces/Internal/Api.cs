@@ -2,16 +2,12 @@
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
-using SolidFoundations.Framework.Patches.Buildings;
 using SolidFoundations.Framework.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
-using StardewValley.Locations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Interfaces.Internal
 {
@@ -108,7 +104,7 @@ namespace SolidFoundations.Framework.Interfaces.Internal
             {
                 return new KeyValuePair<bool, string>(false, "GameLocation is null!");
             }
-            
+
             if (location.buildStructure(modelIdCaseSensitive, tileLocation, Game1.player, out Building _, skipSafetyChecks: true) is false)
             {
                 return new KeyValuePair<bool, string>(false, "Failed to place structure, see log for details.");

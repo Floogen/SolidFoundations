@@ -1,21 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
-using SolidFoundations.Framework.External.SpaceCore;
 using SolidFoundations.Framework.Models.ContentPack;
 using SolidFoundations.Framework.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData;
-using StardewValley.GameData.Buildings;
 using StardewValley.Internal;
 using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
 using static SolidFoundations.Framework.Models.ContentPack.InputFilter;
-using static StardewValley.Object;
 using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Extensions
@@ -63,15 +57,6 @@ namespace SolidFoundations.Framework.Extensions
             if (building.skinId.Value is not null && layer.SkinFilter is not null && layer.SkinFilter.Any(id => building.skinId.Value.Equals("Base_Texture", StringComparison.OrdinalIgnoreCase) || building.skinId.Value.Equals(id, StringComparison.OrdinalIgnoreCase)) is false)
             {
                 return false;
-            }
-
-            if (layer.OnlyDrawIfChestHasContents != null)
-            {
-                Chest buildingChest = building.GetBuildingChest(layer.OnlyDrawIfChestHasContents);
-                if (buildingChest == null || buildingChest.isEmpty())
-                {
-                    return false;
-                }
             }
 
             return true;

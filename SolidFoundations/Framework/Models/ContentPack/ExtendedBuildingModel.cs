@@ -1,15 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using SolidFoundations.Framework.Models.ContentPack.Actions;
-using SolidFoundations.Framework.Utilities;
 using StardewModdingAPI;
 using StardewValley.GameData.Buildings;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {
@@ -21,16 +15,12 @@ namespace SolidFoundations.Framework.Models.ContentPack
         internal string PaintMaskTexture { get; set; }
         internal ITranslationHelper Translations { get; set; }
 
-        [ContentSerializer(Optional = true)]
         public List<Light> Lights;
 
-        [ContentSerializer(Optional = true)]
         public List<PaintMaskData> PaintMasks;
 
-        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingChest> Chests;
 
-        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingSkin> Skins
         {
             set
@@ -45,7 +35,6 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
         private List<ExtendedBuildingSkin> _skins;
 
-        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingDrawLayer> DrawLayers
         {
             set
@@ -60,60 +49,47 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
         private List<ExtendedBuildingDrawLayer> _drawLayers;
 
-        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingItemConversion> ItemConversions;
 
-        [ContentSerializer(Optional = true)]
         public int MaxConcurrentConversions { get; set; } = -1;
 
-        [ContentSerializer(Optional = true)]
         public bool DisableAutomate { get; set; }
 
-        [ContentSerializer(Optional = true)]
         public new List<ExtendedBuildingActionTiles> ActionTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, SpecialAction> _specialActionTiles;
 
-        [ContentSerializer(Optional = true)]
         public List<ChestActionTile> LoadChestTiles;
         protected Dictionary<Point, string> _loadChestTiles;
 
-        [ContentSerializer(Optional = true)]
         public List<ChestActionTile> CollectChestTiles;
         protected Dictionary<Point, string> _collectChestTiles;
 
-        [ContentSerializer(Optional = true)]
         public List<ExtendedBuildingActionTiles> EventTiles = new List<ExtendedBuildingActionTiles>();
         protected Dictionary<Point, string> _eventTiles;
         protected Dictionary<Point, SpecialAction> _specialEventTiles;
 
-        [ContentSerializer(Optional = true)]
         public List<Point> TunnelDoors = new List<Point>();
 
-        [ContentSerializer(Optional = true)]
         public List<Point> AuxiliaryHumanDoors = new List<Point>();
 
-        [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialAction { get; set; }
 
-        [ContentSerializer(Optional = true)]
         public SpecialAction DefaultSpecialEventAction { get; set; }
 
-        [ContentSerializer(Optional = true)]
         public List<InputFilter> InputFilters;
 
-        [ContentSerializer(Optional = true)]
         public string IndoorMapTypeAssembly { get; set; } = "Stardew Valley";
 
         // Required for alert to check for missing MagicalConstruction value 
-        public new bool? MagicalConstruction 
+        public new bool? MagicalConstruction
         {
             set
             {
                 _magicalConstruction = value.Value;
                 base.MagicalConstruction = value.Value;
             }
-            get 
-            { 
+            get
+            {
                 return _magicalConstruction;
             }
         }

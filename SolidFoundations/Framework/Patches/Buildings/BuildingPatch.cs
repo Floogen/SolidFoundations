@@ -9,19 +9,11 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
 using StardewValley.Internal;
-using StardewValley.Locations;
-using StardewValley.Menus;
-using StardewValley.Minigames;
 using StardewValley.Objects;
-using StardewValley.TerrainFeatures;
-using StardewValley.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Object = StardewValley.Object;
 
 namespace SolidFoundations.Framework.Patches.Buildings
 {
@@ -208,7 +200,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 __result = true;
             }
         }
-        
+
         private static void IsValidObjectForChestPostfix(Building __instance, Item item, Chest chest, ref bool __result)
         {
             if (__result is true && __instance.IsValidObjectForChest(item, chest))
@@ -216,7 +208,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 __result = true;
             }
         }
-        
+
         private static void UpdateInteriorWarpsPostfix(Building __instance, GameLocation interior = null)
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(__instance.buildingType.Value) is false)
@@ -253,7 +245,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 warp.TargetY = baseY + __instance.tileY.Value + 1;
             }
         }
-        
+
         private static void UpdatePostfix(Building __instance, GameTime time)
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(__instance.buildingType.Value) is false)
@@ -364,7 +356,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 __instance.ProcessItemConversion(conversion, itemQueryContext, minutesElapsed: timeElapsed);
             }
         }
-        
+
         private static bool ValidateConditionsForDrawLayer(Building building, ExtendedBuildingDrawLayer layer)
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
@@ -374,14 +366,14 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
             return building.ValidateLayer(layer) is false;
         }
-        
+
         private static Rectangle GetExtendedDrawLayerSourceRectangle(ExtendedBuildingDrawLayer layer, int time, Building building)
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
             {
                 return layer.GetSourceRect(time);
             }
-            
+
             return layer.GetSourceRect(time, building);
         }
 
@@ -472,7 +464,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 _monitor.Log($"There was an issue modifying the instructions for StardewValley.Buildings.Building.draw: {e}", LogLevel.Error);
                 return instructions;
             }
-        }        
+        }
 
         private static IEnumerable<CodeInstruction> DrawBackgroundTranspiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -530,7 +522,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return instructions;
             }
         }
-        
+
         private static IEnumerable<CodeInstruction> DrawMenuTranspiler(IEnumerable<CodeInstruction> instructions)
         {
             int MAIN_SOURCE_RECT_INDEX = 3; // Unused: Using OpCodes.Ldloc_3 instead
@@ -602,7 +594,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 return instructions;
             }
         }
-        
+
         private static IEnumerable<CodeInstruction> DrawInConstructionTranspiler(IEnumerable<CodeInstruction> instructions)
         {
             try

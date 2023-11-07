@@ -17,19 +17,15 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
-using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using xTile;
-using xTile.Tiles;
 
 namespace SolidFoundations
 {
@@ -809,7 +805,7 @@ namespace SolidFoundations
 
         private void RefreshAllCustomBuildings(bool resetTexture = true)
         {
-            foreach (GameLocation buildableLocation in Game1.locations.Where(l => l .buildings is not null))
+            foreach (GameLocation buildableLocation in Game1.locations.Where(l => l.buildings is not null))
             {
                 foreach (GenericBuilding building in buildableLocation.buildings.Where(b => b is GenericBuilding))
                 {

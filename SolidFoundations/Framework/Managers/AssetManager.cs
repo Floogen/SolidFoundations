@@ -1,12 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using SolidFoundations.Framework.Interfaces;
 using StardewModdingAPI;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Managers
 {
