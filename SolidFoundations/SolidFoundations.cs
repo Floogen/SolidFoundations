@@ -88,7 +88,7 @@ namespace SolidFoundations
             helper.ConsoleCommands.Add("sf_place_building", "Adds a building in the current location at given tile.\n\nUsage: sf_place_building MODEL_ID TILE_X TILE_Y", this.PlaceBuildingAtTile);
 
             // Hook into the required events
-            helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+            helper.Events.Content.AssetReady += OnAssetReady;
             helper.Events.Content.AssetRequested += OnAssetRequested;
 
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
@@ -155,6 +155,47 @@ namespace SolidFoundations
 
             // Register our game state queries
             GameStateQueries.Register();
+        }
+
+        private void OnAssetReady(object sender, AssetReadyEventArgs e)
+        {
+            if (e.Name.IsEquivalentTo("Data/Buildings") is false)
+            {
+                return;
+            }
+
+            // Force load the changes
+            //var idToModels = Helper.GameContent.Load<Dictionary<string, BuildingData>>(asset);
+
+            // Correct the DrawLayers.Texture and Skins.Texture ids
+            foreach (ExtendedBuildingModel actualModel in buildingManager.GetAllBuildingModels())
+            {
+                if (actualModel.DrawLayers is not null)
+                {
+                    foreach (var layer in actualModel.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
+                    {
+                        var spriteAsset = $"{actualModel.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
+                        if (buildingManager.GetTextureAsset(spriteAsset) is not null)
+                        {
+                            layer.Texture = spriteAsset;
+                        }
+                    }
+                }
+
+                if (actualModel.Skins is not null)
+                {
+                    foreach (var skin in actualModel.Skins.Where(t => String.IsNullOrEmpty(t.Texture) is false))
+                    {
+                        var skinAsset = $"{actualModel.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.Texture)}";
+                        if (buildingManager.GetTextureAsset(skinAsset) is not null)
+                        {
+                            skin.Texture = skinAsset;
+                        }
+                    }
+                }
+
+                buildingManager.AddBuilding(actualModel);
+            }
         }
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -230,52 +271,6 @@ namespace SolidFoundations
                 if (buildingManager.GetMapAsset(asset.Name) is var mapPath && mapPath is not null)
                 {
                     e.LoadFrom(() => Game1.content.Load<Map>(mapPath), AssetLoadPriority.Exclusive);
-                }
-            }
-        }
-
-        private void OnAssetInvalidated(object sender, AssetsInvalidatedEventArgs e)
-        {
-            var asset = e.NamesWithoutLocale.FirstOrDefault(a => a.IsEquivalentTo("Data/Buildings"));
-            if (asset is null)
-            {
-                return;
-            }
-
-            // Force load the changes
-            var idToModels = Helper.GameContent.Load<Dictionary<string, BuildingData>>(asset);
-
-            // Correct the DrawLayers.Texture and Skins.Texture ids
-            foreach (BuildingData model in idToModels.Values)
-            {
-                var actualModel = model as ExtendedBuildingModel;
-                if (actualModel is null)
-                {
-                    continue;
-                }
-
-                if (model.DrawLayers is not null)
-                {
-                    foreach (var layer in model.DrawLayers.Where(t => String.IsNullOrEmpty(t.Texture) is false))
-                    {
-                        var spriteAsset = $"{actualModel.ID}_Sprites_{Path.GetFileNameWithoutExtension(layer.Texture)}";
-                        if (buildingManager.GetTextureAsset(spriteAsset) is not null)
-                        {
-                            layer.Texture = spriteAsset;
-                        }
-                    }
-                }
-
-                if (model.Skins is not null)
-                {
-                    foreach (var skin in model.Skins.Where(t => String.IsNullOrEmpty(t.Texture) is false))
-                    {
-                        var skinAsset = $"{actualModel.ID}_Skins_{Path.GetFileNameWithoutExtension(skin.Texture)}";
-                        if (buildingManager.GetTextureAsset(skinAsset) is not null)
-                        {
-                            skin.Texture = skinAsset;
-                        }
-                    }
                 }
             }
         }
