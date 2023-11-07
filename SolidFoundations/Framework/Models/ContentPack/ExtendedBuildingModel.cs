@@ -93,7 +93,19 @@ namespace SolidFoundations.Framework.Models.ContentPack
         public string IndoorMapTypeAssembly { get; set; } = "Stardew Valley";
 
         // Required for alert to check for missing MagicalConstruction value 
-        public new bool? MagicalConstruction;
+        public new bool? MagicalConstruction 
+        {
+            set
+            {
+                _magicalConstruction = value.Value;
+                base.MagicalConstruction = value.Value;
+            }
+            get 
+            { 
+                return _magicalConstruction;
+            }
+        }
+        private bool _magicalConstruction;
 
         public new string GetActionAtTile(int relative_x, int relative_y)
         {
