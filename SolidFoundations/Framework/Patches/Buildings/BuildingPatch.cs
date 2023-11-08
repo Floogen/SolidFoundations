@@ -39,7 +39,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             harmony.Patch(AccessTools.Method(_object, nameof(Building.updateInteriorWarps), new[] { typeof(GameLocation) }), postfix: new HarmonyMethod(GetType(), nameof(UpdateInteriorWarpsPostfix)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.Update), new[] { typeof(GameTime) }), postfix: new HarmonyMethod(GetType(), nameof(UpdatePostfix)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.performTenMinuteAction), new[] { typeof(int) }), postfix: new HarmonyMethod(GetType(), nameof(PerformTenMinuteActionPostfix)));
-            harmony.Patch(AccessTools.Method(_object, nameof(Building.InitializeIndoor), new[] { typeof(BuildingData), typeof(bool) }), postfix: new HarmonyMethod(GetType(), nameof(InitializeIndoorPostfix)));
+            harmony.Patch(AccessTools.Method(_object, nameof(Building.load), null), postfix: new HarmonyMethod(GetType(), nameof(LoadPostfix)));
 
             harmony.Patch(AccessTools.Method(_object, nameof(Building.PerformBuildingChestAction), new[] { typeof(string), typeof(Farmer) }), transpiler: new HarmonyMethod(GetType(), nameof(PerformBuildingChestActionTranspiler)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.draw), new[] { typeof(SpriteBatch) }), transpiler: new HarmonyMethod(GetType(), nameof(DrawTranspiler)));
@@ -364,19 +364,21 @@ namespace SolidFoundations.Framework.Patches.Buildings
             }
         }        
 
-        private static void InitializeIndoorPostfix(Building __instance, BuildingData data, bool forUpgrade)
+        private static void LoadPostfix(Building __instance)
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(__instance.buildingType.Value) is false)
             {
                 return;
             }
+            var extendedModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(__instance.buildingType.Value);
 
-            ExtendedBuildingModel extendedData = data as ExtendedBuildingModel;
             GameLocation interior = __instance.GetIndoors();
-            if (extendedData is not null && interior is not null && interior.Map is not null && extendedData.ForceLocationToBeBuildable is true)
+            if (extendedModel is not null && interior is not null && interior.Map is not null && extendedModel.ForceLocationToBeBuildable is true)
             {
                 interior.Map.Properties["CanBuildHere"] =  "T";
                 interior.isAlwaysActive.Value = true;
+
+                Game1.locations.Add(interior);
             }
         }
 
