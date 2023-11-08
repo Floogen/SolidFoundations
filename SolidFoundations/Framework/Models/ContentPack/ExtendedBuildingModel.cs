@@ -132,6 +132,9 @@ namespace SolidFoundations.Framework.Models.ContentPack
         }
         private bool _magicalConstruction;
 
+        // Used for backwards compatibility for packs that used StardewValley.Locations.BuildableGameLocation
+        internal bool ForceLocationToBeBuildable { get; set; }
+
         public new string GetActionAtTile(int relative_x, int relative_y)
         {
             Point key = new Point(relative_x, relative_y);
