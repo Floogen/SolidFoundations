@@ -390,7 +390,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         private static Rectangle GetExtendedDrawLayerSourceRectangle(ExtendedBuildingDrawLayer layer, int time, Building building)
         {
-            if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
+            if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false || building.ValidateLayer(layer) is false)
             {
                 return layer.GetSourceRect(time);
             }
@@ -409,7 +409,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             var extendedModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(building.buildingType.Value);
             if (extendedModel.DrawLayers is not null && extendedModel.DrawLayers.Any(l => l.HideBaseTexture && building.ValidateLayer(l)))
             {
-                rectangle = new Rectangle(1, 1, 5, 5);
+                rectangle = Rectangle.Empty;
             }
 
             return rectangle;
