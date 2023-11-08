@@ -298,11 +298,13 @@ namespace SolidFoundations.Framework.Patches.Buildings
                     {
                         parentLocation.lastTouchActionLocation = new Vector2(Game1.player.StandingPixel.X / 64, Game1.player.StandingPixel.Y / 64);
                         bool isStructure = false;
-                        if (__instance.indoors.Value is not null)
+
+                        var indoors = __instance.GetIndoors();
+                        if (indoors is not null)
                         {
                             isStructure = true;
                         }
-                        Game1.warpFarmer(__instance.indoors.Name, __instance.indoors.Value.warps[0].X, __instance.indoors.Value.warps[0].Y - 1, Game1.player.FacingDirection, isStructure);
+                        Game1.warpFarmer(indoors.NameOrUniqueName, indoors.warps[0].X, indoors.warps[0].Y - 1, Game1.player.FacingDirection, isStructure);
                     }
 
                     var specialActionAtTile = extendedModel.GetSpecialEventAtTile(actualTile.X, actualTile.Y);
