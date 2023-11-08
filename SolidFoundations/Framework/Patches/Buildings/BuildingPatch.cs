@@ -90,8 +90,9 @@ namespace SolidFoundations.Framework.Patches.Buildings
                     if (__instance.OnUseHumanDoor(who))
                     {
                         who.currentLocation.playSound("doorClose", tileLocation);
-                        bool isStructure = __instance.indoors.Value != null;
-                        Game1.warpFarmer(interior.NameOrUniqueName, interior.warps[0].X, interior.warps[0].Y - 1, Game1.player.FacingDirection, isStructure);
+                        bool isStructure = interior != null;
+
+                        Game1.warpFarmer(new LocationRequest(interior.NameOrUniqueName, isStructure, interior), interior.warps[0].X, interior.warps[0].Y - 1, Game1.player.FacingDirection);
                     }
 
                     __result = true;
@@ -305,7 +306,8 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         {
                             isStructure = true;
                         }
-                        Game1.warpFarmer(indoors.NameOrUniqueName, indoors.warps[0].X, indoors.warps[0].Y - 1, Game1.player.FacingDirection, isStructure);
+
+                        Game1.warpFarmer(new LocationRequest(indoors.NameOrUniqueName, isStructure, indoors), indoors.warps[0].X, indoors.warps[0].Y - 1, Game1.player.FacingDirection);
                     }
 
                     var specialActionAtTile = extendedModel.GetSpecialEventAtTile(actualTile.X, actualTile.Y);
