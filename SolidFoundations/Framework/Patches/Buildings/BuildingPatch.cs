@@ -127,7 +127,6 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
                         if (who.ActiveObject is not null && extendedModel.LoadChestTiles is not null && extendedModel.GetLoadChestActionAtTile(actualTile.X, actualTile.Y) is var loadChestName && String.IsNullOrEmpty(loadChestName) is false)
                         {
-                            _monitor.Log($"{__instance.IsValidObjectForChest(who.ActiveObject, __instance.GetBuildingChest(loadChestName))}", LogLevel.Warn);
                             __instance.PerformBuildingChestAction(loadChestName, who);
 
                             __result = true;
@@ -376,8 +375,6 @@ namespace SolidFoundations.Framework.Patches.Buildings
             {
                 interior.Map.Properties["CanBuildHere"] =  "T";
                 interior.isAlwaysActive.Value = true;
-
-                _monitor.Log(interior.IsBuildableLocation().ToString(), LogLevel.Warn);
             }
         }
 
@@ -452,11 +449,6 @@ namespace SolidFoundations.Framework.Patches.Buildings
                 lines.Insert(acceptAmountInsertIndex + 2, new CodeInstruction(OpCodes.Ldloc_S, ACCEPT_AMOUNT_INDEX));
                 lines.Insert(acceptAmountInsertIndex + 3, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BuildingPatch), nameof(GetMaxItemsToTakeFromStack))));
                 lines.Insert(acceptAmountInsertIndex + 4, new CodeInstruction(OpCodes.Stloc_S, ACCEPT_AMOUNT_INDEX));
-
-                foreach (var line in lines)
-                {
-                    _monitor.Log(line.ToString(), LogLevel.Warn);
-                }
 
                 // Validate the changes
                 if (acceptAmountInsertIndex == -1)
