@@ -70,16 +70,7 @@ namespace SolidFoundations.Framework.External.ContentPatcher
             string locationName = splitToken[1];
             if (Game1.getLocationFromName(locationName) is GameLocation location && location is not null && location.buildings is not null)
             {
-                foreach (GenericBuilding building in location.buildings.Where(b => b is GenericBuilding))
-                {
-                    if (building.Id.Equals(buildingName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        yield return true.ToString();
-                        yield break;
-                    }
-                }
-
-                foreach (Building building in location.buildings.Where(b => b is not GenericBuilding))
+                foreach (Building building in location.buildings.Where(b => SolidFoundations.buildingManager.DoesBuildingModelExist(b.buildingType.Value)))
                 {
                     if (building.buildingType.Value.Equals(buildingName, StringComparison.OrdinalIgnoreCase))
                     {
