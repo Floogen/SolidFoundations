@@ -1,5 +1,4 @@
-﻿using SolidFoundations.Framework.Models.ContentPack;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using System;

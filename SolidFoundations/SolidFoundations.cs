@@ -1,14 +1,10 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SolidFoundations.Framework.Extensions;
 using SolidFoundations.Framework.External.ContentPatcher;
-using SolidFoundations.Framework.External.SpaceCore;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
-using SolidFoundations.Framework.Models.Buildings;
 using SolidFoundations.Framework.Models.ContentPack;
-using SolidFoundations.Framework.Models.ContentPack.Actions;
 using SolidFoundations.Framework.Models.ContentPack.Compatibility;
 using SolidFoundations.Framework.Patches.Buildings;
 using SolidFoundations.Framework.Patches.GameData;
@@ -18,14 +14,9 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
-using StardewValley.TerrainFeatures;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using xTile;
 
 namespace SolidFoundations
@@ -261,7 +252,7 @@ namespace SolidFoundations
         {
             return api;
         }
-        
+
         // TODO: When SDV v1.6 is released, revise this method to load the buildings into BuildingsData
         private void LoadContentPacks(bool silent = false)
         {

@@ -9,7 +9,6 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
 using StardewValley.Internal;
-using StardewValley.Logging;
 using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
@@ -362,7 +361,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
                 __instance.ProcessItemConversion(conversion, itemQueryContext, minutesElapsed: timeElapsed);
             }
-        }        
+        }
 
         private static void LoadPostfix(Building __instance)
         {
@@ -375,7 +374,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             GameLocation interior = __instance.GetIndoors();
             if (extendedModel is not null && interior is not null && interior.Map is not null && extendedModel.ForceLocationToBeBuildable is true)
             {
-                interior.Map.Properties["CanBuildHere"] =  "T";
+                interior.Map.Properties["CanBuildHere"] = "T";
                 interior.isAlwaysActive.Value = true;
 
                 Game1.locations.Add(interior);
