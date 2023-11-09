@@ -92,8 +92,7 @@ namespace SolidFoundations
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
-
-            helper.Events.World.BuildingListChanged += OnBuildingListChanged;
+            helper.Events.GameLoop.Saved += OnSaved;
         }
 
         private bool IsGameVersionCompatible()
@@ -104,11 +103,19 @@ namespace SolidFoundations
             return gameVersion >= requiredMinimumVersion;
         }
 
-        private void OnBuildingListChanged(object sender, BuildingListChangedEventArgs e)
+        private void OnSaved(object sender, SavedEventArgs e)
         {
-            foreach (GenericBuilding building in e.Added.Where(b => b is GenericBuilding))
+            if (!Game1.IsMasterGame || String.IsNullOrEmpty(Constants.CurrentSavePath))
             {
-                RefreshCustomBuilding(e.Location, building, true);
+                return;
+            }
+            var externalSaveFolderPath = Path.Combine(Constants.CurrentSavePath, "SolidFoundations");
+
+            // Cache the building.json, in case we need to restore it
+            if (String.IsNullOrEmpty(Constants.CurrentSavePath) is false && File.Exists(Path.Combine(externalSaveFolderPath, "buildings.json")))
+            {
+                string cachedBuildingPath = Path.Combine(externalSaveFolderPath, "buildings_old.json");
+                File.Move(Path.Combine(externalSaveFolderPath, "buildings.json"), cachedBuildingPath, true);
             }
         }
 
@@ -312,25 +319,56 @@ namespace SolidFoundations
                 try
                 {
                     Monitor.Log($"Failed initial loading of custom buildings: {ex}", LogLevel.Trace);
-                    Monitor.Log($"Attempting to remove SpaceCore-related items from the cached buildings...", LogLevel.Trace);
+                    Monitor.Log($"Attempting to remove unknown indoor types from the cached buildings...", LogLevel.Trace);
 
                     // Load the XML and remove any nodes with the xsi:type of "Mods_..."
                     XDocument doc = XDocument.Load(customBuildingsExternalSavePath);
-                    var invalidNodes = doc.Descendants().Where(n => n.Attributes().FirstOrDefault(y => y.Name.LocalName == "type") is var nodeType && nodeType is not null && nodeType.Value.Contains("Mods_", StringComparison.OrdinalIgnoreCase)).Select(n => n).ToList();
-                    invalidNodes.ForEach(x => x.Remove());
+                    var invalidNodes = doc.Descendants().Where(n => n.Name.LocalName == "indoors" && n.Attributes().FirstOrDefault(y => y.Name.LocalName == "type") is var nodeType && nodeType is not null && Toolkit.IsKnownVanillaIndoorType(nodeType.Value) is false).Select(n => n).ToList();
+                    
+                    foreach (var node in invalidNodes)
+                    {
+                        Monitor.Log($"Removing building with indoor type of {node.Attributes().FirstOrDefault(y => y.Name.LocalName == "type").Value}", LogLevel.Trace);
+                        node.Remove();
+                    }
 
                     // Attempt the secondary deserialization
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
                     externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(doc.CreateReader());
 
+                    Monitor.Log($"Removed cached buildings with invalid indoor types! See log for details.", LogLevel.Warn);
                     Monitor.Log($"Cleanup of the cached buildings was successful!", LogLevel.Trace);
                 }
                 catch (Exception secondaryEx)
                 {
-                    Monitor.Log("Failed to load the cached custom buildings: No custom buildings will be loaded!", LogLevel.Warn);
-                    Monitor.Log($"Failed to load the cached custom buildings: {secondaryEx}", LogLevel.Trace);
+                    try
+                    {
+                        Monitor.Log($"Failed second attempt at loading of custom buildings: {ex}", LogLevel.Trace);
+                        Monitor.Log($"Attempting to remove SpaceCore-related items from the cached buildings...", LogLevel.Trace);
 
-                    return;
+                        // Load the XML and remove any nodes with the xsi:type of "Mods_..."
+                        XDocument doc = XDocument.Load(customBuildingsExternalSavePath);
+                        var invalidNodes = doc.Descendants().Where(n => n.Attributes().FirstOrDefault(y => y.Name.LocalName == "type") is var nodeType && nodeType is not null && nodeType.Value.Contains("Mods_", StringComparison.OrdinalIgnoreCase)).Select(n => n).ToList();
+
+                        foreach (var node in invalidNodes)
+                        {
+                            Monitor.Log($"Removing nodes prefixed with \"Mods_\" {node.Attributes().FirstOrDefault(y => y.Name.LocalName == "type").Value}", LogLevel.Trace);
+                            node.Remove();
+                        }
+
+                        // Attempt the tertiary deserialization
+                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
+                        externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(doc.CreateReader());
+
+                        Monitor.Log($"Removed cached buildings with invalid class types! See log for details.", LogLevel.Warn);
+                        Monitor.Log($"Cleanup of the cached buildings was successful!", LogLevel.Trace);
+                    }
+                    catch (Exception tertiaryEx)
+                    {
+                        Monitor.Log("Failed to load the cached custom buildings: No custom buildings will be loaded!", LogLevel.Warn);
+                        Monitor.Log($"Failed to load the cached custom buildings: {tertiaryEx}", LogLevel.Trace);
+
+                        return;
+                    }
                 }
             }
 
@@ -350,13 +388,19 @@ namespace SolidFoundations
                             continue;
                         }
 
-                        GenericBuilding customBuilding = externallySavedCustomBuildings.FirstOrDefault(b => b.Id == archivedData.Id && b.tileX.Value == archivedData.TileX && b.tileY.Value == archivedData.TileY);
+                        GenericBuilding customBuilding = externallySavedCustomBuildings.FirstOrDefault(b => b.Id == archivedData.Id && b.tileX == archivedData.TileX && b.tileY == archivedData.TileY);
                         if (customBuilding is null)
                         {
                             continue;
                         }
 
-                        if (MigrateCachedCustomBuildingForLocation(buildableLocation, customBuilding) is false)
+                        Building vanillaBuilding = Building.CreateInstanceFromId(customBuilding.Id, new Vector2(customBuilding.tileX, customBuilding.tileY));
+                        vanillaBuilding.skinId.Value = customBuilding.skinID.Value;
+                        vanillaBuilding.daysOfConstructionLeft.Value = 0;
+                        vanillaBuilding.daysUntilUpgrade.Value = 0;
+                        vanillaBuilding.indoors.Value = customBuilding.indoors;
+                        customBuilding.buildingChests.ForEach(vanillaBuilding.buildingChests.Add);
+                        if (MigrateCachedCustomBuildingForLocation(buildableLocation, vanillaBuilding) is false)
                         {
                             continue;
                         }
@@ -370,7 +414,7 @@ namespace SolidFoundations
             }
         }
 
-        private bool MigrateCachedCustomBuildingForLocation(GameLocation buildableLocation, GenericBuilding customBuilding)
+        private bool MigrateCachedCustomBuildingForLocation(GameLocation buildableLocation, Building customBuilding)
         {
             try
             {
@@ -378,33 +422,27 @@ namespace SolidFoundations
                 if (customBuilding.indoors.Value is not null)
                 {
                     interior = customBuilding.indoors.Value;
-
                     if (Game1.locations.Contains(interior) is false && buildableLocation is not Farm)
                     {
-                        Game1.locations.Add(interior);
+                        //Game1.locations.Add(interior);
                     }
                 }
 
-                customBuilding.buildingType.Value = customBuilding.Id;
-
                 // Set the location
                 customBuilding.parentLocationName.Value = buildableLocation.NameOrUniqueName;
-
                 // Load the building
                 customBuilding.load();
-
                 // Establish any buildings within this building
                 if (interior is GameLocation subBuildableLocation && subBuildableLocation is not null && subBuildableLocation.buildings is not null)
                 {
                     foreach (var subBuilding in subBuildableLocation.buildings.ToList())
                     {
-                        if (subBuilding is GenericBuilding subCustomBuilding)
+                        if (subBuilding is Building subCustomBuilding)
                         {
                             subBuildableLocation.buildings.Remove(subCustomBuilding);
                             MigrateCachedCustomBuildingForLocation(subBuildableLocation, subCustomBuilding);
                             continue;
                         }
-
                         // Handle vanilla buildings
                         subBuilding.load();
                         if (subBuilding.indoors.Value is not null && subBuilding.indoors.Value.warps is not null)
@@ -416,10 +454,8 @@ namespace SolidFoundations
                         }
                     }
                 }
-
                 // Restore the archived custom building
                 buildableLocation.buildings.Add((Building)customBuilding);
-
                 // Clear any grass and other debris
                 var validIndexesForRemoval = new List<int>()
                 {
@@ -438,7 +474,6 @@ namespace SolidFoundations
                     786,
                     674
                 };
-
                 for (int x = 0; x < customBuilding.tilesWide.Value; x++)
                 {
                     for (int y = 0; y < customBuilding.tilesHigh.Value; y++)
@@ -461,11 +496,10 @@ namespace SolidFoundations
             }
             catch (Exception ex)
             {
-                Monitor.Log($"Failed to setup cached custom building {customBuilding.Id} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}, see log for details.", LogLevel.Warn);
-                Monitor.Log($"Failed to setup cached custom building {customBuilding.Id} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}: {ex}", LogLevel.Trace);
+                Monitor.Log($"Failed to setup cached custom building {customBuilding.buildingType.Value} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}, see log for details.", LogLevel.Warn);
+                Monitor.Log($"Failed to setup cached custom building {customBuilding.buildingType.Value} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}: {ex}", LogLevel.Trace);
                 return false;
             }
-
             return true;
         }
 
@@ -813,49 +847,6 @@ namespace SolidFoundations
 
         private void RefreshAllCustomBuildings(bool resetTexture = true)
         {
-            foreach (GameLocation buildableLocation in Game1.locations.Where(l => l.buildings is not null))
-            {
-                foreach (GenericBuilding building in buildableLocation.buildings.Where(b => b is GenericBuilding))
-                {
-                    RefreshCustomBuilding(buildableLocation, building, resetTexture);
-                }
-            }
-        }
-
-        private void RefreshCustomBuilding(GameLocation location, GenericBuilding building, bool resetTexture = true)
-        {
-            try
-            {
-                var model = buildingManager.GetSpecificBuildingModel(building.Id);
-                if (model is not null)
-                {
-                    // Remove any FlagType.Temporary stored in the buildings modData
-                    foreach (var key in building.modData.Keys.Where(k => k.Contains(ModDataKeys.FLAG_BASE)).ToList())
-                    {
-                        if (building.modData[key] == SpecialAction.FlagType.Temporary.ToString())
-                        {
-                            building.modData.Remove(key);
-                        }
-                    }
-
-                    building.RefreshModel(model);
-
-                    if (resetTexture)
-                    {
-                        Helper.GameContent.InvalidateCache(model.Texture);
-                        building.resetTexture();
-                    }
-                }
-                else
-                {
-                    throw new Exception("Model is null.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Monitor.Log($"Failed to refresh {building.Id} | {building.textureName()} from {location.NameOrUniqueName}!", LogLevel.Warn);
-                Monitor.Log($"Failed to refresh {building.Id} | {building.textureName()} from {location.NameOrUniqueName}: {ex}", LogLevel.Trace);
-            }
         }
 
         private void PlaceBuildingAtTile(string command, string[] args)
