@@ -38,6 +38,7 @@ namespace SolidFoundations.Framework.Utilities
             {
                 monitor.Log($"Failed to get known types, some buildings may fail to load: {ex}", LogLevel.Trace);
             }
+            bool didLoadWithoutErrors = false;
 
             var externallySavedCustomBuildings = new List<GenericBuilding>();
             try
@@ -71,8 +72,10 @@ namespace SolidFoundations.Framework.Utilities
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
                     externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(doc.CreateReader());
 
-                    monitor.Log($"Removed cached buildings with invalid indoor types! See log for details.", LogLevel.Warn);
+                    monitor.Log($"Removed {invalidNodes.Count} cached building(s) with invalid indoor types! See log for details.", LogLevel.Warn);
                     monitor.Log($"Cleanup of the cached buildings was successful!", LogLevel.Trace);
+
+                    didLoadWithoutErrors = true;
                 }
                 catch (Exception secondaryEx)
                 {
@@ -95,14 +98,17 @@ namespace SolidFoundations.Framework.Utilities
                         XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<GenericBuilding>), knownTypes);
                         externallySavedCustomBuildings = (List<GenericBuilding>)xmlSerializer.Deserialize(doc.CreateReader());
 
-                        monitor.Log($"Removed cached buildings with invalid class types! See log for details.", LogLevel.Warn);
+                        monitor.Log($"Removed {invalidNodes.Count} cached building(s) with invalid class types! See log for details.", LogLevel.Warn);
                         monitor.Log($"Cleanup of the cached buildings was successful!", LogLevel.Trace);
+
+                        didLoadWithoutErrors = true;
                     }
                     catch (Exception tertiaryEx)
                     {
-                        monitor.Log("Failed to load the cached custom buildings: No custom buildings will be loaded!", LogLevel.Warn);
-                        monitor.Log($"Failed to load the cached custom buildings: {tertiaryEx}", LogLevel.Trace);
+                        monitor.Log("Failed to load the cached Solid Foundation data: No custom buildings will be loaded!", LogLevel.Warn);
+                        monitor.Log($"Failed to load the cached Solid Foundation data: {tertiaryEx}", LogLevel.Trace);
 
+                        DisplayCacheWarning(monitor);
                         return;
                     }
                 }
@@ -143,11 +149,24 @@ namespace SolidFoundations.Framework.Utilities
                     }
                     catch (Exception ex)
                     {
-                        monitor.Log($"Failed to load cached custom building {archivedData.Id} at [{archivedData.TileX}, {archivedData.TileY}] within the map {buildableLocation.NameOrUniqueName}, see log for details.", LogLevel.Warn);
+                        monitor.Log($"Failed to load cached custom building {archivedData.Id} at [{archivedData.TileX}, {archivedData.TileY}] within the map {buildableLocation.NameOrUniqueName}! See log for details.", LogLevel.Warn);
                         monitor.Log($"Failure to load the custom building: {ex}", LogLevel.Trace);
+
+                        didLoadWithoutErrors = true;
                     }
                 }
             }
+
+            // Display one time warning that any buildings which failed to load will be lost upon saving
+            if (didLoadWithoutErrors)
+            {
+                DisplayCacheWarning(monitor);
+            }
+        }
+
+        private static void DisplayCacheWarning(IMonitor monitor)
+        {
+            monitor.Log("There were errors loading the cached Solid Foundation buildings. Any buildings which have failed to load will be lost after saving the game.", LogLevel.Alert);
         }
 
         private static bool MigrateCachedCustomBuildingForLocation(IMonitor monitor, GameLocation buildableLocation, Building customBuilding)
@@ -232,7 +251,7 @@ namespace SolidFoundations.Framework.Utilities
             }
             catch (Exception ex)
             {
-                monitor.Log($"Failed to setup cached custom building {customBuilding.buildingType.Value} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}, see log for details.", LogLevel.Warn);
+                monitor.Log($"Failed to setup cached custom building {customBuilding.buildingType.Value} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}! See log for details.", LogLevel.Warn);
                 monitor.Log($"Failed to setup cached custom building {customBuilding.buildingType.Value} at [{customBuilding.tileX}, {customBuilding.tileY}] within the map {buildableLocation.NameOrUniqueName}: {ex}", LogLevel.Trace);
                 return false;
             }
