@@ -91,7 +91,6 @@ namespace SolidFoundations
 
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
-            helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
             helper.Events.GameLoop.Saved += OnSaved;
         }
 
@@ -117,15 +116,6 @@ namespace SolidFoundations
                 string cachedBuildingPath = Path.Combine(externalSaveFolderPath, "buildings_old.json");
                 File.Move(Path.Combine(externalSaveFolderPath, "buildings.json"), cachedBuildingPath, true);
             }
-        }
-
-        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
-        {
-            // Load any owned content packs
-            LoadContentPacks();
-
-            // Invalidate the BuildingsData cache to reapply any patches
-            //modHelper.GameContent.InvalidateCache("Data/Buildings");
         }
 
         // TODO: When using SDV v1.6, repurpose this to convert all GenericBuildings into SDV Buildings
