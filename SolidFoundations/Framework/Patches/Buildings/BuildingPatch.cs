@@ -385,7 +385,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
             {
-                return true;
+                return false;
             }
 
             return building.ValidateLayer(layer) is false;
