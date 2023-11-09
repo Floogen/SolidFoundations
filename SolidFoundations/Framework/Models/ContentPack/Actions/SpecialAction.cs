@@ -297,59 +297,59 @@ namespace SolidFoundations.Framework.Models.ContentPack.Actions
             switch (shopName.ToLower())
             {
                 case "clintshop":
-                    Utility.OpenShopMenu(Game1.shop_blacksmith, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_blacksmith, shopOwner);
                     return;
                 case "deserttrader":
-                    Utility.OpenShopMenu(Game1.shop_desertTrader, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_desertTrader, shopOwner);
                     return;
                 case "dwarfshop":
-                    Utility.OpenShopMenu(Game1.shop_dwarf, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_dwarf, shopOwner);
                     return;
                 case "geodes":
                     Game1.activeClickableMenu = new GeodeMenu();
                     return;
                 case "gusshop":
-                    Utility.OpenShopMenu(Game1.shop_saloon, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_saloon, shopOwner);
                     return;
                 case "harveyshop":
-                    Utility.OpenShopMenu(Game1.shop_hospital, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_hospital, shopOwner);
                     return;
                 case "itemrecovery":
-                    Utility.OpenShopMenu(Game1.shop_adventurersGuildItemRecovery, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_adventurersGuildItemRecovery, shopOwner);
                     return;
                 case "krobusshop":
-                    Utility.OpenShopMenu(Game1.shop_krobus, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_krobus, shopOwner);
                     return;
                 case "marlonshop":
-                    Utility.OpenShopMenu(Game1.shop_adventurersGuild, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_adventurersGuild, shopOwner);
                     return;
                 case "marnieshop":
-                    Utility.OpenShopMenu(Game1.shop_animalSupplies, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_animalSupplies, shopOwner);
                     return;
                 case "pierreshop":
-                    Utility.OpenShopMenu(Game1.shop_generalStore, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_generalStore, shopOwner);
                     return;
                 case "qishop":
-                    Utility.OpenShopMenu(Game1.shop_qiGemShop, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_qiGemShop, shopOwner);
                     return;
                 case "sandyshop":
-                    Utility.OpenShopMenu(Game1.shop_sandy, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_sandy, shopOwner);
                     return;
                 case "robinshop":
-                    Utility.OpenShopMenu(Game1.shop_carpenter, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_carpenter, shopOwner);
                     return;
                 case "travelingmerchant":
                 case "travellingmerchant":
-                    Utility.OpenShopMenu(Game1.shop_travelingCart, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_travelingCart, shopOwner);
                     return;
                 case "toolupgrades":
-                    Utility.OpenShopMenu(Game1.shop_blacksmithUpgrades, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_blacksmithUpgrades, shopOwner);
                     return;
                 case "willyshop":
-                    Utility.OpenShopMenu(Game1.shop_fish, shopOwner);
+                    Utility.TryOpenShopMenu(Game1.shop_fish, shopOwner);
                     return;
                 default:
-                    Utility.OpenShopMenu(shopName, shopOwner);
+                    Utility.TryOpenShopMenu(shopName, shopOwner);
                     return;
             }
         }
