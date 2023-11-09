@@ -604,8 +604,15 @@ namespace SolidFoundations
             }
         }
 
-        private void RefreshAllCustomBuildings(bool resetTexture = true)
+        private void RefreshAllCustomBuildings()
         {
+            foreach (GameLocation location in Game1.locations.Where(l => l.buildings is not null))
+            {
+                foreach (Building building in location.buildings.Where(b => buildingManager.DoesBuildingModelExist(b.buildingType.Value)))
+                {
+                    building.ReloadBuildingData();
+                }
+            }
         }
 
         private void PlaceBuildingAtTile(string command, string[] args)
