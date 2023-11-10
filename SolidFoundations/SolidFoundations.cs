@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SolidFoundations.Framework.Extensions;
 using SolidFoundations.Framework.External.ContentPatcher;
 using SolidFoundations.Framework.Interfaces.Internal;
 using SolidFoundations.Framework.Managers;
@@ -32,6 +33,7 @@ namespace SolidFoundations
         // Managers
         internal static ApiManager apiManager;
         internal static BuildingManager buildingManager;
+        internal static LightManager lightManager;
 
         public override void Entry(IModHelper helper)
         {
@@ -51,6 +53,7 @@ namespace SolidFoundations
             // Set up the managers
             apiManager = new ApiManager(monitor);
             buildingManager = new BuildingManager(monitor, helper);
+            lightManager = new LightManager(monitor, helper);
 
             // Load our Harmony patches
             try
@@ -83,6 +86,8 @@ namespace SolidFoundations
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.GameLoop.Saved += OnSaved;
+
+            helper.Events.World.BuildingListChanged += OnBuildingListChanged;
         }
 
         private bool IsGameVersionCompatible()
@@ -91,6 +96,19 @@ namespace SolidFoundations
             var gameVersion = new Version(Game1.version);
 
             return gameVersion >= requiredMinimumVersion;
+        }
+
+        private void OnBuildingListChanged(object sender, BuildingListChangedEventArgs e)
+        {
+            foreach (var building in e.Added)
+            {
+                building.ResetLights(e.Location);
+            }
+
+            foreach (var building in e.Removed)
+            {
+                building.ClearLightSources(e.Location);
+            }
         }
 
         private void OnSaved(object sender, SavedEventArgs e)
@@ -616,7 +634,7 @@ namespace SolidFoundations
             {
                 foreach (Building building in location.buildings.Where(b => buildingManager.DoesBuildingModelExist(b.buildingType.Value)))
                 {
-                    building.ReloadBuildingData();
+                    building.RefreshModel(buildingManager.GetSpecificBuildingModel(building.buildingType.Value));
                 }
             }
         }

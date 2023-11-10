@@ -78,7 +78,7 @@ namespace SolidFoundations.Framework.Extensions
             }
 
             // Activate any lights
-            building.ResetLights();
+            building.ResetLights(building.GetParentLocation());
         }
 
         public static void ProcessItemConversion(this Building building, ExtendedBuildingItemConversion conversion, ItemQueryContext itemQueryContext, bool isDayStart = false, int minutesElapsed = 0)
@@ -347,47 +347,41 @@ namespace SolidFoundations.Framework.Extensions
 
         public static List<LightSource> GetLightSources(this Building building)
         {
-            var lightSources = new List<LightSource>();
-
-            // TODO: Get via building's ModData / Metadata
-
-            return lightSources;
+            return SolidFoundations.lightManager.GetLightSources(building);
         }
 
         public static void SetLightSources(this Building building, List<LightSource> lightSources)
         {
-            // TODO: Set via building's ModData / Metadata using JSON serializer
-
+            SolidFoundations.lightManager.SetLightSources(building, lightSources);
         }
 
-        public static void ResetLights(this Building building)
+        public static void ClearLightSources(this Building building, GameLocation gameLocation)
+        {
+            SolidFoundations.lightManager.ClearLights(building, gameLocation);
+        }
+
+        public static void UpdateLightSources(this Building building, GameLocation gameLocation, GameTime time)
+        {
+            SolidFoundations.lightManager.UpdateLights(building, gameLocation, time);
+        }
+
+        public static void ResetLights(this Building building, GameLocation gameLocation)
         {
             if (SolidFoundations.buildingManager.DoesBuildingModelExist(building.buildingType.Value) is false)
             {
                 return;
             }
-
             var extendedModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(building.buildingType.Value);
-            if (extendedModel.Lights is not null && building.GetParentLocation() is not null && building.GetParentLocation().sharedLights is not null)
+
+            if (extendedModel.Lights is not null && gameLocation is not null && gameLocation.sharedLights is not null)
             {
                 var startingTile = new Point(building.tileX.Value, building.tileY.Value);
-                var gameLocation = building.GetParentLocation();
 
-                // Clear any old associated lightsources
-                var lightSources = building.GetLightSources();
-                if (lightSources.Count > 0)
-                {
-                    foreach (var lightSource in lightSources)
-                    {
-                        if (gameLocation.hasLightSource(lightSource.Identifier))
-                        {
-                            gameLocation.removeLightSource(lightSource.Identifier);
-                        }
-                    }
-                }
+                // Clear the current lights
+                building.ClearLightSources(gameLocation);
 
                 // Add the required lights
-                lightSources = new List<LightSource>();
+                var lightSources = new List<LightSource>();
                 foreach (var lightModel in extendedModel.Lights)
                 {
                     var lightTilePosition = lightModel.Tile + startingTile;

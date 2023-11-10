@@ -135,7 +135,6 @@ namespace SolidFoundations.Framework.Managers
             return String.IsNullOrEmpty(buildingId) is false && _idToModels.ContainsKey(buildingId);
         }
 
-        // TODO: After SDV v1.6, revise GetAllActiveBuildings to handle all buildings, instead of just SF buildings
         public List<Building> GetAllActiveBuildings(GameLocation buildableGameLocation)
         {
             var activeBuildings = new List<Building>();

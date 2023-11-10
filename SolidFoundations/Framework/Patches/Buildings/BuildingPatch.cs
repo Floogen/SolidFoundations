@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SolidFoundations.Framework.Extensions;
 using SolidFoundations.Framework.Models.ContentPack;
-using SolidFoundations.Framework.Utilities;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
@@ -39,6 +38,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             harmony.Patch(AccessTools.Method(_object, nameof(Building.Update), new[] { typeof(GameTime) }), postfix: new HarmonyMethod(GetType(), nameof(UpdatePostfix)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.performTenMinuteAction), new[] { typeof(int) }), postfix: new HarmonyMethod(GetType(), nameof(PerformTenMinuteActionPostfix)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.load), null), postfix: new HarmonyMethod(GetType(), nameof(LoadPostfix)));
+            harmony.Patch(AccessTools.Method(_object, nameof(Building.dayUpdate), new[] { typeof(int) }), postfix: new HarmonyMethod(GetType(), nameof(DayUpdatePostfix)));
 
             harmony.Patch(AccessTools.Method(_object, nameof(Building.PerformBuildingChestAction), new[] { typeof(string), typeof(Farmer) }), transpiler: new HarmonyMethod(GetType(), nameof(PerformBuildingChestActionTranspiler)));
             harmony.Patch(AccessTools.Method(_object, nameof(Building.draw), new[] { typeof(SpriteBatch) }), transpiler: new HarmonyMethod(GetType(), nameof(DrawTranspiler)));
@@ -47,6 +47,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             harmony.Patch(AccessTools.Method(_object, nameof(Building.drawInConstruction), new[] { typeof(SpriteBatch) }), transpiler: new HarmonyMethod(GetType(), nameof(DrawInConstructionTranspiler)));
 
             harmony.Patch(AccessTools.Constructor(_object, null), postfix: new HarmonyMethod(GetType(), nameof(BuildingPostfix)));
+            harmony.Patch(AccessTools.Constructor(_object, new[] { typeof(string), typeof(Vector2) }), postfix: new HarmonyMethod(GetType(), nameof(BuildingPostfix)));
         }
 
         private static bool DoActionPrefix(Building __instance, Vector2 tileLocation, Farmer who, ref bool __result)
@@ -182,18 +183,12 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
         private static void PerformActionOnDemolitionPostfix(Building __instance, GameLocation location)
         {
-            foreach (var lightSource in __instance.GetLightSources())
-            {
-                if (location.hasLightSource(lightSource.Identifier))
-                {
-                    location.removeLightSource(lightSource.Identifier);
-                }
-            }
+            __instance.ClearLightSources(location);
         }
 
         private static void OnEndMovePostfix(Building __instance)
         {
-            __instance.ResetLights();
+            __instance.ResetLights(__instance.GetParentLocation());
         }
 
         private static void IsActionableTilePostfix(Building __instance, int xTile, int yTile, Farmer who, ref bool __result)
@@ -259,34 +254,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
             // Handle lights
             var parentLocation = __instance.GetParentLocation();
-            if (extendedModel.Lights is not null && __instance.GetParentLocation() is not null && parentLocation.sharedLights is not null)
-            {
-                var startingTile = new Point(__instance.tileX.Value, __instance.tileY.Value);
-
-                // Add the required lights
-                int lightCount = 0;
-                foreach (var lightModel in extendedModel.Lights)
-                {
-                    lightCount++;
-
-                    lightModel.ElapsedMilliseconds += time.ElapsedGameTime.Milliseconds;
-                    if (lightModel.ElapsedMilliseconds < lightModel.GetUpdateInterval())
-                    {
-                        continue;
-                    }
-                    lightModel.GetUpdateInterval(recalculateValue: true);
-                    lightModel.ElapsedMilliseconds = 0f;
-
-                    var lightTilePosition = lightModel.Tile + startingTile;
-                    int lightIdentifier = Toolkit.GetLightSourceIdentifierForBuilding(startingTile, lightCount);
-                    if (parentLocation.hasLightSource(lightIdentifier) is false)
-                    {
-                        continue;
-                    }
-
-                    parentLocation.sharedLights[lightIdentifier].radius.Value = lightModel.GetRadius();
-                }
-            }
+            __instance.UpdateLightSources(parentLocation, time);
 
             // Catch touch actions
             if (parentLocation is not null)
@@ -379,6 +347,17 @@ namespace SolidFoundations.Framework.Patches.Buildings
 
                 Game1.locations.Add(interior);
             }
+        }
+
+        private static void DayUpdatePostfix(Building __instance, int dayOfMonth)
+        {
+            if (SolidFoundations.buildingManager.DoesBuildingModelExist(__instance.buildingType.Value) is false)
+            {
+                return;
+            }
+            var extendedModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(__instance.buildingType.Value);
+
+            __instance.RefreshModel(extendedModel);
         }
 
         private static bool ValidateConditionsForDrawLayer(Building building, ExtendedBuildingDrawLayer layer)
@@ -720,14 +699,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
             }
             var extendedModel = SolidFoundations.buildingManager.GetSpecificBuildingModel(__instance.buildingType.Value);
 
-            // Update the chests to use the custom capacity
-            foreach (ExtendedBuildingChest chestData in extendedModel.Chests)
-            {
-                if (__instance.GetBuildingChest(chestData.Name) is Chest chest && chest is not null)
-                {
-                    chest.modData[ModDataKeys.CUSTOM_CHEST_CAPACITY] = chestData.Capacity.ToString();
-                }
-            }
+            __instance.RefreshModel(extendedModel);
         }
     }
 }
