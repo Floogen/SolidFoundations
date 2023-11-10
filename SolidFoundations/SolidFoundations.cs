@@ -271,7 +271,6 @@ namespace SolidFoundations
             return api;
         }
 
-        // TODO: When SDV v1.6 is released, revise this method to load the buildings into BuildingsData
         private void LoadContentPacks(bool silent = false)
         {
             // Clear the existing cache of custom buildings
@@ -393,6 +392,7 @@ namespace SolidFoundations
                 int modelsWithCompatibilityIssues = 0;
                 foreach (var folder in buildingsFolder)
                 {
+                    bool isUsingStringBasedRectangles = false;
                     if (!File.Exists(Path.Combine(folder.FullName, "building.json")))
                     {
                         if (folder.GetDirectories().Count() == 0)
@@ -414,11 +414,14 @@ namespace SolidFoundations
                     }
                     catch (Newtonsoft.Json.JsonReaderException)
                     {
-                        // TODO: Add to compatibility alerts that the pack is using string-based Rectangles
+                        // Alert that the pack is using string-based Rectangles
                         Monitor.Log($"Attempting to resolve ExtendedBuildingModel read issue by handling string-based Rectangles for {modelPath}", LogLevel.Trace);
 
                         // Attempt to handle string-based Rectangle classes (SourceRect / AnimalDoor)
                         buildingModel = contentPack.ReadJsonFile<OldExtendedBuildingModel>(modelPath);
+
+                        isUsingStringBasedRectangles = true;
+                        Monitor.Log($"{buildingModel.ID} is using the outdated string-based Rectangles for the \"SourceRect\" or \"AnimalDoor\" properties. Solid Foundations will handle this, though the value should be changed to use the recommended formatting for compatibility.", LogLevel.Trace);
                     }
 
                     // Verify the required Name property is set
@@ -568,7 +571,7 @@ namespace SolidFoundations
                     }
 
                     // Check for any compatibility issues
-                    if (HandleCompatibilityIssues(buildingModel))
+                    if (HandleCompatibilityIssues(buildingModel) || isUsingStringBasedRectangles)
                     {
                         modelsWithCompatibilityIssues += 1;
                     }
