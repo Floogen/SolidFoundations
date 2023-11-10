@@ -372,6 +372,7 @@ namespace SolidFoundations
                 }
 
                 // Load in the buildings
+                int modelsWithCompatibilityIssues = 0;
                 foreach (var folder in buildingsFolder)
                 {
                     if (!File.Exists(Path.Combine(folder.FullName, "building.json")))
@@ -549,7 +550,10 @@ namespace SolidFoundations
                     }
 
                     // Check for any compatibility issues
-                    HandleCompatibilityIssues(buildingModel, silent);
+                    if (HandleCompatibilityIssues(buildingModel))
+                    {
+                        modelsWithCompatibilityIssues += 1;
+                    }
 
                     // Track the model
                     buildingManager.AddBuilding(buildingModel);
@@ -558,6 +562,11 @@ namespace SolidFoundations
                     Monitor.Log($"Loaded the building {buildingModel.ID}", LogLevel.Trace);
                 }
 
+                // Display a warning that the pack will work, but has potential issues if used without Solid Foundations
+                if (modelsWithCompatibilityIssues > 0)
+                {
+                    Monitor.Log($"There were compatibility issues that were handled for {modelsWithCompatibilityIssues} {(modelsWithCompatibilityIssues > 1 ? "models" : "model")} within {contentPack.Manifest.Name}. See the log for details.", silent ? LogLevel.Trace : LogLevel.Warn);
+                }
             }
             catch (Exception ex)
             {
@@ -565,34 +574,40 @@ namespace SolidFoundations
             }
         }
 
-        private void HandleCompatibilityIssues(ExtendedBuildingModel model, bool silent)
+        private bool HandleCompatibilityIssues(ExtendedBuildingModel model)
         {
             if (model is null)
             {
-                return;
+                return false;
             }
 
+            bool hasCompatibilityIssue = false;
             if (string.Equals(model.Builder, "Carpenter", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using the outdated value \"Carpenter\" for the \"Builder\" property. Solid Foundations will handle this, though the value should be changed to \"Robin\" for compatibility.", silent ? LogLevel.Trace : LogLevel.Warn);
+                Monitor.Log($"{model.ID} is using the outdated value \"Carpenter\" for the \"Builder\" property. Solid Foundations will handle this, though the value should be changed to \"Robin\" for compatibility.", LogLevel.Trace);
 
                 model.Builder = "Robin";
+                hasCompatibilityIssue = true;
             }
             else if (model.MagicalConstruction is null && string.Equals(model.Builder, "Wizard", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using the value \"Wizard\" for the \"Builder\" property, but has not declared the \"MagicalConstruction\" property. Solid Foundations will infer \"MagicalConstruction\" as true, though for compatibility this should be set manually.", silent ? LogLevel.Trace : LogLevel.Warn);
+                Monitor.Log($"{model.ID} is using the value \"Wizard\" for the \"Builder\" property, but has not declared the \"MagicalConstruction\" property. Solid Foundations will infer \"MagicalConstruction\" as true, though for compatibility this should be set manually.", LogLevel.Trace);
 
                 model.MagicalConstruction = true;
+                hasCompatibilityIssue = true;
             }
 
             if (string.Equals(model.IndoorMapType, "StardewValley.Locations.BuildableGameLocation", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using an outdated value \"StardewValley.Locations.BuildableGameLocation\" for the \"IndoorMapType\" property. Solid Foundations will handle this, though the value should be changed to \"StardewValley.GameLocation\" and the map property \"CanBuildHere\" should be set for compatibility.", silent ? LogLevel.Trace : LogLevel.Warn);
+                Monitor.Log($"{model.ID} is using an outdated value \"StardewValley.Locations.BuildableGameLocation\" for the \"IndoorMapType\" property. Solid Foundations will handle this, though the value should be changed to \"StardewValley.GameLocation\" and the map property \"CanBuildHere\" should be set for compatibility.", LogLevel.Trace);
 
                 model.IndoorMapType = "StardewValley.GameLocation";
 
                 model.ForceLocationToBeBuildable = true;
+                hasCompatibilityIssue = true;
             }
+
+            return hasCompatibilityIssue;
         }
 
         private void RefreshAllCustomBuildings()
