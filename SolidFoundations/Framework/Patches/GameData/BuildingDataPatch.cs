@@ -23,7 +23,6 @@ namespace SolidFoundations.Framework.Patches.GameData
 
         internal static void GetActionAtTilePostfix(BuildingData __instance, int relativeX, int relativeY, ref string __result)
         {
-            // TODO: Show for chests?
             if (__instance is ExtendedBuildingModel extendedModel && extendedModel is not null && string.IsNullOrEmpty(__result))
             {
                 __result = extendedModel.GetActionAtTile(relativeX, relativeY);
@@ -31,7 +30,7 @@ namespace SolidFoundations.Framework.Patches.GameData
                 {
                     __result = "SpecialAction";
                 }
-                if (string.IsNullOrEmpty(__result) && extendedModel.GetCollectChestActionAtTile(relativeX, relativeY) is not null)
+                if (string.IsNullOrEmpty(__result) && extendedModel.GetCollectChestActionAtTile(relativeX, relativeY) is not null || extendedModel.GetLoadChestActionAtTile(relativeX, relativeY) is not null)
                 {
                     __result = "BuildingChest";
                 }
