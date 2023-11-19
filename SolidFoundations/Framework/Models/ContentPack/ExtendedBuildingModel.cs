@@ -115,7 +115,10 @@ namespace SolidFoundations.Framework.Models.ContentPack
 
         public List<InputFilter> InputFilters = new List<InputFilter>();
 
-        public string IndoorMapTypeAssembly { get; set; } = "Stardew Valley";
+        public new string IndoorMapType { get { return _indoorMapType; } set { _indoorMapType = value; base.IndoorMapType = _indoorMapType; } }
+        private string _indoorMapType;
+        public string IndoorMapTypeAssembly { get { return _indoorMapTypeAssembly; } set { _indoorMapTypeAssembly = value; base.IndoorMapType = $"{this.IndoorMapType},{this.IndoorMapTypeAssembly}"; } }
+        private string _indoorMapTypeAssembly = "Stardew Valley";
 
         // Required for alert to check for missing MagicalConstruction value 
         public new bool? MagicalConstruction
