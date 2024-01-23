@@ -115,7 +115,7 @@ namespace SolidFoundations.Framework.Patches.Buildings
                         __result = true;
                         return false;
                     }
-                    if (who.IsLocalPlayer && __instance.IsInTilePropertyRadius(tileLocation, checkAdditionalRadius: true) && !__instance.isTilePassable(tileLocation))
+                    if (who.IsLocalPlayer && __instance.occupiesTile(tileLocation, applyTilePropertyRadius: true) && !__instance.isTilePassable(tileLocation))
                     {
                         Point actualTile = new Point((int)tileLocation.X - __instance.tileX.Value, (int)tileLocation.Y - __instance.tileY.Value);
                         var specialActionAtTile = extendedModel.GetSpecialActionAtTile(actualTile.X, actualTile.Y);
