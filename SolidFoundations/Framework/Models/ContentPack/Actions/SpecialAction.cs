@@ -6,6 +6,7 @@ using SolidFoundations.Framework.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Menus;
+using StardewValley.TokenizableStrings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
