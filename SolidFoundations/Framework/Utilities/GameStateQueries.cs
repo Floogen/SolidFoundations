@@ -1,5 +1,5 @@
 ﻿using StardewValley;
-using System;
+using StardewValley.Delegates;
 
 namespace SolidFoundations.Framework.Utilities
 {
@@ -12,7 +12,7 @@ namespace SolidFoundations.Framework.Utilities
             GameStateQuery.Register("IS_PLAYER_HOLDING_TOOL", GameStateQueries.query_IS_PLAYER_HOLDING_TOOL);
         }
 
-        public static bool query_IS_PLAYER_HOLDING_ITEM(string[] query, GameLocation location, Farmer player, Item targetItem, Item inputItem, Random random)
+        public static bool query_IS_PLAYER_HOLDING_ITEM(string[] query, GameStateQueryContext context)
         {
             if (int.TryParse(query[2], out int itemId) is false)
             {
@@ -25,17 +25,17 @@ namespace SolidFoundations.Framework.Utilities
                 requiredStack = 1;
             }
 
-            return GameStateQuery.Helpers.WithPlayer(player, query[1], (Farmer target_farmer) => target_farmer.ActiveObject is Item item && item.ParentSheetIndex == itemId && item.Stack >= requiredStack);
+            return GameStateQuery.Helpers.WithPlayer(context.Player, query[1], (Farmer target_farmer) => target_farmer.ActiveObject is Item item && item.ParentSheetIndex == itemId && item.Stack >= requiredStack);
         }
 
-        public static bool query_IS_PLAYER_HOLDING_ANYTHING(string[] query, GameLocation location, Farmer player, Item targetItem, Item inputItem, Random random)
+        public static bool query_IS_PLAYER_HOLDING_ANYTHING(string[] query, GameStateQueryContext context)
         {
-            return GameStateQuery.Helpers.WithPlayer(player, query[1], (Farmer target_farmer) => target_farmer.ActiveObject is not null);
+            return GameStateQuery.Helpers.WithPlayer(context.Player, query[1], (Farmer target_farmer) => target_farmer.ActiveObject is not null);
         }
 
-        public static bool query_IS_PLAYER_HOLDING_TOOL(string[] query, GameLocation location, Farmer player, Item targetItem, Item inputItem, Random random)
+        public static bool query_IS_PLAYER_HOLDING_TOOL(string[] query, GameStateQueryContext context)
         {
-            return GameStateQuery.Helpers.WithPlayer(player, query[1], (Farmer target_farmer) => target_farmer.CurrentTool is not null);
+            return GameStateQuery.Helpers.WithPlayer(context.Player, query[1], (Farmer target_farmer) => target_farmer.CurrentTool is not null);
         }
     }
 }
