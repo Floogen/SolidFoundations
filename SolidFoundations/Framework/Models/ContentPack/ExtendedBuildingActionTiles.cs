@@ -1,16 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using SolidFoundations.Framework.Models.Backport;
-using SolidFoundations.Framework.Models.ContentPack.Actions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SolidFoundations.Framework.Models.ContentPack.Actions;
+using StardewValley.GameData.Buildings;
 
 namespace SolidFoundations.Framework.Models.ContentPack
 {
-    public class ExtendedBuildingActionTiles : BuildingActionTiles
+    public class ExtendedBuildingActionTiles : BuildingActionTile
     {
         public SpecialAction SpecialAction { get; set; }
     }

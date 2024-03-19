@@ -1,10 +1,5 @@
 ﻿using SolidFoundations.Framework.Interfaces;
 using StardewModdingAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SolidFoundations.Framework.Managers
 {
@@ -76,25 +71,6 @@ namespace SolidFoundations.Framework.Managers
         public ISaveAnywhereApi GetSaveAnywhereApi()
         {
             return _saveAnywhereApi;
-        }
-
-        internal bool HookIntoJsonAssets(IModHelper helper)
-        {
-            _jsonAssetsApi = helper.ModRegistry.GetApi<IJsonAssetsApi>("spacechase0.JsonAssets");
-
-            if (_jsonAssetsApi is null)
-            {
-                _monitor.Log("Failed to hook into spacechase0.JsonAssets.", LogLevel.Error);
-                return false;
-            }
-
-            _monitor.Log("Successfully hooked into spacechase0.JsonAssets.", LogLevel.Debug);
-            return true;
-        }
-
-        public IJsonAssetsApi GetJsonAssetsApi()
-        {
-            return _jsonAssetsApi;
         }
     }
 }
