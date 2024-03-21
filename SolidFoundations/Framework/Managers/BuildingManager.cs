@@ -50,7 +50,9 @@ namespace SolidFoundations.Framework.Managers
             {
                 return false;
             }
+
             _idToModels[model.ID] = model;
+            Game1.buildingData[model.ID] = model;
 
             return true;
         }
