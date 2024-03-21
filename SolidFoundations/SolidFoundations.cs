@@ -605,14 +605,14 @@ namespace SolidFoundations
             bool hasCompatibilityIssue = false;
             if (string.Equals(model.Builder, "Carpenter", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using the outdated value \"Carpenter\" for the \"Builder\" property. Solid Foundations will handle this, though the value should be changed to \"Robin\" for compatibility.", LogLevel.Trace);
+                Monitor.Log($"[COMPATIBILITY] {model.ID} is using the outdated value \"Carpenter\" for the \"Builder\" property. Solid Foundations will handle this, though the value should be changed to \"Robin\" for compatibility.", LogLevel.Trace);
 
                 model.Builder = "Robin";
                 hasCompatibilityIssue = true;
             }
             else if (model.MagicalConstruction is null && string.Equals(model.Builder, "Wizard", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using the value \"Wizard\" for the \"Builder\" property, but has not declared the \"MagicalConstruction\" property. Solid Foundations will infer \"MagicalConstruction\" as true, though for compatibility this should be set manually.", LogLevel.Trace);
+                Monitor.Log($"[COMPATIBILITY] {model.ID} is using the value \"Wizard\" for the \"Builder\" property, but has not declared the \"MagicalConstruction\" property. Solid Foundations will infer \"MagicalConstruction\" as true, though for compatibility this should be set manually.", LogLevel.Trace);
 
                 model.MagicalConstruction = true;
                 hasCompatibilityIssue = true;
@@ -620,7 +620,7 @@ namespace SolidFoundations
 
             if (string.Equals(model.IndoorMapType, "StardewValley.Locations.BuildableGameLocation", StringComparison.OrdinalIgnoreCase))
             {
-                Monitor.Log($"{model.ID} is using an outdated value \"StardewValley.Locations.BuildableGameLocation\" for the \"IndoorMapType\" property. Solid Foundations will handle this, though the value should be changed to \"StardewValley.GameLocation\" and the map property \"CanBuildHere\" should be set for compatibility.", LogLevel.Trace);
+                Monitor.Log($"[COMPATIBILITY] {model.ID} is using an outdated value \"StardewValley.Locations.BuildableGameLocation\" for the \"IndoorMapType\" property. Solid Foundations will handle this, though the value should be changed to \"StardewValley.GameLocation\" and the map property \"CanBuildHere\" should be set for compatibility.", LogLevel.Trace);
 
                 model.IndoorMapType = "StardewValley.GameLocation";
 
@@ -630,7 +630,7 @@ namespace SolidFoundations
 
             if (model.DrawLayers is not null && model.DrawLayers.Any(l => l.DrawBehindBase is true))
             {
-                Monitor.Log($"{model.ID} is using an outdated property \"DrawBehindBase\". Solid Foundations will handle this, though property should be changed to \"DrawInBackground\".", LogLevel.Trace);
+                Monitor.Log($"[COMPATIBILITY] {model.ID} is using an outdated property \"DrawBehindBase\". Solid Foundations will handle this, though property should be changed to \"DrawInBackground\".", LogLevel.Trace);
 
                 foreach (var layer in model.DrawLayers.Where(l => l.DrawBehindBase is true))
                 {
