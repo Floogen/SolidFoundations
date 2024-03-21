@@ -566,8 +566,12 @@ namespace SolidFoundations
                     {
                         buildingModel.Translations = contentPack.Translation;
 
-                        buildingModel.Name = buildingModel.GetTranslation(buildingModel.Name);
-                        buildingModel.Description = buildingModel.GetTranslation(buildingModel.Description);
+                        // Preserve the translation keys for name / description
+                        buildingModel.NameTranslationKey = buildingModel.Name;
+                        buildingModel.DescriptionTranslationKey = buildingModel.Description;
+
+                        buildingModel.Name = buildingModel.GetTranslation(buildingModel.NameTranslationKey);
+                        buildingModel.Description = buildingModel.GetTranslation(buildingModel.DescriptionTranslationKey);
                     }
 
                     // Check for any compatibility issues

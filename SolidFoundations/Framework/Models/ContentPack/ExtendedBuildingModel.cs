@@ -10,6 +10,8 @@ namespace SolidFoundations.Framework.Models.ContentPack
     public class ExtendedBuildingModel : BuildingData
     {
         public string ID;
+        internal string NameTranslationKey { get; set; }
+        internal string DescriptionTranslationKey { get; set; }
         internal string Owner { get; set; }
         internal string PackName { get; set; }
         internal string PaintMaskTexture { get; set; }
