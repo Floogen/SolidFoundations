@@ -66,6 +66,9 @@ namespace SolidFoundations
                 // Apply GameData patches
                 new BuildingDataPatch(monitor, helper).Apply(harmony);
 
+                // Apply language patches
+                new LocalizedContentManagerPatch(monitor, helper).Apply(harmony);
+
                 // Apply object patch
                 new ChestPatch(monitor, helper).Apply(harmony);
             }
