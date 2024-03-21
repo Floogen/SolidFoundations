@@ -13,7 +13,7 @@ namespace SolidFoundations.Framework.Models.ContentPack
     {
         public bool HideBaseTexture { get; set; }
         [Obsolete("Outdated property. Use BuildingDrawLayer.DrawInBackground instead.")]
-        public bool DrawBehindBase { get { return base.DrawInBackground; } set { base.DrawInBackground = value; } }
+        public bool DrawBehindBase { get; set; }
         public List<Sequence> Sequences { get; set; }
         public string Condition { get; set; }
         public string[] ModDataFlags { get; set; }

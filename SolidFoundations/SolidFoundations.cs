@@ -628,6 +628,17 @@ namespace SolidFoundations
                 hasCompatibilityIssue = true;
             }
 
+            if (model.DrawLayers is not null && model.DrawLayers.Any(l => l.DrawBehindBase is true))
+            {
+                Monitor.Log($"{model.ID} is using an outdated property \"DrawBehindBase\". Solid Foundations will handle this, though property should be changed to \"DrawInBackground\".", LogLevel.Trace);
+
+                foreach (var layer in model.DrawLayers.Where(l => l.DrawBehindBase is true))
+                {
+                    layer.DrawInBackground = true;
+                }
+                hasCompatibilityIssue = true;
+            }
+
             return hasCompatibilityIssue;
         }
 
