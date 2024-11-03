@@ -60,7 +60,7 @@ namespace SolidFoundations.Framework.Managers
                     lightModel.GetUpdateInterval(recalculateValue: true);
                     lightModel.ElapsedMilliseconds = 0f;
 
-                    int lightIdentifier = Toolkit.GetLightSourceIdentifierForBuilding(startingTile, lightCount);
+                    string lightIdentifier = Toolkit.GetLightSourceIdentifierForBuilding(extendedModel.Name, startingTile, lightCount);
                     if (gameLocation.hasLightSource(lightIdentifier) is false)
                     {
                         continue;
@@ -80,9 +80,9 @@ namespace SolidFoundations.Framework.Managers
 
             foreach (var lightSource in building.GetLightSources())
             {
-                if (gameLocation.hasLightSource(lightSource.Identifier))
+                if (gameLocation.hasLightSource(lightSource.Id))
                 {
-                    gameLocation.removeLightSource(lightSource.Identifier);
+                    gameLocation.removeLightSource(lightSource.Id);
                 }
             }
 

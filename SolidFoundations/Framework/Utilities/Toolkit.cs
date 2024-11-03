@@ -66,10 +66,10 @@ namespace SolidFoundations.Framework.Utilities
             "Woods"
         };
 
-        internal static int GetLightSourceIdentifierForBuilding(Point tile, int count)
+        internal static string GetLightSourceIdentifierForBuilding(string buildingName, Point tile, int count)
         {
             var baseId = (tile.X * 5000) + (tile.Y * 6000);
-            return baseId + count + 1;
+            return $"SolidFoundations.Lights.{buildingName}.{baseId + count + 1}";
         }
 
         internal static Rectangle GetRectangleFromString(string rawRectangle)

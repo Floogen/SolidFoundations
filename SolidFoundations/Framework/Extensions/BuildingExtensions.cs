@@ -386,14 +386,14 @@ namespace SolidFoundations.Framework.Extensions
                 foreach (var lightModel in extendedModel.Lights)
                 {
                     var lightTilePosition = lightModel.Tile + startingTile;
-                    int lightIdentifier = Toolkit.GetLightSourceIdentifierForBuilding(startingTile, lightSources.Count);
+                    string lightIdentifier = Toolkit.GetLightSourceIdentifierForBuilding(extendedModel.Name, startingTile, lightSources.Count);
                     if (gameLocation.hasLightSource(lightIdentifier))
                     {
                         gameLocation.removeLightSource(lightIdentifier);
                     }
 
                     var lightPosition = new Vector2((lightTilePosition.X * 64f) + lightModel.TileOffsetInPixels.X, (lightTilePosition.Y * 64f) + lightModel.TileOffsetInPixels.Y);
-                    var lightSource = new LightSource(lightModel.GetTextureSource(), lightPosition, lightModel.GetRadius(), lightModel.GetColor(), lightIdentifier, LightSource.LightContext.None);
+                    var lightSource = new LightSource(lightIdentifier, lightModel.GetTextureSource(), lightPosition, lightModel.GetRadius(), lightModel.GetColor(), LightSource.LightContext.None);
 
                     gameLocation.sharedLights[lightIdentifier] = lightSource;
                     lightSources.Add(lightSource);
